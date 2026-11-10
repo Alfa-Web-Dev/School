@@ -26,3 +26,14 @@ body.pub{display:block;padding:0}
 .pub .hero{background:var(--c);color:#fff;text-align:center;padding:60px 16px;max-width:none}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
 .pub .card{max-width:none}.pub img{max-width:100%;border-radius:10px}
+
+/* content editor */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.tab{width:auto;margin:0;padding:7px 12px;background:none;color:var(--tx);border:1px solid var(--bd)}.tab.on{background:var(--c);color:#fff}
+.ed label{margin-top:12px}.ed fieldset{border:1px solid var(--bd);border-radius:10px;margin:12px 0}
+.item{border:1px solid var(--bd);border-radius:10px;padding:10px;margin:10px 0}
+.row{display:flex;gap:6px;align-items:center}.row button{width:auto;margin:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}textarea{font:inherit;width:100%;padding:10px;border-radius:9px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
+.th{height:70px;border-radius:8px;margin-top:6px}.thumbs{display:flex;flex-wrap:wrap;gap:8px}
+.pubbar{position:sticky;bottom:0;background:var(--bg);padding:10px 0;display:flex;gap:10px;align-items:center}.pubbar button{width:auto;margin:0}
+details{margin:10px 0}summary{cursor:pointer}
+@media(max-width:600px){.two{grid-template-columns:1fr}}

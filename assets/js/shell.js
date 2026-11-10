@@ -16,6 +16,7 @@ async function initShell(role,page,phase){
  document.getElementById('lo').onclick=async()=>{try{await api('logout')}catch(e){}sessionStorage.clear();location.href='../login.html'};
  applyI18n();
  const m=document.getElementById('main');
+ if(!phase)return u;
  m.innerHTML='<h1 data-i="n_'+(NAV[role].find(x=>x[0]===page)||[0,page])[1]+'"></h1><p class="mu"><span data-i="soon"></span> Phase '+phase+'</p>';
  applyI18n();
  return u}

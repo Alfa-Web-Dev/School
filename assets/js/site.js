@@ -8,8 +8,14 @@ async function render(){
  document.getElementById('sn').textContent=CFG.name;
  document.getElementById('lg').textContent=getLang()==='hi'?'EN':'हिं';
  const [site,home,nt,ev,st,dls,gls]=await Promise.all(['site','home','notices','events','staff','downloads','gallery'].map(J));
- const h=home&&home.hero&&home.hero[0];if(h){ht.textContent=L(h.title);hs.textContent=L(h.sub)}
- if(site){ab.textContent=L(site.about);pr.textContent=site.principal.name+': '+L(site.principal.message);ad.textContent=L(site.admission.text)}
+ const hs_=(home&&home.hero)||[];let hi=0;
+ const showHero=()=>{const h=hs_[hi%hs_.length];if(!h)return;ht.textContent=L(h.title);hs.textContent=L(h.sub);
+  document.getElementById('hero').style.background=h.image?'linear-gradient(#0006,#0006),url("'+encodeURI(h.image)+'") center/cover':'';};
+ showHero();clearInterval(window._hv);if(hs_.length>1)window._hv=setInterval(()=>{hi++;showHero()},5000);
+ const lg_=document.getElementById('logo');if(home&&home.logo){lg_.src=home.logo;lg_.style.display='inline'}
+ if(site){ab.textContent=L(site.about);pr.innerHTML=(site.principal.photo?'<img src="'+esc(site.principal.photo)+'" style="height:90px;float:left;margin:0 12px 8px 0">':'')+'<b>'+esc(site.principal.name)+'</b><br>'+esc(L(site.principal.message));
+ document.getElementById('ac').innerHTML=(site.academics||[]).map(a=>'<div class="card"><b>'+esc(L(a.title))+'</b><p>'+esc(L(a.text))+'</p></div>').join('');
+ document.getElementById('av').innerHTML=(site.achievements||[]).map(a=>'<div class="card">'+(a.image?'<img src="'+esc(a.image)+'">':'')+'<b>'+esc(L(a.title))+'</b><p>'+esc(L(a.text))+'</p></div>').join('');ad.textContent=L(site.admission.text)}
  nl.innerHTML=(nt||[]).map(n=>'<div class="card"><b>'+esc(L(n.title))+'</b> <span class="mu">'+esc(n.date)+'</span><p>'+esc(L(n.text))+'</p></div>').join('');
  el.innerHTML=(ev||[]).map(n=>'<div class="card"><b>'+esc(L(n.title))+'</b> <span class="mu">'+esc(n.date)+'</span></div>').join('');
  sl.innerHTML=(st||[]).map(s=>'<div class="card">'+(s.photo?'<img src="'+esc(s.photo)+'">':'')+'<b>'+esc(s.name)+'</b><br><span class="mu">'+esc(L(s.role))+'</span></div>').join('');
