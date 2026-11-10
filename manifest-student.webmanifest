@@ -1,0 +1,9 @@
+{
+ "name": "School Portal",
+ "short_name": "Student",
+ "start_url": "student/index.html",
+ "display": "standalone",
+ "background_color": "#ffffff",
+ "theme_color": "#1d4ed8",
+ "icons": []
+}

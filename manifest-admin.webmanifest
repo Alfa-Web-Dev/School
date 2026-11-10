@@ -1,0 +1,9 @@
+{
+ "name": "School Admin",
+ "short_name": "Admin",
+ "start_url": "admin/index.html",
+ "display": "standalone",
+ "background_color": "#ffffff",
+ "theme_color": "#1d4ed8",
+ "icons": []
+}

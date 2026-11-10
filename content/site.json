@@ -1,0 +1,34 @@
+{
+ "about": {
+  "hi": "हमारे स्कूल के बारे में यहाँ लिखें।",
+  "en": "Write about your school here."
+ },
+ "principal": {
+  "name": "Principal Name",
+  "photo": "",
+  "message": {
+   "hi": "प्रधानाचार्य का संदेश।",
+   "en": "Principal's message."
+  }
+ },
+ "academics": [
+  {
+   "title": {
+    "hi": "प्राथमिक",
+    "en": "Primary"
+   },
+   "text": {
+    "hi": "कक्षा 1-5",
+    "en": "Classes 1-5"
+   }
+  }
+ ],
+ "achievements": [],
+ "admission": {
+  "open": true,
+  "text": {
+   "hi": "प्रवेश जानकारी यहाँ।",
+   "en": "Admission info here."
+  }
+ }
+}

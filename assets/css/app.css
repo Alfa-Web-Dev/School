@@ -7,3 +7,22 @@ label{display:block;margin:10px 0 2px;font-size:14px;color:var(--mu)}
 input,select,button{font:inherit;width:100%;padding:11px;border-radius:9px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
 button{background:var(--c);color:#fff;border:0;cursor:pointer;margin-top:14px}button.g{background:none;color:var(--mu);border:1px solid var(--bd)}
 #m{min-height:20px;margin-top:10px;color:#dc2626;font-size:14px}
+
+/* panels (admin/teacher/student) */
+body.app{display:block;padding:0;place-items:unset}
+.app header{display:flex;gap:8px;align-items:center;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:0}
+.app header button{width:auto;margin:0}.sp{flex:1}.s{padding:6px 10px;font-size:13px}
+.wrap{display:flex;gap:16px;padding:14px;max-width:1100px;margin:auto}
+nav{display:flex;flex-direction:column;gap:2px;min-width:170px}
+nav a{padding:9px 12px;border-radius:8px;color:var(--tx);text-decoration:none;font-size:15px}
+nav a.on,nav a:hover{background:var(--c);color:#fff}
+main{flex:1;min-width:0}
+@media(max-width:700px){.wrap{flex-direction:column}nav{flex-direction:row;overflow-x:auto;min-width:0}nav a{white-space:nowrap}}
+/* public site */
+body.pub{display:block;padding:0}
+.pub header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;background:var(--c);color:#fff;position:sticky;top:0;z-index:5}
+.pub header a{color:#fff;text-decoration:none;font-size:14px}.pub header button{width:auto;margin:0;background:#fff3;border:0}
+.pub section{max-width:1000px;margin:auto;padding:28px 16px}
+.pub .hero{background:var(--c);color:#fff;text-align:center;padding:60px 16px;max-width:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.pub .card{max-width:none}.pub img{max-width:100%;border-radius:10px}

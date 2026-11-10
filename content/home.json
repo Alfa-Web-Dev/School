@@ -1,0 +1,16 @@
+{
+ "hero": [
+  {
+   "image": "",
+   "title": {
+    "hi": "आपका स्वागत है",
+    "en": "Welcome"
+   },
+   "sub": {
+    "hi": "बेहतर शिक्षा, बेहतर भविष्य",
+    "en": "Better education, better future"
+   }
+  }
+ ],
+ "logo": ""
+}
