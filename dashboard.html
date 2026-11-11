@@ -4,6 +4,8 @@
 <script>
 applyI18n();
 (async()=>{try{const r=await api('me');if(!r.ok){location.href='login.html';return}
- document.getElementById('who').textContent=r.user.name+' ('+r.user.role+')'}catch(e){location.href='login.html'}})();
+ document.getElementById('who').textContent=r.user.name+' ('+r.user.role+')';
+ const home={admin:'admin',teacher:'teacher',student:'student',parent:'student'}[r.user.role];
+ if(home&&!location.search.includes('stay'))location.replace(home+'/index.html')}catch(e){location.href='login.html'}})();
 document.getElementById('lo').onclick=async()=>{try{await api('logout')}catch(e){}sessionStorage.clear();location.href='login.html'};
 </script></body></html>
