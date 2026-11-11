@@ -1,11 +1,11 @@
 // Role panels ka common layout + login guard. Use: initShell('admin','students')
 const NAV={"admin":[["index","dashboard"],["students","students"],["teachers","teachers"],["classes","classes"],["timetable","timetable"],["fees","fees"],["exams","exams"],["notices","notices"],["enquiries","enquiries"],["certificates","certificates"],["content","content"],["logs","logs"]],"teacher":[["index","dashboard"],["attendance","attendance"],["marks","marks"],["homework","homework"],["classes","classes"]],"student":[["index","dashboard"],["profile","profile"],["attendance","attendance"],["fees","fees"],["results","results"],["timetable","timetable"],["homework","homework"],["notices","notices"],["settings","settings"]]};
-const HOME={admin:'admin',teacher:'teacher',student:'student',parent:'student'};
+const HOME={admin:'admin',teacher:'teacher',student:'student'};
 async function initShell(role,page,phase){
  applyI18n();
  let r;try{r=await api('me')}catch(e){location.href='../login.html';return}
  if(!r.ok){location.href='../login.html';return}
- const u=r.user,ok=(u.role===role)||(role==='student'&&u.role==='parent');
+ const u=r.user,ok=(u.role===role);
  if(!ok){location.href='../'+HOME[u.role]+'/index.html';return}
  const nav=NAV[role].map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+' data-i="n_'+k+'"></a>').join('');
  document.getElementById('shell').innerHTML=

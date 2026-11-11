@@ -5,8 +5,7 @@ const SCHEMA={
  Settings:['key','value'],
  AcademicYears:['yearId','name','start','end','current'],
  Users:['userId','name','role','phone','email','passHash','salt','active'],
- Students:['studentId','admNo','name','classId','roll','gender','dob','parentId','address','pinHash','salt','status'],
- Parents:['parentId','name','phone','email','pinHash','salt'],
+ Students:['studentId','admNo','name','classId','roll','gender','dob','parentName','parentPhone','address','pinHash','salt','status'],
  Classes:['classId','name','grade','section','classTeacherId'],
  Subjects:['subjectId','name'],
  Lessons:['lessonId','classId','subjectId','teacherId','day','start','end'],
@@ -43,9 +42,6 @@ function lookup(role,id){
  if(role==='student'){
   const r=find('Students',r=>String(r.studentId).toLowerCase()===lc);
   return r&&{userId:String(r.studentId),name:r.name,role,salt:String(r.salt),hash:String(r.pinHash),active:String(r.status).toLowerCase()==='active'}}
- if(role==='parent'){
-  const r=find('Parents',r=>String(r.parentId).toLowerCase()===lc||String(r.phone).trim()===String(id).trim());
-  return r&&{userId:String(r.parentId),name:r.name,role,salt:String(r.salt),hash:String(r.pinHash),active:true}}
  return null}
 
 function login(b){
@@ -157,14 +153,6 @@ const ROUTES={resetSecret:'resetSecret',listStudents:'listStudents',saveStudent:
 
 // ===== Students.gs =====
 // Students (Phase 2): list, add/edit, CSV import, promote
-function upsertParent(name,phone){
- phone=clean(phone,15).replace(/[^\d+]/g,'');if(!phone)return{id:'',pin:''};
- const p=find('Parents',r=>String(r.phone).trim()===phone);
- if(p){if(name&&!p.name)setRow('Parents',p._row,{name});return{id:String(p.parentId),pin:''}}
- const id=nextId('Parents','parentId','P',3),pin=genPin(),f=setSecretFields(pin);
- addRow('Parents',{parentId:id,name:name||'Parent',phone,email:'',pinHash:f.hash,salt:f.salt});
- return{id,pin}}
-
 function saveStudentCore(d,actor){
  const name=clean(d.name,80);if(!name)throw new Error('Name zaruri hai');
  const classId=resolveClass(d.classId);if(!classId)throw new Error('Class nahi mili: '+clean(d.classId,30));
@@ -176,23 +164,18 @@ function saveStudentCore(d,actor){
  if(d.studentId&&!ex)throw new Error('Student nahi mila');
  const admNo=clean(d.admNo,20);
  if(admNo&&find('Students',r=>String(r.admNo)===admNo&&(!ex||r._row!==ex._row)))throw new Error('Admission no pehle se hai: '+admNo);
- const par=upsertParent(clean(d.parentName,80),d.parentPhone);
- const o={name,classId,roll:clean(d.roll,10),gender,dob,address:clean(d.address,200),status};
- if(par.id)o.parentId=par.id;
+ const o={name,classId,roll:clean(d.roll,10),gender,dob,parentName:clean(d.parentName,80),parentPhone:clean(d.parentPhone,15).replace(/[^\d+]/g,''),address:clean(d.address,200),status};
  if(ex){if(admNo)o.admNo=admNo;setRow('Students',ex._row,o);log(actor,'student_edit',ex.studentId);
-  return{studentId:String(ex.studentId),pin:'',parentId:par.id,parentPin:par.pin}}
+  return{studentId:String(ex.studentId),pin:''}}
  const id=nextId('Students','studentId','S',3),pin=genPin(),f=setSecretFields(pin);
  o.studentId=id;o.admNo=admNo||String(new Date().getFullYear())+id.slice(1);o.pinHash=f.hash;o.salt=f.salt;
  addRow('Students',o);log(actor,'student_add',id);
- return{studentId:id,pin,parentId:par.id,parentPin:par.pin}}
+ return{studentId:id,pin}}
 
 function listStudents(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
- const par={};table('Parents').rows.forEach(p=>par[String(p.parentId)]=p);
  const mine=s.role==='teacher'?teacherClassIds(s.userId):null;
- const students=table('Students').rows.filter(r=>!mine||mine[String(r.classId)]).map(r=>{
-  const p=par[String(r.parentId)]||{};
-  return Object.assign(strip(r,['pinHash','salt']),{parentName:p.name||'',parentPhone:String(p.phone||'')})});
+ const students=table('Students').rows.filter(r=>!mine||mine[String(r.classId)]).map(r=>strip(r,['pinHash','salt']));
  const classes=table('Classes').rows.filter(c=>!mine||mine[String(c.classId)]).map(c=>strip(c,[]));
  return{ok:true,students,classes}}
 
@@ -237,12 +220,12 @@ function saveTeacher(b){
   addRow('Users',Object.assign(o,{userId:id,role:'teacher',passHash:f.hash,salt:f.salt}));
   log(s.userId,'teacher_add',id);return{ok:true,userId:id,password:pw}}))}
 
-// kind: student | parent | teacher. Naya secret sirf ek baar dikhta hai.
+// kind: student | teacher. Naya secret sirf ek baar dikhta hai.
 function resetSecret(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const id=String(b.id||''),kind=String(b.kind||'');
-  const m={student:['Students','studentId','pinHash',genPin],parent:['Parents','parentId','pinHash',genPin],teacher:['Users','userId','passHash',genPassword]}[kind];
+  const m={student:['Students','studentId','pinHash',genPin],teacher:['Users','userId','passHash',genPassword]}[kind];
   if(!m)throw new Error('kind galat hai');
   const r=find(m[0],x=>String(x[m[1]])===id&&(kind!=='teacher'||x.role==='teacher'));
   if(!r)throw new Error('Record nahi mila');

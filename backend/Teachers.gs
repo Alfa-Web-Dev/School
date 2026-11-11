@@ -16,12 +16,12 @@ function saveTeacher(b){
   addRow('Users',Object.assign(o,{userId:id,role:'teacher',passHash:f.hash,salt:f.salt}));
   log(s.userId,'teacher_add',id);return{ok:true,userId:id,password:pw}}))}
 
-// kind: student | parent | teacher. Naya secret sirf ek baar dikhta hai.
+// kind: student | teacher. Naya secret sirf ek baar dikhta hai.
 function resetSecret(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const id=String(b.id||''),kind=String(b.kind||'');
-  const m={student:['Students','studentId','pinHash',genPin],parent:['Parents','parentId','pinHash',genPin],teacher:['Users','userId','passHash',genPassword]}[kind];
+  const m={student:['Students','studentId','pinHash',genPin],teacher:['Users','userId','passHash',genPassword]}[kind];
   if(!m)throw new Error('kind galat hai');
   const r=find(m[0],x=>String(x[m[1]])===id&&(kind!=='teacher'||x.role==='teacher'));
   if(!r)throw new Error('Record nahi mila');

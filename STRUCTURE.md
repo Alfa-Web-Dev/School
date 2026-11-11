@@ -12,3 +12,5 @@ manifest-*.webmanifest  sw.js  robots.txt  sitemap.xml
 
 Phases: 1 content editor, 2 admin core, 3 student portal, 4 teacher+attendance, 5 fees, 6 results, 7 enquiry, 8 PWA polish, 9 dashboard/logs/backup.
 Baaki ke pages abhi "Coming in Phase N" dikhate hain.
+
+Roles: sirf admin, teacher, student. Parent ke liye alag login nahi (student login se dekhte hain). Parent ka naam/phone Students tab mein record ke liye.

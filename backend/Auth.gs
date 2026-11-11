@@ -12,9 +12,6 @@ function lookup(role,id){
  if(role==='student'){
   const r=find('Students',r=>String(r.studentId).toLowerCase()===lc);
   return r&&{userId:String(r.studentId),name:r.name,role,salt:String(r.salt),hash:String(r.pinHash),active:String(r.status).toLowerCase()==='active'}}
- if(role==='parent'){
-  const r=find('Parents',r=>String(r.parentId).toLowerCase()===lc||String(r.phone).trim()===String(id).trim());
-  return r&&{userId:String(r.parentId),name:r.name,role,salt:String(r.salt),hash:String(r.pinHash),active:true}}
  return null}
 
 function login(b){

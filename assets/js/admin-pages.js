@@ -16,12 +16,9 @@ const SFIELDS=()=>[
  {k:'name',l:'Name',req:1},{k:'classId',l:'Class',type:'select',opts:CL.map(c=>[c.classId,c.name])},
  {k:'roll',l:'Roll no'},{k:'gender',l:'Gender',type:'select',opts:[['','-'],['M','Male'],['F','Female'],['O','Other']]},
  {k:'dob',l:'Date of birth',type:'date'},{k:'admNo',l:'Admission no (khali = auto)'},
- {k:'parentName',l:'Parent name'},{k:'parentPhone',l:'Parent phone (login ke liye)',type:'tel'},
+ {k:'parentName',l:'Parent name'},{k:'parentPhone',l:'Parent phone (sirf record ke liye)',type:'tel'},
  {k:'address',l:'Address',type:'textarea'},{k:'status',l:'Status',type:'select',opts:[['active','Active'],['inactive','Inactive'],['passed-out','Passed out']]}];
-function showStudentCreds(r){
- const rows=[['Student ID',r.studentId],['Student PIN',r.pin||'(change nahi)']];
- if(r.parentId){rows.push(['Parent ID',r.parentId]);rows.push(['Parent PIN',r.parentPin||'(pehle se hai)'])}
- showSecret('Login details',rows)}
+function showStudentCreds(r){showSecret('Student login',[['Student ID',r.studentId],['PIN',r.pin]],'Yeh sirf abhi dikh raha hai. Student/parent ko de do (parent isi login se dekhenge).')}
 async function reloadStudents(){const r=await call('listStudents');ST=r.students;CL=r.classes;drawStudents()}
 function drawStudents(){
  const q=($('#sq').value||'').toLowerCase(),c=$('#sc').value;
@@ -30,9 +27,8 @@ function drawStudents(){
   {h:'ID',f:r=>r.studentId},{h:'Name',f:r=>r.name},{h:'Class',f:r=>cname(r.classId)},{h:'Roll',f:r=>r.roll},
   {h:'Parent',f:r=>r.parentName+(r.parentPhone?' ('+r.parentPhone+')':'')},{h:'Status',f:r=>r.status},
   {h:'',f:r=>el('div',{class:'row'},
-   btn('Edit',()=>formModal('Edit student',SFIELDS(),r,async v=>{v.studentId=r.studentId;const x=await call('saveStudent',{student:v});await reloadStudents();if(x.parentPin)showStudentCreds(x)})),
-   btn('PIN',()=>resetFor('student',r.studentId,r.name)),
-   r.parentId?btn('Parent PIN',()=>resetFor('parent',r.parentId,r.parentName)):'')}],rows))}
+   btn('Edit',()=>formModal('Edit student',SFIELDS(),r,async v=>{v.studentId=r.studentId;const x=await call('saveStudent',{student:v});await reloadStudents();})),
+   btn('PIN',()=>resetFor('student',r.studentId,r.name)))}],rows))}
 async function resetFor(kind,id,name){
  if(!confirm('"'+name+'" ka naya '+(kind==='teacher'?'password':'PIN')+' banana hai? Purana band ho jayega.'))return;
  const r=await call('resetSecret',{kind,id});
@@ -46,9 +42,9 @@ function importCSV(){
   if(head.indexOf('name')<0||head.indexOf('classId')<0)throw new Error('Header mein name aur classId zaruri hain');
   const data=rows.slice(1).filter(r=>r.some(x=>x.trim())).map(r=>{const o={};head.forEach((h,j)=>o[h]=(r[j]||'').trim());return o});
   if(!confirm(data.length+' students import karne hain?'))return;
-  toast('Import chal raha hai, page band mat karo...');const out=[['row','studentId','name','studentPIN','parentId','parentPIN','error']];let bad=0;
+  toast('Import chal raha hai, page band mat karo...');const out=[['row','studentId','name','PIN','error']];let bad=0;
   for(let k=0;k<data.length;k+=40){const r=await call('importStudents',{rows:data.slice(k,k+40)});
-   r.results.forEach((x,j)=>{if(x.error)bad++;out.push([k+j+2,x.studentId||'',x.name||'',x.pin||'',x.parentId||'',x.parentPin||'',x.error||''])})}
+   r.results.forEach((x,j)=>{if(x.error)bad++;out.push([k+j+2,x.studentId||'',x.name||'',x.pin||'',x.error||''])})}
   await reloadStudents();downloadCSV('import-result.csv',out);
   toast((data.length-bad)+' add hue, '+bad+' error. Result CSV (PIN ke saath) download hui.',bad>0)}catch(e){toast(e.message,1)}};i.click()}
 function promote(){

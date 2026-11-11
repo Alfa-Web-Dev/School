@@ -10,12 +10,11 @@
 2. **Teachers**: demo teachers (T001-T003) ke saamne **Password** dabao -> naya password dikhega (copy karo). Naya teacher bhi **+ Add teacher** se jodo.
 3. **Classes**: class ka **Edit** -> Class teacher chuno. **+ Add class** try karo. Subjects neeche hain.
 4. **Students**:
-   - Demo students ke saamne **PIN** (student) aur **Parent PIN** dabao -> PIN dikhega.
-   - **+ Add** se naya student jodo -> Student ID + PIN + Parent ID + PIN dikhega (sirf ek baar).
-   - Same parent phone se doosra bachcha jodo -> parent same rahega.
+   - Demo students ke saamne **PIN** dabao -> naya PIN dikhega.
+   - **+ Add** se naya student jodo -> Student ID + PIN dikhega (sirf ek baar). Parent ka naam/phone sirf record ke liye hai.
    - **Template** download karo, usme 2-3 students bharo, **Import CSV** se upload karo -> result CSV (PIN ke saath) download hogi.
    - **Promote**: ek class ke saare active students agli class mein.
-5. **Login test**: logout karo -> Student ID + PIN se (Login as: Student) aur Parent phone + PIN se (Login as: Parent) login karo. Abhi unka panel "Coming in Phase 3" dikhayega, bas login chalna chahiye.
+5. **Login test**: logout karo -> Student ID + PIN se (Login as: Student) login karo. Parent bachche ke isi login se dekhenge. Abhi unka panel "Coming in Phase 3" dikhayega, bas login chalna chahiye.
 6. Teacher ID (T001) + password se login karo (panel Phase 4 mein banega).
 
 ## Dhyan

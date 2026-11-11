@@ -1,12 +1,4 @@
 // Students (Phase 2): list, add/edit, CSV import, promote
-function upsertParent(name,phone){
- phone=clean(phone,15).replace(/[^\d+]/g,'');if(!phone)return{id:'',pin:''};
- const p=find('Parents',r=>String(r.phone).trim()===phone);
- if(p){if(name&&!p.name)setRow('Parents',p._row,{name});return{id:String(p.parentId),pin:''}}
- const id=nextId('Parents','parentId','P',3),pin=genPin(),f=setSecretFields(pin);
- addRow('Parents',{parentId:id,name:name||'Parent',phone,email:'',pinHash:f.hash,salt:f.salt});
- return{id,pin}}
-
 function saveStudentCore(d,actor){
  const name=clean(d.name,80);if(!name)throw new Error('Name zaruri hai');
  const classId=resolveClass(d.classId);if(!classId)throw new Error('Class nahi mili: '+clean(d.classId,30));
@@ -18,23 +10,18 @@ function saveStudentCore(d,actor){
  if(d.studentId&&!ex)throw new Error('Student nahi mila');
  const admNo=clean(d.admNo,20);
  if(admNo&&find('Students',r=>String(r.admNo)===admNo&&(!ex||r._row!==ex._row)))throw new Error('Admission no pehle se hai: '+admNo);
- const par=upsertParent(clean(d.parentName,80),d.parentPhone);
- const o={name,classId,roll:clean(d.roll,10),gender,dob,address:clean(d.address,200),status};
- if(par.id)o.parentId=par.id;
+ const o={name,classId,roll:clean(d.roll,10),gender,dob,parentName:clean(d.parentName,80),parentPhone:clean(d.parentPhone,15).replace(/[^\d+]/g,''),address:clean(d.address,200),status};
  if(ex){if(admNo)o.admNo=admNo;setRow('Students',ex._row,o);log(actor,'student_edit',ex.studentId);
-  return{studentId:String(ex.studentId),pin:'',parentId:par.id,parentPin:par.pin}}
+  return{studentId:String(ex.studentId),pin:''}}
  const id=nextId('Students','studentId','S',3),pin=genPin(),f=setSecretFields(pin);
  o.studentId=id;o.admNo=admNo||String(new Date().getFullYear())+id.slice(1);o.pinHash=f.hash;o.salt=f.salt;
  addRow('Students',o);log(actor,'student_add',id);
- return{studentId:id,pin,parentId:par.id,parentPin:par.pin}}
+ return{studentId:id,pin}}
 
 function listStudents(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
- const par={};table('Parents').rows.forEach(p=>par[String(p.parentId)]=p);
  const mine=s.role==='teacher'?teacherClassIds(s.userId):null;
- const students=table('Students').rows.filter(r=>!mine||mine[String(r.classId)]).map(r=>{
-  const p=par[String(r.parentId)]||{};
-  return Object.assign(strip(r,['pinHash','salt']),{parentName:p.name||'',parentPhone:String(p.phone||'')})});
+ const students=table('Students').rows.filter(r=>!mine||mine[String(r.classId)]).map(r=>strip(r,['pinHash','salt']));
  const classes=table('Classes').rows.filter(c=>!mine||mine[String(c.classId)]).map(c=>strip(c,[]));
  return{ok:true,students,classes}}
 
