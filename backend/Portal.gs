@@ -18,21 +18,26 @@ function attOf(sid){
  const total=c.P+c.A+c.L;
  return{rows,present:c.P,absent:c.A,late:c.L,total,percent:total?Math.round((c.P+c.L)*1000/total)/10:0}}  // late = present maana
 
-function feesOf(r){
- const sid=String(r.studentId),cid=String(r.classId),now=new Date();
- const yr=find('AcademicYears',y=>String(y.current).toUpperCase()==='TRUE')||{},start=dstr(yr.start)||(now.getFullYear()+'-04-01');
- const ny=Number(Utilities.formatDate(now,TZ,'yyyy')),nm=Number(Utilities.formatDate(now,TZ,'MM')),curYM=Utilities.formatDate(now,TZ,'yyyy-MM');
- const months=Math.max(0,Math.min(12,(ny-Number(start.slice(0,4)))*12+(nm-Number(start.slice(5,7)))+1));
- const pays=table('Payments').rows.filter(p=>String(p.studentId)===sid&&(!start||dstr(p.date)>=start))
-  .map(p=>({receiptNo:String(p.receiptNo),feeType:String(p.feeType),amount:Number(p.amount)||0,mode:p.mode,date:dstr(p.date)}));
- pays.sort((a,b)=>a.date<b.date?1:-1);
- const lines=table('FeeStructure').rows.filter(f=>String(f.classId)===cid).map(f=>{
+// Fee hisaab: monthly fee = amount x (session start se ab tak ke mahine); one-time fee = due month aane par. Payments mein negative (void) rows bhi judti hain.
+function feeCtx(){
+ const now=new Date(),yr=find('AcademicYears',y=>String(y.current).toUpperCase()==='TRUE')||{},start=dstr(yr.start)||(now.getFullYear()+'-04-01');
+ const ny=Number(Utilities.formatDate(now,TZ,'yyyy')),nm=Number(Utilities.formatDate(now,TZ,'MM'));
+ return{start,year:yr.name||'',curYM:Utilities.formatDate(now,TZ,'yyyy-MM'),
+  months:Math.max(0,Math.min(12,(ny-Number(start.slice(0,4)))*12+(nm-Number(start.slice(5,7)))+1)),
+  structure:table('FeeStructure').rows,pays:table('Payments').rows}}
+function feesOfCtx(r,c){
+ const sid=String(r.studentId),cid=String(r.classId);
+ const pays=c.pays.filter(p=>String(p.studentId)===sid&&dstr(p.date)>=c.start)
+  .map(p=>({receiptNo:String(p.receiptNo),feeType:String(p.feeType),amount:Number(p.amount)||0,mode:String(p.mode),date:dstr(p.date)}));
+ pays.sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(a.receiptNo<b.receiptNo?1:-1));
+ const lines=c.structure.filter(f=>String(f.classId)===cid).map(f=>{
   const amt=Number(f.amount)||0,dm=String(f.dueMonth),type=String(f.feeType);
-  const due=dm==='monthly'?amt*months:(/^\d{4}-\d{2}$/.test(dm)&&dm<=curYM?amt:0);
-  const paid=pays.filter(p=>p.feeType===type).reduce((a,p)=>a+p.amount,0);
-  return{feeType:type,amount:amt,dueMonth:dm,due,paid,balance:due-paid}});
- const sum=k=>lines.reduce((a,l)=>a+l[k],0);
- return{lines,payments:pays,totalDue:sum('due'),totalPaid:sum('paid'),balance:sum('balance'),year:yr.name||''}}
+  const due=dm==='monthly'?amt*c.months:(/^\d{4}-\d{2}$/.test(dm)&&dm<=c.curYM?amt:0);
+  const paid=Math.round(pays.filter(p=>p.feeType===type).reduce((a,p)=>a+p.amount,0)*100)/100;
+  return{feeType:type,amount:amt,dueMonth:dm,due,paid,balance:Math.round((due-paid)*100)/100}});
+ const sum=k=>Math.round(lines.reduce((a,l)=>a+l[k],0)*100)/100;
+ return{lines,payments:pays,totalDue:sum('due'),totalPaid:sum('paid'),balance:sum('balance'),year:c.year}}
+function feesOf(r){return feesOfCtx(r,feeCtx())}
 
 function noticesOf(r){
  return table('ClassNotices').rows.filter(n=>String(n.classId)==='ALL'||String(n.classId)===String(r.classId))
@@ -50,7 +55,7 @@ function myDashboard(b){const r=stu(b);if(!r)return DENIED;
   fees:{balance:f.balance,totalDue:f.totalDue,totalPaid:f.totalPaid},notices:noticesOf(r).slice(0,3),today:lessonsOf(r).filter(l=>l.day===today)}}
 function myProfile(b){const r=stu(b);return r?{ok:true,profile:profileOf(r)}:DENIED}
 function myAttendance(b){const r=stu(b);if(!r)return DENIED;const a=attOf(String(r.studentId));a.rows=a.rows.slice(0,400);return Object.assign({ok:true},a)}
-function myFees(b){const r=stu(b);return r?Object.assign({ok:true},feesOf(r)):DENIED}
+function myFees(b){const r=stu(b);return r?Object.assign({ok:true,studentId:String(r.studentId)},feesOf(r)):DENIED}
 function myNotices(b){const r=stu(b);return r?{ok:true,notices:noticesOf(r)}:DENIED}
 function myTimetable(b){const r=stu(b);return r?{ok:true,lessons:lessonsOf(r)}:DENIED}
 function myHomework(b){const r=stu(b);if(!r)return DENIED;

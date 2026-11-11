@@ -163,7 +163,7 @@ function doPost(e){
  }catch(err){return out({ok:false,error:'Server error'})}}
 
 // action -> function ka naam. Naye features yahin jodo.
-const ROUTES={getMarks:'getMarks',deleteAssignment:'deleteAssignment',deleteLesson:'deleteLesson',deleteClassNotice:'deleteClassNotice',teacherHome:'teacherHome',resetSecret:'resetSecret',myDashboard:'myDashboard',myProfile:'myProfile',myAttendance:'myAttendance',myFees:'myFees',myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',saveClass:'saveClass',listSubjects:'listSubjects',saveSubject:'saveSubject',listLessons:'listLessons',saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',backupNow:'backupNow'};
+const ROUTES={deleteFee:'deleteFee',studentFees:'studentFees',voidPayment:'voidPayment',getReceipt:'getReceipt',defaulters:'defaulters',getMarks:'getMarks',deleteAssignment:'deleteAssignment',deleteLesson:'deleteLesson',deleteClassNotice:'deleteClassNotice',teacherHome:'teacherHome',resetSecret:'resetSecret',myDashboard:'myDashboard',myProfile:'myProfile',myAttendance:'myAttendance',myFees:'myFees',myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',saveClass:'saveClass',listSubjects:'listSubjects',saveSubject:'saveSubject',listLessons:'listLessons',saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',backupNow:'backupNow'};
 
 // ===== Portal.gs =====
 // Student portal (Phase 3): student sirf apni hi data dekh sakta hai. changeSecret sab roles ke liye.
@@ -186,21 +186,26 @@ function attOf(sid){
  const total=c.P+c.A+c.L;
  return{rows,present:c.P,absent:c.A,late:c.L,total,percent:total?Math.round((c.P+c.L)*1000/total)/10:0}}  // late = present maana
 
-function feesOf(r){
- const sid=String(r.studentId),cid=String(r.classId),now=new Date();
- const yr=find('AcademicYears',y=>String(y.current).toUpperCase()==='TRUE')||{},start=dstr(yr.start)||(now.getFullYear()+'-04-01');
- const ny=Number(Utilities.formatDate(now,TZ,'yyyy')),nm=Number(Utilities.formatDate(now,TZ,'MM')),curYM=Utilities.formatDate(now,TZ,'yyyy-MM');
- const months=Math.max(0,Math.min(12,(ny-Number(start.slice(0,4)))*12+(nm-Number(start.slice(5,7)))+1));
- const pays=table('Payments').rows.filter(p=>String(p.studentId)===sid&&(!start||dstr(p.date)>=start))
-  .map(p=>({receiptNo:String(p.receiptNo),feeType:String(p.feeType),amount:Number(p.amount)||0,mode:p.mode,date:dstr(p.date)}));
- pays.sort((a,b)=>a.date<b.date?1:-1);
- const lines=table('FeeStructure').rows.filter(f=>String(f.classId)===cid).map(f=>{
+// Fee hisaab: monthly fee = amount x (session start se ab tak ke mahine); one-time fee = due month aane par. Payments mein negative (void) rows bhi judti hain.
+function feeCtx(){
+ const now=new Date(),yr=find('AcademicYears',y=>String(y.current).toUpperCase()==='TRUE')||{},start=dstr(yr.start)||(now.getFullYear()+'-04-01');
+ const ny=Number(Utilities.formatDate(now,TZ,'yyyy')),nm=Number(Utilities.formatDate(now,TZ,'MM'));
+ return{start,year:yr.name||'',curYM:Utilities.formatDate(now,TZ,'yyyy-MM'),
+  months:Math.max(0,Math.min(12,(ny-Number(start.slice(0,4)))*12+(nm-Number(start.slice(5,7)))+1)),
+  structure:table('FeeStructure').rows,pays:table('Payments').rows}}
+function feesOfCtx(r,c){
+ const sid=String(r.studentId),cid=String(r.classId);
+ const pays=c.pays.filter(p=>String(p.studentId)===sid&&dstr(p.date)>=c.start)
+  .map(p=>({receiptNo:String(p.receiptNo),feeType:String(p.feeType),amount:Number(p.amount)||0,mode:String(p.mode),date:dstr(p.date)}));
+ pays.sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(a.receiptNo<b.receiptNo?1:-1));
+ const lines=c.structure.filter(f=>String(f.classId)===cid).map(f=>{
   const amt=Number(f.amount)||0,dm=String(f.dueMonth),type=String(f.feeType);
-  const due=dm==='monthly'?amt*months:(/^\d{4}-\d{2}$/.test(dm)&&dm<=curYM?amt:0);
-  const paid=pays.filter(p=>p.feeType===type).reduce((a,p)=>a+p.amount,0);
-  return{feeType:type,amount:amt,dueMonth:dm,due,paid,balance:due-paid}});
- const sum=k=>lines.reduce((a,l)=>a+l[k],0);
- return{lines,payments:pays,totalDue:sum('due'),totalPaid:sum('paid'),balance:sum('balance'),year:yr.name||''}}
+  const due=dm==='monthly'?amt*c.months:(/^\d{4}-\d{2}$/.test(dm)&&dm<=c.curYM?amt:0);
+  const paid=Math.round(pays.filter(p=>p.feeType===type).reduce((a,p)=>a+p.amount,0)*100)/100;
+  return{feeType:type,amount:amt,dueMonth:dm,due,paid,balance:Math.round((due-paid)*100)/100}});
+ const sum=k=>Math.round(lines.reduce((a,l)=>a+l[k],0)*100)/100;
+ return{lines,payments:pays,totalDue:sum('due'),totalPaid:sum('paid'),balance:sum('balance'),year:c.year}}
+function feesOf(r){return feesOfCtx(r,feeCtx())}
 
 function noticesOf(r){
  return table('ClassNotices').rows.filter(n=>String(n.classId)==='ALL'||String(n.classId)===String(r.classId))
@@ -218,7 +223,7 @@ function myDashboard(b){const r=stu(b);if(!r)return DENIED;
   fees:{balance:f.balance,totalDue:f.totalDue,totalPaid:f.totalPaid},notices:noticesOf(r).slice(0,3),today:lessonsOf(r).filter(l=>l.day===today)}}
 function myProfile(b){const r=stu(b);return r?{ok:true,profile:profileOf(r)}:DENIED}
 function myAttendance(b){const r=stu(b);if(!r)return DENIED;const a=attOf(String(r.studentId));a.rows=a.rows.slice(0,400);return Object.assign({ok:true},a)}
-function myFees(b){const r=stu(b);return r?Object.assign({ok:true},feesOf(r)):DENIED}
+function myFees(b){const r=stu(b);return r?Object.assign({ok:true,studentId:String(r.studentId)},feesOf(r)):DENIED}
 function myNotices(b){const r=stu(b);return r?{ok:true,notices:noticesOf(r)}:DENIED}
 function myTimetable(b){const r=stu(b);return r?{ok:true,lessons:lessonsOf(r)}:DENIED}
 function myHomework(b){const r=stu(b);if(!r)return DENIED;
@@ -486,11 +491,93 @@ function deleteAssignment(b){
   tab('Assignments').deleteRow(ex._row);log(s.userId,'homework_delete',ex.id);return{ok:true}}))}
 
 // ===== Fees.gs =====
-// Fees: Phase 5 me banega. Abhi sirf skeleton.
-function getFeeStructure(b){return{ok:false,error:'Not built yet (Phase 5)'}}
-function saveFeeStructure(b){return{ok:false,error:'Not built yet (Phase 5)'}}
-function listPayments(b){return{ok:false,error:'Not built yet (Phase 5)'}}
-function addPayment(b){return{ok:false,error:'Not built yet (Phase 5)'}}
+// Fees (Phase 5): structure, payments ledger (sirf nayi rows; galti = void entry), receipt, defaulters
+const PAY_MODES=['cash','upi','bank','cheque'];
+const round2=n=>Math.round(n*100)/100;
+
+function getFeeStructure(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ const cn=nameMap('Classes','classId');
+ return{ok:true,fees:table('FeeStructure').rows.map(f=>({classId:String(f.classId),className:cn[String(f.classId)]||String(f.classId),feeType:String(f.feeType),amount:Number(f.amount)||0,dueMonth:String(f.dueMonth)}))}}
+
+function saveFeeStructure(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{
+  const d=b.fee||{},cid=resolveClass(d.classId),type=clean(d.feeType,40),amt=round2(Number(d.amount)),dm=clean(d.dueMonth,10);
+  if(!cid)throw new Error('Class chuno');if(!type)throw new Error('Fee ka naam zaruri hai');
+  if(!isFinite(amt)||amt<=0||amt>1e7)throw new Error('Amount sahi daalo');
+  if(dm!=='monthly'&&!/^\d{4}-(0[1-9]|1[0-2])$/.test(dm))throw new Error('Due month "monthly" ya YYYY-MM hona chahiye');
+  const ex=find('FeeStructure',f=>String(f.classId)===cid&&String(f.feeType).toLowerCase()===type.toLowerCase());
+  if(ex){setRow('FeeStructure',ex._row,{amount:amt,dueMonth:dm});log(s.userId,'fee_edit',cid+' '+type);return{ok:true}}
+  addRow('FeeStructure',{classId:cid,feeType:type,amount:amt,dueMonth:dm});log(s.userId,'fee_add',cid+' '+type);return{ok:true}}))}
+
+function deleteFee(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{const cid=resolveClass(b.classId),ex=find('FeeStructure',f=>String(f.classId)===cid&&String(f.feeType)===String(b.feeType));
+  if(!ex)throw new Error('Fee nahi mili');tab('FeeStructure').deleteRow(ex._row);log(s.userId,'fee_delete',cid+' '+b.feeType);return{ok:true}}))}
+
+function studentFees(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>{const r=find('Students',x=>String(x.studentId)===String(b.studentId));if(!r)throw new Error('Student nahi mila');
+  return{ok:true,student:profileOf(r),fees:feesOf(r)}})}
+
+function nextReceipt(){
+ const pre=clean((find('Settings',x=>String(x.key)==='receipt_prefix')||{}).value,5)||'R';let m=0;
+ table('Payments').rows.forEach(p=>{const x=String(p.receiptNo);if(x.indexOf(pre)===0){const v=parseInt(x.slice(pre.length),10);if(v>m)m=v}});
+ return pre+String(m+1).padStart(4,'0')}
+
+function addPayment(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{
+  const d=b.payment||{},r=find('Students',x=>String(x.studentId)===String(d.studentId));if(!r)throw new Error('Student nahi mila');
+  const type=clean(d.feeType,40),amt=round2(Number(d.amount)),mode=clean(d.mode,10).toLowerCase(),date=dstr(d.date)||todayStr();
+  if(!find('FeeStructure',f=>String(f.classId)===String(r.classId)&&String(f.feeType)===type))throw new Error('Is class ki fee structure mein "'+type+'" nahi hai');
+  if(!isFinite(amt)||amt<=0||amt>1e7)throw new Error('Amount sahi daalo');
+  if(PAY_MODES.indexOf(mode)<0)throw new Error('Mode cash/upi/bank/cheque mein se ho');
+  if(!validDate(date)||date>todayStr())throw new Error('Date galat hai (aane wali date nahi chalegi)');
+  const no=nextReceipt();addRow('Payments',{receiptNo:no,studentId:String(r.studentId),feeType:type,amount:amt,mode,date,receivedBy:s.userId});
+  log(s.userId,'payment',no+' '+r.studentId+' '+type+' '+amt);
+  return{ok:true,receiptNo:no,fees:feesOf(r)}}))}
+
+// Galti sudharne ke liye purani row delete nahi hoti: ulta (negative) entry judti hai.
+function voidPayment(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{
+  const rows=table('Payments').rows,o=rows.find(p=>String(p.receiptNo)===String(b.receiptNo));
+  if(!o)throw new Error('Receipt nahi mili');
+  if(Number(o.amount)<=0||String(o.mode).indexOf('void:')===0)throw new Error('Yeh entry void nahi ho sakti');
+  if(rows.some(p=>String(p.mode)==='void:'+o.receiptNo))throw new Error('Yeh receipt pehle hi void ho chuki hai');
+  const reason=clean(b.reason,100);if(!reason)throw new Error('Void ka karan likho');
+  const no=nextReceipt();addRow('Payments',{receiptNo:no,studentId:String(o.studentId),feeType:String(o.feeType),amount:-Number(o.amount),mode:'void:'+o.receiptNo,date:todayStr(),receivedBy:s.userId});
+  log(s.userId,'void',o.receiptNo+' -> '+no+' ('+reason+')');return{ok:true,receiptNo:no}}))}
+
+function listPayments(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ const st={},cn=nameMap('Classes','classId'),un=nameMap('Users','userId');table('Students').rows.forEach(r=>st[String(r.studentId)]=r);
+ const all=table('Payments').rows,voided={};all.forEach(p=>{const m=/^void:(.+)$/.exec(String(p.mode));if(m)voided[m[1]]=1});
+ const from=dstr(b.from),to=dstr(b.to),sid=clean(b.studentId,20);
+ const rows=all.filter(p=>(!sid||String(p.studentId)===sid)&&(!from||dstr(p.date)>=from)&&(!to||dstr(p.date)<=to)).map(p=>{const r=st[String(p.studentId)]||{};
+  return{receiptNo:String(p.receiptNo),studentId:String(p.studentId),name:r.name||'',className:cn[String(r.classId)]||String(r.classId||''),feeType:String(p.feeType),amount:Number(p.amount)||0,mode:String(p.mode),date:dstr(p.date),
+   receivedBy:un[String(p.receivedBy)]||String(p.receivedBy),isVoid:String(p.mode).indexOf('void:')===0,voided:!!voided[String(p.receiptNo)]}});
+ rows.sort((a,c)=>a.date<c.date?1:a.date>c.date?-1:(a.receiptNo<c.receiptNo?1:-1));
+ const total=round2(rows.reduce((a,p)=>a+p.amount,0));
+ return{ok:true,payments:rows.slice(0,500),total,count:rows.length}}
+
+function getReceipt(b){
+ const s=guard(b,['admin','student']);if(!s)return DENIED;
+ return safe(()=>{const p=find('Payments',x=>String(x.receiptNo)===String(b.receiptNo));if(!p)throw new Error('Receipt nahi mili');
+  if(s.role==='student'&&String(p.studentId)!==s.userId)return DENIED;
+  const r=find('Students',x=>String(x.studentId)===String(p.studentId))||{},un=nameMap('Users','userId');
+  return{ok:true,receipt:{receiptNo:String(p.receiptNo),date:dstr(p.date),feeType:String(p.feeType),amount:Number(p.amount)||0,mode:String(p.mode),receivedBy:un[String(p.receivedBy)]||String(p.receivedBy),
+   isVoid:String(p.mode).indexOf('void:')===0,voided:table('Payments').rows.some(x=>String(x.mode)==='void:'+p.receiptNo)},student:r.studentId?profileOf(r):{}}})}
+
+function defaulters(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>{const cid=b.classId?resolveClass(b.classId):'',c=feeCtx(),cn=nameMap('Classes','classId');
+  const rows=table('Students').rows.filter(r=>String(r.status).toLowerCase()==='active'&&(!cid||String(r.classId)===cid)).map(r=>{const f=feesOfCtx(r,c);
+   return{studentId:String(r.studentId),name:r.name,className:cn[String(r.classId)]||String(r.classId),roll:String(r.roll),phone:String(r.parentPhone||''),due:f.totalDue,paid:f.totalPaid,balance:f.balance}})
+   .filter(x=>x.balance>0).sort((a,d)=>d.balance-a.balance);
+  return{ok:true,students:rows,total:round2(rows.reduce((a,x)=>a+x.balance,0))}})}
 
 // ===== Results.gs =====
 // Results/marks (Phase 4: marks entry. Exams banana + report card PDF Phase 6). Har entry nayi row, latest jeetti hai.

@@ -1,5 +1,5 @@
 // Student portal pages + sab roles ke liye "PIN/Password badlo" (settings)
-const rupee=n=>'₹'+Number(n||0).toLocaleString('en-IN');
+const rupee=n=>(Number(n)<0?'-':'')+'₹'+Math.abs(Number(n||0)).toLocaleString('en-IN');
 const safeUrl=u=>/^https?:\/\//i.test(u)?u:'';
 function page(key,title){const m=$('#main');m.innerHTML='';m.append(el('h1',{'data-i':key},title||''));applyI18n();return m}
 const stat=(l,v,sub)=>el('div',{class:'card stat'},el('div',{class:'big'},v),el('div',{class:'mu'},l),sub?el('div',{class:'mu'},sub):'');
@@ -25,7 +25,8 @@ async function initSFees(){
  const m=page('n_fees'),r=await call('myFees');
  m.append(el('p',{class:'mu'},'Session '+r.year),el('div',{class:'grid'},stat('Total due',rupee(r.totalDue)),stat('Paid',rupee(r.totalPaid)),stat('Balance',rupee(r.balance))),
   el('h3',{},'Fee details'),tableEl([{h:'Fee',f:x=>x.feeType},{h:'Amount',f:x=>rupee(x.amount)+(x.dueMonth==='monthly'?' /month':'')},{h:'Due so far',f:x=>rupee(x.due)},{h:'Paid',f:x=>rupee(x.paid)},{h:'Balance',f:x=>rupee(x.balance)}],r.lines,'Fee structure set nahi hai'),
-  el('h3',{},'Payments / Receipts'),tableEl([{h:'Receipt',f:x=>x.receiptNo},{h:'Date',f:x=>x.date},{h:'Fee',f:x=>x.feeType},{h:'Amount',f:x=>rupee(x.amount)},{h:'Mode',f:x=>x.mode}],r.payments,'Abhi koi payment nahi'))}
+  el('h3',{},'Payments / Receipts'),tableEl([{h:'Receipt',f:x=>el('a',{href:'../receipt.html?no='+encodeURIComponent(x.receiptNo),target:'_blank',rel:'noopener'},x.receiptNo)},{h:'Date',f:x=>x.date},{h:'Fee',f:x=>x.feeType},{h:'Amount',f:x=>rupee(x.amount)},{h:'Mode',f:x=>x.mode}],r.payments,'Abhi koi payment nahi'));
+ upiBlock(m,r)}
 async function initSResults(){
  const m=page('n_results'),r=await call('myResults');
  if(!r.exams.length)m.append(el('p',{class:'mu'},'Abhi result nahi aaya'));
@@ -50,3 +51,11 @@ async function initSettings(){
    try{if(n.value!==c.value)throw new Error('Dono naye alag hain');await call('changeSecret',{oldSecret:o.value,newSecret:n.value});o.value=n.value=c.value='';msg.style.color='#16a34a';msg.textContent='Badal gaya'}
    catch(e){msg.textContent=e.message}}},'Save'),msg);
  m.append(f)}
+
+// UPI QR (optional): config.js mein upi.id bharo. Payment admin haath se confirm karta hai.
+function upiLink(bal,sid){const u=CFG.upi||{};return 'upi://pay?pa='+encodeURIComponent(u.id)+'&pn='+encodeURIComponent(u.name||CFG.name)+'&am='+Number(bal).toFixed(2)+'&cu=INR&tn='+encodeURIComponent('Fee '+sid)}
+function upiBlock(m,r){
+ if(!(CFG.upi&&CFG.upi.id)||!(r.balance>0)||typeof qrSvg!=='function')return;
+ const sid=r.studentId||'',link=upiLink(r.balance,sid),q=el('div');q.innerHTML=qrSvg(link,200);
+ m.append(el('h3',{},'UPI se payment'),el('div',{class:'upi'},q,el('div',{},el('p',{},'Baaki: '+rupee(r.balance)),el('a',{class:'btnlink',href:link},'UPI app mein kholo'),
+  el('p',{class:'mu'},'QR scan karo ya button dabao. Payment ke baad school office ko batao; receipt tab milegi jab office payment confirm kar degi.'))))}

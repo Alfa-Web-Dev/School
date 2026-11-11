@@ -51,3 +51,14 @@ details{margin:10px 0}summary{cursor:pointer}
 @media print{header,nav,.bar,button{display:none!important}body.app{background:#fff;color:#000}}
 .tg{background:none;color:var(--tx);border:1px solid var(--bd)}.tg.on{color:#fff;border:0}.tg.on.P{background:#16a34a}.tg.on.A{background:#dc2626}.tg.on.L{background:#d97706}
 td input[type=number]{padding:6px}
+/* receipt + fees */
+body.rbody{display:block;padding:16px}#rc{max-width:560px;margin:auto}
+.rcpt{position:relative;background:#fff;color:#000;border:2px solid #000;border-radius:6px;padding:18px;margin-bottom:12px}
+.rcpt .mu{color:#555}.rh{text-align:center;border-bottom:1px solid #000;margin-bottom:10px}.rh h2,.rh h3{margin:4px 0}
+.rt{width:100%;border-collapse:collapse}.rt td{padding:5px 4px;border-bottom:1px dotted #aaa}.amt{font-size:30px;font-weight:700;text-align:center;margin:14px 0 2px}
+.sig{display:flex;justify-content:space-between;margin-top:46px;font-size:13px}.sig span{border-top:1px solid #000;padding-top:4px}
+.rcpt.void .rt,.rcpt.void .amt{opacity:.45}.stamp{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%) rotate(-18deg);font-size:44px;font-weight:700;color:#dc2626;border:4px solid #dc2626;padding:0 12px;opacity:.8}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chip{width:auto;margin:0;padding:6px 10px;font-size:14px;background:none;color:var(--tx);border:1px solid var(--bd)}
+.upi{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.upi svg{border:1px solid var(--bd);border-radius:8px;background:#fff}
+@media print{body.rbody{padding:0}.no-print{display:none!important}}
+.btnlink{display:inline-block;background:var(--c);color:#fff;padding:10px 14px;border-radius:9px;text-decoration:none}
