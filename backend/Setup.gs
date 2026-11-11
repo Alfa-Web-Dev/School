@@ -21,3 +21,10 @@ function createFirstAdmin(){
  tab('Users').appendRow([id,name,'admin','','',f.hash,f.salt,true]);
  P.deleteProperty('FIRST_ADMIN_PASSWORD');
  Logger.log('Admin ban gaya. Password property hata di gayi.')}
+
+// Notes ke liye Drive folder (ek baar editor se chalao; pehli baar Drive permission maangega)
+function setupDrive(){
+ const old=P.getProperty('NOTES_FOLDER_ID');
+ if(old){try{DriveApp.getFolderById(old);Logger.log('Notes folder pehle se hai: '+old);return}catch(e){}}
+ const f=DriveApp.createFolder('School Notes');P.setProperty('NOTES_FOLDER_ID',f.getId());
+ Logger.log('Notes folder ban gaya: '+f.getUrl())}
