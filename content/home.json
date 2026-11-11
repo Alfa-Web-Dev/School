@@ -1,7 +1,7 @@
 {
  "hero": [
   {
-   "image": "",
+   "image": "uploads/mwbnivvt-file_00000000dc0081f4b645875a8570ad6d.jpg",
    "title": {
     "hi": "आपका स्वागत है",
     "en": "Welcome"
@@ -10,7 +10,18 @@
     "hi": "बेहतर शिक्षा, बेहतर भविष्य",
     "en": "Better education, better future"
    }
+  },
+  {
+   "image": "uploads/mwbnj4jg-our-dream-house-tour---_-diwali-special_00-08-46.jpg",
+   "title": {
+    "hi": "",
+    "en": ""
+   },
+   "sub": {
+    "hi": "",
+    "en": ""
+   }
   }
  ],
- "logo": ""
+ "logo": "uploads/mwbnk8y4-file_00000000d40c81f48fce7becd35a196b.jpg"
 }
