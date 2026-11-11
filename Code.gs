@@ -1,4 +1,3 @@
-// ===== Utils.gs =====
 const VERSION='0.1.0';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
@@ -29,7 +28,6 @@ function table(n){const v=tab(n).getDataRange().getValues(),h=v.shift().map(Stri
 const find=(n,fn)=>table(n).rows.find(fn);
 function log(uid,action,details){tab('Logs').appendRow([new Date(),uid||'',action,details||''])}
 
-// ===== Auth.gs =====
 const SESSION_HOURS=6,MAX_FAILS=5,LOCK_SEC=900;
 const sha=s=>Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,s,Utilities.Charset.UTF_8).map(b=>('0'+(b&255).toString(16)).slice(-2)).join('');
 const newSalt=()=>Utilities.getUuid().replace(/-/g,'');
@@ -84,7 +82,6 @@ function cleanTokens(){
  const s=tab('Tokens'),v=s.getDataRange().getValues(),now=Date.now();
  for(let i=v.length-1;i>=1;i--)if(Number(v[i][3])<now)s.deleteRow(i+1)}
 
-// ===== Core.gs =====
 // Core: sab modules ke common helpers (guard, lock, row read/write, id aur PIN banana)
 const DENIED={ok:false,error:'Not allowed'};
 const clean=(v,n)=>String(v==null?'':v).trim().slice(0,n||200);
@@ -124,7 +121,6 @@ function activeStudents(cid){return table('Students').rows.filter(r=>String(r.cl
 const validDate=d=>/^\d{4}-\d{2}-\d{2}$/.test(d);
 const validTime=t=>/^([01]\d|2[0-3]):[0-5]\d$/.test(t);
 
-// ===== Setup.gs =====
 // Editor se chalao: pehle setupSheet(), phir createFirstAdmin()
 function setupSheet(){
  const ss=SpreadsheetApp.getActive();
@@ -156,7 +152,6 @@ function setupDrive(){
  const f=DriveApp.createFolder('School Notes');P.setProperty('NOTES_FOLDER_ID',f.getId());
  Logger.log('Notes folder ban gaya: '+f.getUrl())}
 
-// ===== Main.gs =====
 function doGet(){return out({ok:true,version:VERSION})}
 function doPost(e){
  try{
@@ -172,9 +167,8 @@ function doPost(e){
  }catch(err){return out({ok:false,error:'Server error'})}}
 
 // action -> function ka naam. Naye features yahin jodo.
-const ROUTES={noteOptions:'noteOptions',listNotes:'listNotes',uploadNote:'uploadNote',updateNote:'updateNote',deleteNote:'deleteNote',uploadNote:'uploadNote',listNotes:'listNotes',updateNote:'updateNote',deleteNote:'deleteNote',noteSubjects:'noteSubjects',deleteFee:'deleteFee',studentFees:'studentFees',voidPayment:'voidPayment',getReceipt:'getReceipt',defaulters:'defaulters',getMarks:'getMarks',deleteAssignment:'deleteAssignment',deleteLesson:'deleteLesson',deleteClassNotice:'deleteClassNotice',teacherHome:'teacherHome',resetSecret:'resetSecret',myDashboard:'myDashboard',myProfile:'myProfile',myAttendance:'myAttendance',myFees:'myFees',myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',saveClass:'saveClass',listSubjects:'listSubjects',saveSubject:'saveSubject',listLessons:'listLessons',saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',backupNow:'backupNow'};
+const ROUTES={noteOptions:'noteOptions',listNotes:'listNotes',uploadNote:'uploadNote',updateNote:'updateNote',deleteNote:'deleteNote',uploadNote:'uploadNote',listNotes:'listNotes',updateNote:'updateNote',deleteNote:'deleteNote',noteSubjects:'noteSubjects',deleteFee:'deleteFee',studentFees:'studentFees',voidPayment:'voidPayment',getReceipt:'getReceipt',defaulters:'defaulters',getMarks:'getMarks',deleteAssignment:'deleteAssignment',deleteLesson:'deleteLesson',deleteClassNotice:'deleteClassNotice',teacherHome:'teacherHome',resetSecret:'resetSecret',myDashboard:'myDashboard',myProfile:'myProfile',myAttendance:'myAttendance',myFees:'myFees',myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',saveClass:'saveClass',listSubjects:'listSubjects',saveSubject:'saveSubject',listLessons:'listLessons',saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',adminExams:'adminExams',deleteExam:'deleteExam',reportCard:'reportCard',saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',backupNow:'backupNow'};
 
-// ===== Portal.gs =====
 // Student portal (Phase 3): student sirf apni hi data dekh sakta hai. changeSecret sab roles ke liye.
 const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],TZ='Asia/Kolkata';
 const dstr=v=>v instanceof Date?Utilities.formatDate(v,TZ,'yyyy-MM-dd'):String(v==null?'':v).slice(0,10);
@@ -240,11 +234,9 @@ function myHomework(b){const r=stu(b);if(!r)return DENIED;
  return{ok:true,homework:table('Assignments').rows.filter(a=>String(a.classId)===String(r.classId)).map(a=>({id:String(a.id),subject:sn[String(a.subjectId)]||String(a.subjectId),
   title:a.title,due:dstr(a.due),link:String(a.link||''),by:tn[String(a.by)]||''})).sort((x,y)=>x.due<y.due?1:-1)}}
 function myResults(b){const r=stu(b);if(!r)return DENIED;
- const sn=nameMap('Subjects','subjectId'),sid=String(r.studentId),res=(()=>{const m={};table('Results').rows.forEach(x=>{if(String(x.studentId)===sid)m[x.examId+'|'+x.subjectId]=x});return Object.keys(m).map(k=>m[k])})();  // latest row jeetti hai
- const exams=table('Exams').rows.filter(e=>String(e.classId)===String(r.classId)).map(e=>{
-  const rows=res.filter(x=>String(x.examId)===String(e.examId)).map(x=>({subject:sn[String(x.subjectId)]||String(x.subjectId),marks:Number(x.marks)||0,max:Number(e.maxMarks)||0}));
-  const total=rows.reduce((a,x)=>a+x.marks,0),max=rows.reduce((a,x)=>a+x.max,0);
-  return{examId:String(e.examId),title:e.title,date:dstr(e.date),rows,total,max,percent:max?Math.round(total*1000/max)/10:0}}).filter(e=>e.rows.length);
+ const exams=[];table('Exams').rows.filter(e=>String(e.classId)===String(r.classId)).forEach(e=>{
+  const x=examBoard(e).board[String(r.studentId)];if(!x||!x.rows.length)return;
+  exams.push({examId:String(e.examId),title:e.title,date:dstr(e.date),rows:x.rows.map(y=>({subject:y.subject,marks:y.marks,max:y.max,grade:y.grade})),total:x.total,max:x.max,percent:x.percent,grade:x.grade,pass:x.pass,rank:x.rank})});
  exams.sort((a,b)=>a.date<b.date?1:-1);return{ok:true,exams}}
 
 // Apna password/PIN badlo (admin, teacher, student sab). Student PIN: sirf digits, kam se kam 4.
@@ -259,7 +251,6 @@ function changeSecret(b){
   const f=setSecretFields(nw),o={salt:f.salt};o[m[2]]=f.hash;setRow(m[0],r._row,o);log(s.userId,'change_secret',s.role);
   return{ok:true}}))}
 
-// ===== Students.gs =====
 // Students (Phase 2): list, add/edit, CSV import, promote
 function saveStudentCore(d,actor){
  const name=clean(d.name,80);if(!name)throw new Error('Name zaruri hai');
@@ -309,7 +300,6 @@ function promoteStudents(b){
   log(s.userId,'promote',from+'->'+to+' ('+n+')');
   return{ok:true,moved:n}}))}
 
-// ===== Teachers.gs =====
 // Teachers (Phase 2) + PIN/password reset
 function listTeachers(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
@@ -351,7 +341,6 @@ function teacherHome(b){
   today:lessons.filter(l=>String(l.day)===today).map(l=>({classId:String(l.classId),className:cn[String(l.classId)]||String(l.classId),subject:sn[String(l.subjectId)]||String(l.subjectId),start:String(l.start),end:String(l.end)}))
    .sort((a,c)=>a.start<c.start?-1:1)}}
 
-// ===== Classes.gs =====
 // Classes + Subjects (Phase 2)
 function listClasses(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
@@ -382,7 +371,6 @@ function saveSubject(b){
   const id=nextId('Subjects','subjectId','SUB',2);addRow('Subjects',{subjectId:id,name});
   log(s.userId,'subject_add',id);return{ok:true,subjectId:id}}))}
 
-// ===== Timetable.gs =====
 // Timetable (Phase 4): admin banata hai, teacher apna dekhta hai
 function listLessons(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
@@ -412,7 +400,6 @@ function deleteLesson(b){
  return safe(()=>withLock(()=>{const ex=find('Lessons',l=>String(l.lessonId)===String(b.lessonId));if(!ex)throw new Error('Lesson nahi mila');
   tab('Lessons').deleteRow(ex._row);log(s.userId,'lesson_delete',ex.lessonId);return{ok:true}}))}
 
-// ===== Notices.gs =====
 // Class notices (Phase 4): admin sab ko (ALL) ya kisi class ko; teacher sirf apni classes ko
 function listClassNotices(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
@@ -440,7 +427,6 @@ function deleteClassNotice(b){
   if(!(s.role==='admin'||canClass(s,String(ex.classId))&&String(ex.classId)!=='ALL'))throw new Error('Is notice ko delete nahi kar sakte');
   tab('ClassNotices').deleteRow(ex._row);log(s.userId,'notice_delete',ex.id);return{ok:true}}))}
 
-// ===== Attendance.gs =====
 // Attendance (Phase 4): har entry nayi row (purani delete nahi), latest row jeetti hai
 function attMap(cid,date){const m={};
  table('Attendance').rows.forEach(r=>{if(String(r.classId)===cid&&dstr(r.date)===date)m[String(r.studentId)]=String(r.status).toUpperCase()});return m}
@@ -469,7 +455,6 @@ function markAttendance(b){
   addRows('Attendance',rows);log(s.userId,'attendance',cid+' '+date+' ('+rows.length+')');
   return{ok:true,saved:rows.length}}))}
 
-// ===== Homework.gs =====
 // Homework (Phase 4)
 function listAssignments(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
@@ -499,7 +484,6 @@ function deleteAssignment(b){
   if(s.role!=='admin'&&String(ex.by)!==s.userId)throw new Error('Sirf apna homework delete kar sakte ho');
   tab('Assignments').deleteRow(ex._row);log(s.userId,'homework_delete',ex.id);return{ok:true}}))}
 
-// ===== Fees.gs =====
 // Fees (Phase 5): structure, payments ledger (sirf nayi rows; galti = void entry), receipt, defaulters
 const PAY_MODES=['cash','upi','bank','cheque'];
 const round2=n=>Math.round(n*100)/100;
@@ -588,7 +572,6 @@ function defaulters(b){
    .filter(x=>x.balance>0).sort((a,d)=>d.balance-a.balance);
   return{ok:true,students:rows,total:round2(rows.reduce((a,x)=>a+x.balance,0))}})}
 
-// ===== Results.gs =====
 // Results/marks (Phase 4: marks entry. Exams banana + report card PDF Phase 6). Har entry nayi row, latest jeetti hai.
 function subjectsFor(s,cid){const all=table('Subjects').rows;
  if(s.role==='admin'||isClassTeacher(s,cid))return all.map(x=>({subjectId:String(x.subjectId),name:x.name}));
@@ -627,10 +610,84 @@ function saveMarks(b){
   addRows('Results',rows);log(s.userId,'marks',ex.examId+' '+sub+' ('+rows.length+')');
   return{ok:true,saved:rows.length}}))}
 
-function saveExam(b){return{ok:false,error:'Not built yet (Phase 6)'}}
-function getResults(b){return{ok:false,error:'Not built yet (Phase 6)'}}
 
-// ===== Library.gs =====
+// ---- Phase 6: exams banana, class result sheet, report card ----
+function gradeOf(pc){return pc>=90?'A+':pc>=80?'A':pc>=70?'B+':pc>=60?'B':pc>=50?'C':pc>=40?'D':pc>=33?'E':'F'}
+const PASS_PC=33;
+
+function adminExams(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>{const cn=nameMap('Classes','classId'),cnt={};
+  table('Results').rows.forEach(r=>{const k=String(r.examId);cnt[k]=cnt[k]||{};cnt[k][String(r.studentId)+'|'+String(r.subjectId)]=1});
+  const ex=table('Exams').rows.map(e=>({examId:String(e.examId),title:e.title,classId:String(e.classId),className:cn[String(e.classId)]||String(e.classId),date:dstr(e.date),maxMarks:Number(e.maxMarks)||0,entries:Object.keys(cnt[String(e.examId)]||{}).length}));
+  ex.sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);return{ok:true,exams:ex}})}
+
+function saveExam(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{
+  const d=b.exam||{},title=clean(d.title,60),max=Number(d.maxMarks),date=clean(d.date,10);
+  if(!title)throw new Error('Exam ka naam zaruri hai');
+  if(!isFinite(max)||max<=0||max>1000)throw new Error('Max marks 1 se 1000 ke beech hone chahiye');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error('Date galat hai');
+  if(d.examId){const ex=find('Exams',e=>String(e.examId)===String(d.examId));if(!ex)throw new Error('Exam nahi mila');
+   const over=table('Results').rows.some(r=>String(r.examId)===String(ex.examId)&&Number(r.marks)>max);
+   if(over)throw new Error('Kuch students ke marks is max se zyada hain, max kam nahi kar sakte');
+   setRow('Exams',ex._row,{title,date,maxMarks:max});log(s.userId,'exam_edit',ex.examId);return{ok:true,examId:String(ex.examId)}}
+  const ids=(Array.isArray(d.classIds)&&d.classIds.length?d.classIds:[d.classId]).map(resolveClass);
+  if(!ids.length||ids.some(x=>!x))throw new Error('Class chuniye');
+  const made=[];[...new Set(ids)].forEach(cid=>{
+   if(table('Exams').rows.some(e=>String(e.classId)===cid&&String(e.title).toLowerCase()===title.toLowerCase()))throw new Error('Is class mein "'+title+'" pehle se hai');
+   const id=nextId('Exams','examId','E',3);addRow('Exams',{examId:id,title,classId:cid,date,maxMarks:max});made.push(id)});
+  log(s.userId,'exam_add',made.join(','));return{ok:true,examIds:made}}))}
+
+function deleteExam(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam nahi mila');
+  if(table('Results').rows.some(r=>String(r.examId)===String(ex.examId)))throw new Error('Is exam mein marks bhare hain, delete nahi ho sakta');
+  tab('Exams').deleteRow(ex._row);log(s.userId,'exam_delete',ex.examId);return{ok:true}}))}
+
+// Ek exam ka poori class ka hisaab: {studentId:{rows,total,max,percent,grade,rank}}
+function examBoard(ex){
+ const cid=String(ex.classId),max=Number(ex.maxMarks)||0,sn=nameMap('Subjects','subjectId'),latest={};
+ table('Results').rows.forEach(r=>{if(String(r.examId)===String(ex.examId))latest[String(r.studentId)+'|'+String(r.subjectId)]=r});  // latest row jeetti hai
+ const stus=activeStudents(cid),out={},subjSeen={};
+ stus.forEach(st=>{const sid=String(st.studentId),rows=[];
+  Object.keys(latest).forEach(k=>{const r=latest[k];if(String(r.studentId)!==sid)return;const m=Number(r.marks)||0,pc=max?Math.round(m*1000/max)/10:0;
+   subjSeen[String(r.subjectId)]=1;rows.push({subjectId:String(r.subjectId),subject:sn[String(r.subjectId)]||String(r.subjectId),marks:m,max,grade:gradeOf(pc),pass:pc>=PASS_PC})});
+  rows.sort((a,b)=>a.subject<b.subject?-1:1);
+  const total=rows.reduce((a,x)=>a+x.marks,0),mx=rows.length*max,percent=mx?Math.round(total*1000/mx)/10:0;
+  out[sid]={student:st,rows,total,max:mx,percent,grade:rows.length?gradeOf(percent):'',pass:rows.length>0&&rows.every(x=>x.pass)}});
+ const ranked=Object.keys(out).filter(k=>out[k].rows.length).sort((a,b)=>out[b].percent-out[a].percent);
+ ranked.forEach((k,i)=>{out[k].rank=i>0&&out[ranked[i-1]].percent===out[k].percent?out[ranked[i-1]].rank:i+1});
+ return{board:out,subjects:Object.keys(subjSeen).map(id=>({subjectId:id,name:sn[id]||id})).sort((a,b)=>a.name<b.name?-1:1),ranked:ranked.length}}
+
+// Admin ya class teacher: poori class ka result sheet
+function getResults(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam nahi mila');
+  const cid=String(ex.classId);if(s.role!=='admin'&&!isClassTeacher(s,cid))throw new Error('Poora result sirf class teacher ya admin dekh sakta hai');
+  const r=examBoard(ex);
+  const students=Object.keys(r.board).map(k=>{const x=r.board[k],m={};x.rows.forEach(y=>m[y.subjectId]=y.marks);
+   return{studentId:k,name:x.student.name,roll:String(x.student.roll),marks:m,total:x.total,max:x.max,percent:x.percent,grade:x.grade,pass:x.pass,rank:x.rank||''}});
+  students.sort((a,b)=>(Number(a.roll)||0)-(Number(b.roll)||0)||(a.name<b.name?-1:1));
+  return{ok:true,exam:{examId:String(ex.examId),title:ex.title,date:dstr(ex.date),maxMarks:Number(ex.maxMarks)||0},subjects:r.subjects,students}})}
+
+function cardOf(st,ex){
+ const r=examBoard(ex),x=r.board[String(st.studentId)];if(!x||!x.rows.length)throw new Error('Is exam ka result abhi nahi aaya');
+ const cl=find('Classes',c=>String(c.classId)===String(st.classId))||{},a=attOf(String(st.studentId));
+ return{ok:true,exam:{examId:String(ex.examId),title:ex.title,date:dstr(ex.date),maxMarks:Number(ex.maxMarks)||0},
+  student:{studentId:String(st.studentId),name:st.name,roll:String(st.roll),admNo:String(st.admNo||''),className:cl.name||String(st.classId),parentName:String(st.parentName||''),dob:dstr(st.dob)},
+  rows:x.rows,total:x.total,max:x.max,percent:x.percent,grade:x.grade,pass:x.pass,rank:x.rank,classSize:r.ranked,attendance:a.total?a.percent:null,
+  classTeacher:(cl.classTeacherId?nameMap('Users','userId')[String(cl.classTeacherId)]:'')||''}}
+
+function reportCard(b){
+ const s=guard(b);if(!s)return DENIED;
+ return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam nahi mila');
+  let sid=s.role==='student'?s.userId:String(b.studentId||'');
+  const st=find('Students',x=>String(x.studentId)===sid);if(!st||String(st.classId)!==String(ex.classId))throw new Error('Student is exam ka nahi hai');
+  if(s.role==='teacher'&&!isClassTeacher(s,String(ex.classId)))return DENIED;
+  return cardOf(st,ex)})}
+
 // Notes library (Phase 6a): file Google Drive mein, list Sheet ke "Notes" tab mein.
 // Folder: School Notes / <Class> / <Subject> /. File "anyone with link can view" hoti hai; list sirf login wale ko milti hai.
 const NOTE_MAX_BYTES=20*1024*1024,NOTE_TYPES={'application/pdf':'.pdf','image/jpeg':'.jpg','image/png':'.png','image/webp':'.webp'};
@@ -699,13 +756,11 @@ function deleteNote(b){
   try{DriveApp.getFileById(String(ex.fileId)).setTrashed(true)}catch(e){}   // Drive trash mein jati hai (wapas laya ja sakta hai)
   tab('Notes').deleteRow(ex._row);log(s.userId,'note_delete',ex.noteId);return{ok:true}}))}
 
-// ===== Enquiry.gs =====
 // Enquiry: Phase 7 me banega. Abhi sirf skeleton.
 function enquiry(b){return{ok:false,error:'Not built yet (Phase 7)'}}
 function listEnquiries(b){return{ok:false,error:'Not built yet (Phase 7)'}}
 function updateEnquiry(b){return{ok:false,error:'Not built yet (Phase 7)'}}
 
-// ===== Dashboard.gs =====
 // Dashboard: admin ke counts (Phase 2). Logs/charts Phase 9 me.
 function dashboardStats(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
@@ -720,7 +775,6 @@ function dashboardStats(b){
   byClass:classes.map(c=>({classId:String(c.classId),name:c.name,count:cnt[String(c.classId)]||0}))}}}
 function listLogs(b){return{ok:false,error:'Not built yet (Phase 9)'}}
 
-// ===== Backup.gs =====
 // Backup: Phase 9 me banega. Abhi sirf skeleton.
 function backupNow(b){return{ok:false,error:'Not built yet (Phase 9)'}}
 

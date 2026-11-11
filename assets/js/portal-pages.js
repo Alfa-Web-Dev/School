@@ -30,9 +30,9 @@ async function initSFees(){
 async function initSResults(){
  const m=page('n_results'),r=await call('myResults');
  if(!r.exams.length)m.append(el('p',{class:'mu'},'Abhi result nahi aaya'));
- r.exams.forEach(e=>m.append(el('h3',{},e.title+' · '+e.date),tableEl([{h:'Subject',f:x=>x.subject},{h:'Marks',f:x=>x.marks+' / '+x.max}],e.rows),
-  el('p',{},el('b',{},'Total: '+e.total+' / '+e.max+' ('+e.percent+'%)'))));
- if(r.exams.length)m.append(btn('Print report',()=>window.print()))}
+ r.exams.forEach(e=>m.append(el('h3',{},e.title+' · '+e.date),tableEl([{h:'Subject',f:x=>x.subject},{h:'Marks',f:x=>x.marks+' / '+x.max},{h:'Grade',f:x=>x.grade}],e.rows),
+  el('p',{},el('b',{},'Total: '+e.total+' / '+e.max+' ('+e.percent+'%) · Grade '+e.grade+' · Rank '+e.rank+' · '+(e.pass?'Pass':'Fail'))),
+  el('p',{},el('a',{href:'../reportcard.html?exam='+encodeURIComponent(e.examId),target:'_blank',rel:'noopener'},'Report card (PDF / Print)'))))}
 async function initSTime(){
  const m=page('n_timetable'),r=await call('myTimetable');
  if(!r.lessons.length)m.append(el('p',{class:'mu'},'Timetable abhi set nahi hai'));

@@ -63,11 +63,9 @@ function myHomework(b){const r=stu(b);if(!r)return DENIED;
  return{ok:true,homework:table('Assignments').rows.filter(a=>String(a.classId)===String(r.classId)).map(a=>({id:String(a.id),subject:sn[String(a.subjectId)]||String(a.subjectId),
   title:a.title,due:dstr(a.due),link:String(a.link||''),by:tn[String(a.by)]||''})).sort((x,y)=>x.due<y.due?1:-1)}}
 function myResults(b){const r=stu(b);if(!r)return DENIED;
- const sn=nameMap('Subjects','subjectId'),sid=String(r.studentId),res=(()=>{const m={};table('Results').rows.forEach(x=>{if(String(x.studentId)===sid)m[x.examId+'|'+x.subjectId]=x});return Object.keys(m).map(k=>m[k])})();  // latest row jeetti hai
- const exams=table('Exams').rows.filter(e=>String(e.classId)===String(r.classId)).map(e=>{
-  const rows=res.filter(x=>String(x.examId)===String(e.examId)).map(x=>({subject:sn[String(x.subjectId)]||String(x.subjectId),marks:Number(x.marks)||0,max:Number(e.maxMarks)||0}));
-  const total=rows.reduce((a,x)=>a+x.marks,0),max=rows.reduce((a,x)=>a+x.max,0);
-  return{examId:String(e.examId),title:e.title,date:dstr(e.date),rows,total,max,percent:max?Math.round(total*1000/max)/10:0}}).filter(e=>e.rows.length);
+ const exams=[];table('Exams').rows.filter(e=>String(e.classId)===String(r.classId)).forEach(e=>{
+  const x=examBoard(e).board[String(r.studentId)];if(!x||!x.rows.length)return;
+  exams.push({examId:String(e.examId),title:e.title,date:dstr(e.date),rows:x.rows.map(y=>({subject:y.subject,marks:y.marks,max:y.max,grade:y.grade})),total:x.total,max:x.max,percent:x.percent,grade:x.grade,pass:x.pass,rank:x.rank})});
  exams.sort((a,b)=>a.date<b.date?1:-1);return{ok:true,exams}}
 
 // Apna password/PIN badlo (admin, teacher, student sab). Student PIN: sirf digits, kam se kam 4.
