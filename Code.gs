@@ -633,7 +633,7 @@ function getResults(b){return{ok:false,error:'Not built yet (Phase 6)'}}
 // ===== Library.gs =====
 // Notes library (Phase 6a): file Google Drive mein, list Sheet ke "Notes" tab mein.
 // Folder: School Notes / <Class> / <Subject> /. File "anyone with link can view" hoti hai; list sirf login wale ko milti hai.
-const NOTE_MAX_BYTES=15*1024*1024,NOTE_TYPES={'application/pdf':'.pdf','image/jpeg':'.jpg','image/png':'.png','image/webp':'.webp'};
+const NOTE_MAX_BYTES=20*1024*1024,NOTE_TYPES={'application/pdf':'.pdf','image/jpeg':'.jpg','image/png':'.png','image/webp':'.webp'};
 function magicOk(b,mime){const u=i=>b[i]&255;
  if(mime==='application/pdf')return u(0)===0x25&&u(1)===0x50&&u(2)===0x44&&u(3)===0x46;
  if(mime==='image/jpeg')return u(0)===0xFF&&u(1)===0xD8;
@@ -670,10 +670,10 @@ function uploadNote(b){
   if(!teachesSub(s,cid,sub))throw new Error('Aap is class mein yeh subject nahi padhate');
   if(!title)throw new Error('Title zaruri hai');if(!chapter)throw new Error('Chapter zaruri hai');
   if(!NOTE_TYPES[mime])throw new Error('Sirf PDF ya photo (JPG/PNG/WEBP) chalegi');
-  if(!data||data.length>NOTE_MAX_BYTES*1.4)throw new Error('File 15 MB se badi hai');
+  if(!data||data.length>NOTE_MAX_BYTES*1.4)throw new Error('File 20 MB se badi hai');
   const root=P.getProperty('NOTES_FOLDER_ID');if(!root)throw new Error('Drive folder set nahi hai. Apps Script mein setupDrive chalao.');
   const bytes=Utilities.base64Decode(data);
-  if(bytes.length>NOTE_MAX_BYTES)throw new Error('File 15 MB se badi hai');if(!magicOk(bytes,mime))throw new Error('File ka type galat hai (extension badla hua lagta hai)');
+  if(bytes.length>NOTE_MAX_BYTES)throw new Error('File 20 MB se badi hai');if(!magicOk(bytes,mime))throw new Error('File ka type galat hai (extension badla hua lagta hai)');
   return withLock(()=>{
    const cls=find('Classes',c=>String(c.classId)===cid),folder=subFolder(subFolder(DriveApp.getFolderById(root),safeName(cls.name)),safeName(subj.name));
    const file=folder.createFile(Utilities.newBlob(bytes,mime,safeName(title)+NOTE_TYPES[mime]));

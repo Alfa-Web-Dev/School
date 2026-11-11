@@ -3,7 +3,7 @@ const fmtSize=n=>n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n
 const gThumb=id=>'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w400';
 const gView=id=>'https://drive.google.com/file/d/'+encodeURIComponent(id)+'/preview';
 const gDown=id=>'https://drive.google.com/uc?export=download&id='+encodeURIComponent(id);
-const NOTE_MAX=15*1024*1024;
+const NOTE_MAX=20*1024*1024;
 
 function viewNote(n){
  const d=modal(n.title+' · '+n.subject,el('iframe',{src:gView(n.fileId),allow:'autoplay',style:'width:100%;height:70vh;border:0;background:#fff'}),
@@ -33,7 +33,7 @@ async function prepNote(file){
   cv.width=Math.round(bm.width*s);cv.height=Math.round(bm.height*s);cv.getContext('2d').drawImage(bm,0,0,cv.width,cv.height);
   blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',0.82));mime='image/jpeg'}
  if(!['application/pdf','image/jpeg','image/png','image/webp'].includes(mime))throw new Error('Sirf PDF ya photo (JPG/PNG/WEBP) chalegi');
- if(blob.size>NOTE_MAX)throw new Error('File '+fmtSize(blob.size)+' hai, limit 15 MB. PDF chhoti karke dalo.');
+ if(blob.size>NOTE_MAX)throw new Error('File '+fmtSize(blob.size)+' hai, limit 20 MB. PDF chhoti karke dalo.');
  return{data:await b64(blob),mime}}
 
 async function initNotesMgr2(){   // admin + teacher
@@ -49,7 +49,7 @@ async function initNotesMgr2(){   // admin + teacher
    const f=await prepNote(fi.files[0]);await call('uploadNote',{classId:cs.value,subjectId:ss.value,chapter:ch.value,title:ti.value,mime:f.mime,data:f.data});
    toast('Notes upload ho gaye');ti.value='';fi.value='';msg.textContent='';await load()}
   catch(e){msg.style.color='';msg.textContent=e.message}go.disabled=false};
- m.append(el('div',{class:'card',style:'max-width:520px'},el('h3',{style:'margin-top:0'},'Naye notes upload karo'),el('label',{},'Class'),cs,el('label',{},'Subject'),ss,el('label',{},'Chapter'),ch,el('label',{},'Title'),ti,el('label',{},'File (PDF ya photo, max 15 MB)'),fi,go,msg));
+ m.append(el('div',{class:'card',style:'max-width:520px'},el('h3',{style:'margin-top:0'},'Naye notes upload karo'),el('label',{},'Class'),cs,el('label',{},'Subject'),ss,el('label',{},'Chapter'),ch,el('label',{},'Title'),ti,el('label',{},'File (PDF ya photo, max 20 MB)'),fi,go,msg));
  const fc=el('select',{},o.classes.map(c=>el('option',{value:c.classId},c.name))),q=el('input',{placeholder:'Search title / chapter'}),list=el('div');let all=[];
  m.append(el('h3',{},'Upload kiye hue notes'),el('div',{class:'bar'},fc,q),list);
  const act=n=>n.editable?[btn('Edit',()=>formModal('Edit notes',[{k:'title',l:'Title',req:1},{k:'chapter',l:'Chapter',req:1}],n,async v=>{await call('updateNote',{noteId:n.noteId,title:v.title,chapter:v.chapter});await load()})),

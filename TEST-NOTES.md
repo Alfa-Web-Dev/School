@@ -17,7 +17,7 @@ Files Google Drive mein jati hain (GitHub repo mein nahi). Sheet ke `Notes` tab 
 4. Teacher apne notes **Edit/Delete** kar sakta hai (delete par file Drive ke trash mein jati hai).
 
 ## Limits / dhyan
-- Ek file max **15 MB**, sirf PDF ya photo (JPG/PNG/WEBP). Photo browser mein khud chhoti ho jati hai.
+- Ek file max **20 MB**, sirf PDF ya photo (JPG/PNG/WEBP). Photo browser mein khud chhoti ho jati hai.
 - Teacher sirf apni class aur apne subject mein upload kar sakta hai.
 - Card ka preview Drive ke thumbnail se aata hai. Na aaye to PDF ka icon dikhta hai, viewer phir bhi chalta hai.
 - Drive free storage 15 GB hai (Gmail/Photos ke saath shared). Is school ke notes ke liye alag Google account rakhna behtar hai.
