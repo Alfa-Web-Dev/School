@@ -19,7 +19,7 @@ function formModal(title,fields,vals,onSave){
  const body=el('div',{class:'frm'},fields.map(f=>{
   const i=f.type==='select'?el('select',{},f.opts.map(([v,l])=>el('option',{value:v},l))):
    f.type==='textarea'?el('textarea',{rows:3}):el('input',{type:f.type||'text'});
-  i.value=vals[f.k]==null?'':vals[f.k];inp[f.k]=i;
+  i.value=vals[f.k]==null?'':vals[f.k];if(f.type==='select'&&i.selectedIndex<0)i.selectedIndex=0;inp[f.k]=i;
   return el('div',{},el('label',{},f.l+(f.req?' *':'')),i)}));
  return modal(title,body,[{t:'Cancel',g:1,fn:()=>true},{t:'Save',fn:async()=>{
   const v={};for(const f of fields){v[f.k]=inp[f.k].value.trim();if(f.req&&!v[f.k])throw new Error(f.l+' zaruri hai')}

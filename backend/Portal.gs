@@ -11,7 +11,8 @@ function profileOf(r){
   gender:r.gender,dob:dstr(r.dob),parentName:r.parentName,parentPhone:String(r.parentPhone||''),address:r.address,classTeacher:tn||''}}
 
 function attOf(sid){
- const rows=table('Attendance').rows.filter(r=>String(r.studentId)===sid).map(r=>({date:dstr(r.date),status:String(r.status).toUpperCase()}));
+ const byDate={};table('Attendance').rows.forEach(r=>{if(String(r.studentId)===sid)byDate[dstr(r.date)]=String(r.status).toUpperCase()});  // latest row jeetti hai
+ const rows=Object.keys(byDate).map(d=>({date:d,status:byDate[d]}));
  rows.sort((a,b)=>a.date<b.date?1:-1);
  const c={P:0,A:0,L:0};rows.forEach(r=>{if(c[r.status]!==undefined)c[r.status]++});
  const total=c.P+c.A+c.L;
@@ -57,7 +58,7 @@ function myHomework(b){const r=stu(b);if(!r)return DENIED;
  return{ok:true,homework:table('Assignments').rows.filter(a=>String(a.classId)===String(r.classId)).map(a=>({id:String(a.id),subject:sn[String(a.subjectId)]||String(a.subjectId),
   title:a.title,due:dstr(a.due),link:String(a.link||''),by:tn[String(a.by)]||''})).sort((x,y)=>x.due<y.due?1:-1)}}
 function myResults(b){const r=stu(b);if(!r)return DENIED;
- const sn=nameMap('Subjects','subjectId'),sid=String(r.studentId),res=table('Results').rows.filter(x=>String(x.studentId)===sid);
+ const sn=nameMap('Subjects','subjectId'),sid=String(r.studentId),res=(()=>{const m={};table('Results').rows.forEach(x=>{if(String(x.studentId)===sid)m[x.examId+'|'+x.subjectId]=x});return Object.keys(m).map(k=>m[k])})();  // latest row jeetti hai
  const exams=table('Exams').rows.filter(e=>String(e.classId)===String(r.classId)).map(e=>{
   const rows=res.filter(x=>String(x.examId)===String(e.examId)).map(x=>({subject:sn[String(x.subjectId)]||String(x.subjectId),marks:Number(x.marks)||0,max:Number(e.maxMarks)||0}));
   const total=rows.reduce((a,x)=>a+x.marks,0),max=rows.reduce((a,x)=>a+x.max,0);

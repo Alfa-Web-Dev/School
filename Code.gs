@@ -108,6 +108,20 @@ function teacherClassIds(uid){const ids={};
  table('Lessons').rows.forEach(l=>{if(String(l.teacherId)===uid)ids[String(l.classId)]=1});
  return ids}
 
+// ---- Phase 4 helpers ----
+const todayStr=()=>Utilities.formatDate(new Date(),'Asia/Kolkata','yyyy-MM-dd');
+function addRows(n,list){if(!list.length)return;const h=SCHEMA[n],s=tab(n),start=s.getLastRow()+1,end=start+list.length-1;
+ if(end>s.getMaxRows())s.insertRowsAfter(s.getMaxRows(),end-s.getMaxRows()+200);
+ s.getRange(start,1,list.length,h.length).setValues(list.map(o=>h.map(k=>o[k]!==undefined?o[k]:'')))}
+const canClass=(s,cid)=>s.role==='admin'||!!teacherClassIds(s.userId)[cid];
+const isClassTeacher=(s,cid)=>{const c=find('Classes',x=>String(x.classId)===cid);return !!c&&String(c.classTeacherId)===s.userId};
+function teachesSub(s,cid,sub){if(s.role==='admin'||isClassTeacher(s,cid))return true;
+ return table('Lessons').rows.some(l=>String(l.classId)===cid&&String(l.subjectId)===sub&&String(l.teacherId)===s.userId)}
+function activeStudents(cid){return table('Students').rows.filter(r=>String(r.classId)===cid&&String(r.status).toLowerCase()==='active')
+ .sort((a,b)=>((parseInt(a.roll,10)||999)-(parseInt(b.roll,10)||999))||String(a.name).localeCompare(String(b.name)))}
+const validDate=d=>/^\d{4}-\d{2}-\d{2}$/.test(d);
+const validTime=t=>/^([01]\d|2[0-3]):[0-5]\d$/.test(t);
+
 // ===== Setup.gs =====
 // Editor se chalao: pehle setupSheet(), phir createFirstAdmin()
 function setupSheet(){
@@ -149,7 +163,7 @@ function doPost(e){
  }catch(err){return out({ok:false,error:'Server error'})}}
 
 // action -> function ka naam. Naye features yahin jodo.
-const ROUTES={resetSecret:'resetSecret',myDashboard:'myDashboard',myProfile:'myProfile',myAttendance:'myAttendance',myFees:'myFees',myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',saveClass:'saveClass',listSubjects:'listSubjects',saveSubject:'saveSubject',listLessons:'listLessons',saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',backupNow:'backupNow'};
+const ROUTES={getMarks:'getMarks',deleteAssignment:'deleteAssignment',deleteLesson:'deleteLesson',deleteClassNotice:'deleteClassNotice',teacherHome:'teacherHome',resetSecret:'resetSecret',myDashboard:'myDashboard',myProfile:'myProfile',myAttendance:'myAttendance',myFees:'myFees',myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',saveClass:'saveClass',listSubjects:'listSubjects',saveSubject:'saveSubject',listLessons:'listLessons',saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',backupNow:'backupNow'};
 
 // ===== Portal.gs =====
 // Student portal (Phase 3): student sirf apni hi data dekh sakta hai. changeSecret sab roles ke liye.
@@ -165,7 +179,8 @@ function profileOf(r){
   gender:r.gender,dob:dstr(r.dob),parentName:r.parentName,parentPhone:String(r.parentPhone||''),address:r.address,classTeacher:tn||''}}
 
 function attOf(sid){
- const rows=table('Attendance').rows.filter(r=>String(r.studentId)===sid).map(r=>({date:dstr(r.date),status:String(r.status).toUpperCase()}));
+ const byDate={};table('Attendance').rows.forEach(r=>{if(String(r.studentId)===sid)byDate[dstr(r.date)]=String(r.status).toUpperCase()});  // latest row jeetti hai
+ const rows=Object.keys(byDate).map(d=>({date:d,status:byDate[d]}));
  rows.sort((a,b)=>a.date<b.date?1:-1);
  const c={P:0,A:0,L:0};rows.forEach(r=>{if(c[r.status]!==undefined)c[r.status]++});
  const total=c.P+c.A+c.L;
@@ -211,7 +226,7 @@ function myHomework(b){const r=stu(b);if(!r)return DENIED;
  return{ok:true,homework:table('Assignments').rows.filter(a=>String(a.classId)===String(r.classId)).map(a=>({id:String(a.id),subject:sn[String(a.subjectId)]||String(a.subjectId),
   title:a.title,due:dstr(a.due),link:String(a.link||''),by:tn[String(a.by)]||''})).sort((x,y)=>x.due<y.due?1:-1)}}
 function myResults(b){const r=stu(b);if(!r)return DENIED;
- const sn=nameMap('Subjects','subjectId'),sid=String(r.studentId),res=table('Results').rows.filter(x=>String(x.studentId)===sid);
+ const sn=nameMap('Subjects','subjectId'),sid=String(r.studentId),res=(()=>{const m={};table('Results').rows.forEach(x=>{if(String(x.studentId)===sid)m[x.examId+'|'+x.subjectId]=x});return Object.keys(m).map(k=>m[k])})();  // latest row jeetti hai
  const exams=table('Exams').rows.filter(e=>String(e.classId)===String(r.classId)).map(e=>{
   const rows=res.filter(x=>String(x.examId)===String(e.examId)).map(x=>({subject:sn[String(x.subjectId)]||String(x.subjectId),marks:Number(x.marks)||0,max:Number(e.maxMarks)||0}));
   const total=rows.reduce((a,x)=>a+x.marks,0),max=rows.reduce((a,x)=>a+x.max,0);
@@ -312,6 +327,16 @@ function resetSecret(b){
   setRow(m[0],r._row,o);revokeTokens(id);log(s.userId,'reset_'+kind,id);
   return{ok:true,id,secret}}))}
 
+// Teacher dashboard: meri classes aur aaj ke periods
+function teacherHome(b){
+ const s=guard(b,['teacher']);if(!s)return DENIED;
+ const ids=teacherClassIds(s.userId),sn=nameMap('Subjects','subjectId'),cn=nameMap('Classes','classId'),today=Utilities.formatDate(new Date(),'Asia/Kolkata','EEE');
+ const lessons=table('Lessons').rows.filter(l=>String(l.teacherId)===s.userId);
+ return{ok:true,classes:Object.keys(ids).map(cid=>({classId:cid,name:cn[cid]||cid,isClassTeacher:isClassTeacher(s,cid),students:activeStudents(cid).length,
+   subjects:lessons.filter(l=>String(l.classId)===cid).map(l=>sn[String(l.subjectId)]||String(l.subjectId)).filter((v,i,a)=>a.indexOf(v)===i)})),
+  today:lessons.filter(l=>String(l.day)===today).map(l=>({classId:String(l.classId),className:cn[String(l.classId)]||String(l.classId),subject:sn[String(l.subjectId)]||String(l.subjectId),start:String(l.start),end:String(l.end)}))
+   .sort((a,c)=>a.start<c.start?-1:1)}}
+
 // ===== Classes.gs =====
 // Classes + Subjects (Phase 2)
 function listClasses(b){
@@ -344,24 +369,121 @@ function saveSubject(b){
   log(s.userId,'subject_add',id);return{ok:true,subjectId:id}}))}
 
 // ===== Timetable.gs =====
-// Timetable: Phase 2 me banega. Abhi sirf skeleton.
-function listLessons(b){return{ok:false,error:'Not built yet (Phase 2)'}}
-function saveLesson(b){return{ok:false,error:'Not built yet (Phase 2)'}}
+// Timetable (Phase 4): admin banata hai, teacher apna dekhta hai
+function listLessons(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ const sn=nameMap('Subjects','subjectId'),cn=nameMap('Classes','classId'),un=nameMap('Users','userId');
+ const lessons=table('Lessons').rows.filter(l=>s.role==='admin'||String(l.teacherId)===s.userId).map(l=>({lessonId:String(l.lessonId),classId:String(l.classId),className:cn[String(l.classId)]||String(l.classId),
+  subjectId:String(l.subjectId),subject:sn[String(l.subjectId)]||String(l.subjectId),teacherId:String(l.teacherId),teacher:un[String(l.teacherId)]||'',day:String(l.day),start:String(l.start),end:String(l.end)}))
+  .sort((a,c)=>(DAYS.indexOf(a.day)-DAYS.indexOf(c.day))||(a.start<c.start?-1:1));
+ return{ok:true,lessons}}
+
+function saveLesson(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{
+  const d=b.lesson||{},cid=resolveClass(d.classId),sub=clean(d.subjectId,20),tid=clean(d.teacherId,20),day=clean(d.day,3),st=clean(d.start,5),en=clean(d.end,5);
+  if(!cid)throw new Error('Class chuno');if(!find('Subjects',x=>String(x.subjectId)===sub))throw new Error('Subject chuno');
+  if(!find('Users',u=>String(u.userId)===tid&&u.role==='teacher'))throw new Error('Teacher chuno');
+  if(DAYS.indexOf(day)<0)throw new Error('Din chuno');if(!validTime(st)||!validTime(en))throw new Error('Time HH:MM format mein do (jaise 09:30)');
+  if(st>=en)throw new Error('End time start ke baad hona chahiye');
+  const me=String(d.lessonId||'');
+  const clash=table('Lessons').rows.find(l=>String(l.lessonId)!==me&&String(l.day)===day&&String(l.start)<en&&st<String(l.end)&&(String(l.classId)===cid||String(l.teacherId)===tid));
+  if(clash)throw new Error(String(clash.classId)===cid?'Is class ka us time pe doosra period hai ('+clash.lessonId+')':'Yeh teacher us time pe doosri class mein hai ('+clash.lessonId+')');
+  const o={classId:cid,subjectId:sub,teacherId:tid,day,start:st,end:en};
+  if(me){const ex=find('Lessons',l=>String(l.lessonId)===me);if(!ex)throw new Error('Lesson nahi mila');setRow('Lessons',ex._row,o);return{ok:true,lessonId:me}}
+  const id=nextId('Lessons','lessonId','L',3);addRow('Lessons',Object.assign(o,{lessonId:id}));log(s.userId,'lesson_add',id);return{ok:true,lessonId:id}}))}
+
+function deleteLesson(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{const ex=find('Lessons',l=>String(l.lessonId)===String(b.lessonId));if(!ex)throw new Error('Lesson nahi mila');
+  tab('Lessons').deleteRow(ex._row);log(s.userId,'lesson_delete',ex.lessonId);return{ok:true}}))}
 
 // ===== Notices.gs =====
-// Notices: Phase 2 me banega. Abhi sirf skeleton.
-function listClassNotices(b){return{ok:false,error:'Not built yet (Phase 2)'}}
-function saveClassNotice(b){return{ok:false,error:'Not built yet (Phase 2)'}}
+// Class notices (Phase 4): admin sab ko (ALL) ya kisi class ko; teacher sirf apni classes ko
+function listClassNotices(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ const mine=s.role==='teacher'?teacherClassIds(s.userId):null,cn=nameMap('Classes','classId');
+ return{ok:true,notices:table('ClassNotices').rows.filter(n=>!mine||String(n.classId)==='ALL'||mine[String(n.classId)]).map(n=>({id:String(n.id),classId:String(n.classId),
+  className:String(n.classId)==='ALL'?'All classes':(cn[String(n.classId)]||String(n.classId)),title:n.title,text:n.text,date:dstr(n.date),
+  editable:s.role==='admin'||!!(mine&&mine[String(n.classId)])})).sort((a,c)=>a.date<c.date?1:-1)}}
+
+function saveClassNotice(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{
+  const d=b.notice||{},raw=clean(d.classId,40),cid=raw==='ALL'?'ALL':resolveClass(raw),title=clean(d.title,120),text=clean(d.text,1000),date=dstr(d.date)||todayStr();
+  if(!cid)throw new Error('Class chuno');if(cid==='ALL'&&s.role!=='admin')throw new Error('Sab classes ko sirf admin bhej sakta hai');
+  if(cid!=='ALL'&&!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
+  if(!title)throw new Error('Title zaruri hai');if(!validDate(date))throw new Error('Date galat hai');
+  const o={classId:cid,title,text,date};
+  if(d.id){const ex=find('ClassNotices',n=>String(n.id)===String(d.id));if(!ex)throw new Error('Notice nahi mili');
+   if(!(s.role==='admin'||canClass(s,String(ex.classId))&&String(ex.classId)!=='ALL'))throw new Error('Is notice ko edit nahi kar sakte');
+   setRow('ClassNotices',ex._row,o);return{ok:true,id:String(ex.id)}}
+  const id=nextId('ClassNotices','id','N',3);addRow('ClassNotices',Object.assign(o,{id}));log(s.userId,'notice_add',id);return{ok:true,id}}))}
+
+function deleteClassNotice(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{const ex=find('ClassNotices',n=>String(n.id)===String(b.id));if(!ex)throw new Error('Notice nahi mili');
+  if(!(s.role==='admin'||canClass(s,String(ex.classId))&&String(ex.classId)!=='ALL'))throw new Error('Is notice ko delete nahi kar sakte');
+  tab('ClassNotices').deleteRow(ex._row);log(s.userId,'notice_delete',ex.id);return{ok:true}}))}
 
 // ===== Attendance.gs =====
-// Attendance: Phase 4 me banega. Abhi sirf skeleton.
-function getAttendance(b){return{ok:false,error:'Not built yet (Phase 4)'}}
-function markAttendance(b){return{ok:false,error:'Not built yet (Phase 4)'}}
+// Attendance (Phase 4): har entry nayi row (purani delete nahi), latest row jeetti hai
+function attMap(cid,date){const m={};
+ table('Attendance').rows.forEach(r=>{if(String(r.classId)===cid&&dstr(r.date)===date)m[String(r.studentId)]=String(r.status).toUpperCase()});return m}
+
+function getAttendance(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>{const cid=resolveClass(b.classId),date=dstr(b.date)||todayStr();
+  if(!cid||!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
+  if(!validDate(date))throw new Error('Date galat hai');
+  const m=attMap(cid,date);
+  return{ok:true,date,marked:Object.keys(m).length>0,students:activeStudents(cid).map(r=>({studentId:String(r.studentId),name:r.name,roll:String(r.roll),status:m[String(r.studentId)]||''}))}})}
+
+function markAttendance(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{
+  const cid=resolveClass(b.classId),date=dstr(b.date);
+  if(!cid||!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
+  if(!validDate(date))throw new Error('Date galat hai');
+  if(date>todayStr())throw new Error('Aane wali date ki attendance nahi lag sakti');
+  const okIds={};activeStudents(cid).forEach(r=>okIds[String(r.studentId)]=1);
+  const m=attMap(cid,date),rows=[];
+  (Array.isArray(b.marks)?b.marks:[]).forEach(x=>{const sid=String(x.studentId),st=String(x.status).toUpperCase();
+   if(!okIds[sid])throw new Error('Student is class ka nahi hai: '+sid);
+   if(st!=='P'&&st!=='A'&&st!=='L')throw new Error('Status P/A/L hona chahiye');
+   if(m[sid]!==st)rows.push({date,classId:cid,studentId:sid,status:st,markedBy:s.userId})});
+  addRows('Attendance',rows);log(s.userId,'attendance',cid+' '+date+' ('+rows.length+')');
+  return{ok:true,saved:rows.length}}))}
 
 // ===== Homework.gs =====
-// Homework: Phase 4 me banega. Abhi sirf skeleton.
-function listAssignments(b){return{ok:false,error:'Not built yet (Phase 4)'}}
-function saveAssignment(b){return{ok:false,error:'Not built yet (Phase 4)'}}
+// Homework (Phase 4)
+function listAssignments(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>{const sn=nameMap('Subjects','subjectId'),cn=nameMap('Classes','classId'),un=nameMap('Users','userId'),mine=s.role==='teacher'?teacherClassIds(s.userId):null;
+  const cid=b.classId?resolveClass(b.classId):'';
+  return{ok:true,assignments:table('Assignments').rows.filter(a=>(!mine||mine[String(a.classId)])&&(!cid||String(a.classId)===cid)).map(a=>({id:String(a.id),classId:String(a.classId),className:cn[String(a.classId)]||String(a.classId),
+   subjectId:String(a.subjectId),subject:sn[String(a.subjectId)]||String(a.subjectId),title:a.title,due:dstr(a.due),link:String(a.link||''),by:String(a.by),byName:un[String(a.by)]||String(a.by),
+   editable:s.role==='admin'||String(a.by)===s.userId})).sort((x,y)=>x.due<y.due?1:-1)}})}
+
+function saveAssignment(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{
+  const d=b.assignment||{},cid=resolveClass(d.classId),sub=clean(d.subjectId,20),title=clean(d.title,200),due=dstr(d.due),link=clean(d.link,300);
+  if(!cid||!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
+  if(!find('Subjects',x=>String(x.subjectId)===sub))throw new Error('Subject chuno');
+  if(!title)throw new Error('Title zaruri hai');if(!validDate(due))throw new Error('Due date galat hai');
+  if(link&&!/^https?:\/\//i.test(link))throw new Error('Link http:// ya https:// se shuru hona chahiye');
+  if(d.id){const ex=find('Assignments',a=>String(a.id)===String(d.id));if(!ex)throw new Error('Homework nahi mila');
+   if(s.role!=='admin'&&String(ex.by)!==s.userId)throw new Error('Sirf apna homework edit kar sakte ho');
+   setRow('Assignments',ex._row,{classId:cid,subjectId:sub,title,due,link});return{ok:true,id:String(ex.id)}}
+  const id=nextId('Assignments','id','A',3);addRow('Assignments',{id,classId:cid,subjectId:sub,title,due,link,by:s.userId});
+  log(s.userId,'homework_add',id);return{ok:true,id}}))}
+
+function deleteAssignment(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{const ex=find('Assignments',a=>String(a.id)===String(b.id));if(!ex)throw new Error('Homework nahi mila');
+  if(s.role!=='admin'&&String(ex.by)!==s.userId)throw new Error('Sirf apna homework delete kar sakte ho');
+  tab('Assignments').deleteRow(ex._row);log(s.userId,'homework_delete',ex.id);return{ok:true}}))}
 
 // ===== Fees.gs =====
 // Fees: Phase 5 me banega. Abhi sirf skeleton.
@@ -371,11 +493,46 @@ function listPayments(b){return{ok:false,error:'Not built yet (Phase 5)'}}
 function addPayment(b){return{ok:false,error:'Not built yet (Phase 5)'}}
 
 // ===== Results.gs =====
-// Results: Phase 6 me banega. Abhi sirf skeleton.
-function listExams(b){return{ok:false,error:'Not built yet (Phase 6)'}}
+// Results/marks (Phase 4: marks entry. Exams banana + report card PDF Phase 6). Har entry nayi row, latest jeetti hai.
+function subjectsFor(s,cid){const all=table('Subjects').rows;
+ if(s.role==='admin'||isClassTeacher(s,cid))return all.map(x=>({subjectId:String(x.subjectId),name:x.name}));
+ const ids={};table('Lessons').rows.forEach(l=>{if(String(l.classId)===cid&&String(l.teacherId)===s.userId)ids[String(l.subjectId)]=1});
+ return all.filter(x=>ids[String(x.subjectId)]).map(x=>({subjectId:String(x.subjectId),name:x.name}))}
+
+function listExams(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>{const cid=resolveClass(b.classId);if(!cid||!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
+  return{ok:true,exams:table('Exams').rows.filter(e=>String(e.classId)===cid).map(e=>({examId:String(e.examId),title:e.title,date:dstr(e.date),maxMarks:Number(e.maxMarks)||0})),subjects:subjectsFor(s,cid)}})}
+
+function marksMap(examId,subjectId){const m={};
+ table('Results').rows.forEach(r=>{if(String(r.examId)===examId&&String(r.subjectId)===subjectId)m[String(r.studentId)]=r.marks});return m}
+
+function getMarks(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId)),sub=String(b.subjectId||'');
+  if(!ex)throw new Error('Exam nahi mila');const cid=String(ex.classId);
+  if(!canClass(s,cid)||!teachesSub(s,cid,sub))throw new Error('Is subject ki permission nahi hai');
+  const m=marksMap(String(ex.examId),sub);
+  return{ok:true,maxMarks:Number(ex.maxMarks)||0,students:activeStudents(cid).map(r=>({studentId:String(r.studentId),name:r.name,roll:String(r.roll),marks:m[String(r.studentId)]===undefined?'':m[String(r.studentId)]}))}})}
+
+function saveMarks(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{
+  const ex=find('Exams',e=>String(e.examId)===String(b.examId)),sub=String(b.subjectId||'');
+  if(!ex)throw new Error('Exam nahi mila');const cid=String(ex.classId),max=Number(ex.maxMarks)||0;
+  if(!find('Subjects',x=>String(x.subjectId)===sub))throw new Error('Subject galat hai');
+  if(!canClass(s,cid)||!teachesSub(s,cid,sub))throw new Error('Is subject ki permission nahi hai');
+  const okIds={};activeStudents(cid).forEach(r=>okIds[String(r.studentId)]=1);
+  const m=marksMap(String(ex.examId),sub),rows=[];
+  (Array.isArray(b.marks)?b.marks:[]).forEach(x=>{const sid=String(x.studentId);if(x.marks===''||x.marks==null)return;
+   if(!okIds[sid])throw new Error('Student is class ka nahi hai: '+sid);
+   const v=Number(x.marks);if(!isFinite(v)||v<0||v>max)throw new Error(sid+': marks 0 se '+max+' ke beech hone chahiye');
+   if(m[sid]===undefined||Number(m[sid])!==v)rows.push({examId:String(ex.examId),studentId:sid,subjectId:sub,marks:v})});
+  addRows('Results',rows);log(s.userId,'marks',ex.examId+' '+sub+' ('+rows.length+')');
+  return{ok:true,saved:rows.length}}))}
+
 function saveExam(b){return{ok:false,error:'Not built yet (Phase 6)'}}
 function getResults(b){return{ok:false,error:'Not built yet (Phase 6)'}}
-function saveMarks(b){return{ok:false,error:'Not built yet (Phase 6)'}}
 
 // ===== Enquiry.gs =====
 // Enquiry: Phase 7 me banega. Abhi sirf skeleton.

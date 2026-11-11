@@ -22,3 +22,17 @@ function teacherClassIds(uid){const ids={};
  table('Classes').rows.forEach(c=>{if(String(c.classTeacherId)===uid)ids[String(c.classId)]=1});
  table('Lessons').rows.forEach(l=>{if(String(l.teacherId)===uid)ids[String(l.classId)]=1});
  return ids}
+
+// ---- Phase 4 helpers ----
+const todayStr=()=>Utilities.formatDate(new Date(),'Asia/Kolkata','yyyy-MM-dd');
+function addRows(n,list){if(!list.length)return;const h=SCHEMA[n],s=tab(n),start=s.getLastRow()+1,end=start+list.length-1;
+ if(end>s.getMaxRows())s.insertRowsAfter(s.getMaxRows(),end-s.getMaxRows()+200);
+ s.getRange(start,1,list.length,h.length).setValues(list.map(o=>h.map(k=>o[k]!==undefined?o[k]:'')))}
+const canClass=(s,cid)=>s.role==='admin'||!!teacherClassIds(s.userId)[cid];
+const isClassTeacher=(s,cid)=>{const c=find('Classes',x=>String(x.classId)===cid);return !!c&&String(c.classTeacherId)===s.userId};
+function teachesSub(s,cid,sub){if(s.role==='admin'||isClassTeacher(s,cid))return true;
+ return table('Lessons').rows.some(l=>String(l.classId)===cid&&String(l.subjectId)===sub&&String(l.teacherId)===s.userId)}
+function activeStudents(cid){return table('Students').rows.filter(r=>String(r.classId)===cid&&String(r.status).toLowerCase()==='active')
+ .sort((a,b)=>((parseInt(a.roll,10)||999)-(parseInt(b.roll,10)||999))||String(a.name).localeCompare(String(b.name)))}
+const validDate=d=>/^\d{4}-\d{2}-\d{2}$/.test(d);
+const validTime=t=>/^([01]\d|2[0-3]):[0-5]\d$/.test(t);

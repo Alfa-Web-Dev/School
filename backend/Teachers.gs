@@ -28,3 +28,13 @@ function resetSecret(b){
   const secret=m[3](),f=setSecretFields(secret),o={salt:f.salt};o[m[2]]=f.hash;
   setRow(m[0],r._row,o);revokeTokens(id);log(s.userId,'reset_'+kind,id);
   return{ok:true,id,secret}}))}
+
+// Teacher dashboard: meri classes aur aaj ke periods
+function teacherHome(b){
+ const s=guard(b,['teacher']);if(!s)return DENIED;
+ const ids=teacherClassIds(s.userId),sn=nameMap('Subjects','subjectId'),cn=nameMap('Classes','classId'),today=Utilities.formatDate(new Date(),'Asia/Kolkata','EEE');
+ const lessons=table('Lessons').rows.filter(l=>String(l.teacherId)===s.userId);
+ return{ok:true,classes:Object.keys(ids).map(cid=>({classId:cid,name:cn[cid]||cid,isClassTeacher:isClassTeacher(s,cid),students:activeStudents(cid).length,
+   subjects:lessons.filter(l=>String(l.classId)===cid).map(l=>sn[String(l.subjectId)]||String(l.subjectId)).filter((v,i,a)=>a.indexOf(v)===i)})),
+  today:lessons.filter(l=>String(l.day)===today).map(l=>({classId:String(l.classId),className:cn[String(l.classId)]||String(l.classId),subject:sn[String(l.subjectId)]||String(l.subjectId),start:String(l.start),end:String(l.end)}))
+   .sort((a,c)=>a.start<c.start?-1:1)}}
