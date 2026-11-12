@@ -1,20 +1,52 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>School</title><meta name="description" content="School website"><link rel="stylesheet" href="assets/css/app.css"></head>
-<body class="pub">
-<header><img id="logo" style="height:32px;display:none"><b id="sn"></b><span class="sp"></span>
-<a href="#about" data-i="about"></a><a href="#notices" data-i="notices"></a><a href="#events" data-i="events"></a><a href="#staff" data-i="staff"></a><a href="#downloads" data-i="downloads"></a><a href="#gallery" data-i="gallery"></a><a href="#contact" data-i="contact"></a>
-<a href="login.html" data-i="login"></a><button id="lg"></button></header>
-<section class="hero" id="hero"><h1 id="ht"></h1><p id="hs"></p></section>
-<section id="about"><h2 data-i="about"></h2><p id="ab"></p><h3 data-i="principal"></h3><p id="pr"></p></section>
-<section id="academics"><h2 data-i="academics"></h2><div class="grid" id="ac"></div><div class="grid" id="av"></div></section>
-<section id="notices"><h2 data-i="notices"></h2><div id="nl"></div></section>
-<section id="events"><h2 data-i="events"></h2><div id="el"></div></section>
-<section id="staff"><h2 data-i="staff"></h2><div class="grid" id="sl"></div></section>
-<section id="downloads"><h2 data-i="downloads"></h2><div id="dl"></div></section>
-<section id="gallery"><h2 data-i="gallery"></h2><div id="gl"></div></section>
-<section id="admission"><h2 data-i="admission"></h2><p id="ad"></p>
- <form id="ef" class="card"><input name="name" data-ph="name" required><input name="phone" data-ph="phone" required style="margin-top:8px"><input name="message" data-ph="msg" style="margin-top:8px">
- <input name="website" style="display:none" tabindex="-1" autocomplete="off"><button data-i="send"></button><div id="m"></div></form></section>
-<section id="contact"><h2 data-i="contact"></h2><p id="ct"></p>
- <a href="#" id="tel" data-i="call"></a> · <a href="#" id="wa">WhatsApp</a></section>
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>School</title><meta name="description" content="School website">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/css/site.css"></head>
+<body id="top">
+<header class="nav"><div class="wrap nv">
+ <a class="brand" href="#top"><span class="lm" id="lm">🎓</span><img id="logo" alt="" hidden><span id="sn"></span></a>
+ <nav id="links"><a href="#about" data-i="about"></a><a href="#academics" data-i="academics"></a><a href="#notices" data-i="notices"></a><a href="#staff" data-i="staff"></a><a href="#gallery" data-i="gallery"></a><a href="#admission" data-i="admission"></a><a href="#contact" data-i="contact"></a></nav>
+ <div class="nvr"><button class="pill ghost sm" id="lg"></button><a class="pill solid sm" href="login.html" data-i="login"></a><button id="mb" aria-label="Menu">☰</button></div>
+</div></header>
+
+<section class="hero"><div class="wrap hg">
+ <div><div class="chip"><b id="chb"></b><span id="chs"></span></div>
+  <h1 id="ht"></h1><p class="sub" id="hs"></p>
+  <div class="cta"><a class="pill solid" href="#admission" id="c1"></a><a class="pill ghost" href="#" id="tel"></a></div></div>
+ <div class="hv"><div class="frame" id="fr"></div><div id="fa"></div><div id="fb"></div><div class="dots" id="dots"></div></div>
+</div></section>
+
+<div class="stats" id="stats" hidden><div class="wrap"><div class="sg" id="sg"></div></div></div>
+
+<section class="sec" id="about"><div class="wrap ab">
+ <div class="abimg" id="abi"></div>
+ <div class="abt"><span class="eyebrow" id="ab_e"></span><div class="sh" style="margin-bottom:16px"><h2 id="ab_h"></h2></div><p class="big" id="ab"></p><div class="pm" id="pm"></div></div>
+</div></section>
+
+<section class="sec" id="academics" hidden><div class="wrap"><div class="sh"><span class="eyebrow" id="ac_e"></span><h2 id="ac_h"></h2></div><div class="cards" id="ac"></div></div></section>
+<section class="sec" id="achieve" hidden><div class="wrap"><div class="sh"><span class="eyebrow" id="av_e"></span><h2 id="av_h"></h2></div><div class="cards" id="av"></div></div></section>
+
+<section class="sec" id="notices"><div class="wrap two">
+ <div class="panel"><h3 id="nl_h"></h3><div id="nl"></div></div>
+ <div class="panel" id="events"><h3 id="el_h"></h3><div id="el"></div></div>
+</div></section>
+
+<section class="sec" id="staff" hidden><div class="wrap"><div class="sh"><span class="eyebrow" id="sl_e"></span><h2 id="sl_h"></h2></div><div class="team" id="sl"></div></div></section>
+<section class="sec" id="gallery" hidden><div class="wrap"><div class="sh"><span class="eyebrow" id="gl_e"></span><h2 id="gl_h"></h2></div><div id="gl"></div></div></section>
+<section class="sec" id="downloads" hidden><div class="wrap"><div class="sh"><span class="eyebrow" id="dl_e"></span><h2 id="dl_h"></h2></div><div class="dls" id="dl"></div></div></section>
+
+<section class="sec" id="admission"><div class="wrap"><div class="cta-band">
+ <div><span class="eyebrow" style="background:#fff2;color:#fff" id="ad_e"></span><h2 id="ad_h"></h2><p id="ad"></p></div>
+ <form id="ef"><input name="name" data-ph="name" required maxlength="60"><input name="phone" data-ph="phone" type="tel" required maxlength="15"><input name="message" data-ph="msg" maxlength="600">
+  <input name="website" style="display:none" tabindex="-1" autocomplete="off"><button class="pill solid" data-i="send"></button><div id="m"></div></form>
+</div></div></section>
+
+<section class="sec" id="contact"><div class="wrap"><div class="sh"><span class="eyebrow" id="ct_e"></span><h2 id="ct_h"></h2></div><div class="ct" id="ct"></div><div class="map" id="map" hidden></div></div></section>
+
+<footer><div class="wrap"><div class="fg"><a class="brand" href="#top"><span id="fn"></span></a>
+ <nav><a href="#about" data-i="about"></a><a href="#notices" data-i="notices"></a><a href="#gallery" data-i="gallery"></a><a href="#admission" data-i="admission"></a><a href="#contact" data-i="contact"></a><a href="login.html" data-i="login"></a></nav></div>
+ <small id="cp"></small></div></footer>
+<a class="wa" id="wa" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+
 <script src="config.js"></script><script src="assets/js/i18n.js"></script><script src="assets/js/i18n-extra.js"></script><script src="assets/js/api.js"></script><script src="assets/js/site.js"></script>
 </body></html>
