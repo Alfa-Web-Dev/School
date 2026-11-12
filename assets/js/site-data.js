@@ -8,7 +8,7 @@ const PH={group:'1692269725836-fbd72e98883f',girls:'1692269725911-87697c558be1',
  blue:'1569173675610-42c361a86e37',lab:'1758685734153-132c8620c1bd',labgirl:'1633828763399-e29f1cd3f4c1',pc:'1719159381981-1327b22aff9b',
  read:'1759977064094-840dfc694bee',chess:'1745556377753-9efffe9181ef',play:'1566938089211-5821c49b3548',field:'1710000736115-692bbb897fca',ground:'1552537595-b30edb7afd9d',football:'1651281782183-2f47112ece7b',smart:'1722573783625-eceb04251036',
  teacher:'1522661067900-ab829854a57f',labteach:'1758685734030-a31d96462eec',stage:'1551731409-43eb3e517a1a',kids:'1524069290683-0457abfe42c3',hug:'1489942986787-cded4ecf962e',twoboys:'1692269725827-699e04a11cdf',books:'1692269726060-9c604e06f63b',micro:'1780265596033-47b8cb06c794',libshelf:'1680178776508-41a276595b0f',swing:'1460788150444-d9dc07fa9dba',girlsclass:'1573894998033-c0cef4ed722b'};
-const U=(k,w)=>/^(uploads\/|https:\/\/)/.test(PH[k]||'')?PH[k]:'https://images.unsplash.com/photo-'+PH[k]+'?auto=format&fit=crop&w='+(w||900)+'&q=75';
+const U=(k,w)=>/^(uploads\/|https:\/\/|data:image\/)/.test(PH[k]||'')?PH[k]:'https://images.unsplash.com/photo-'+PH[k]+'?auto=format&fit=crop&w='+(w||900)+'&q=75';
 
 const SITE={
  logo:"",

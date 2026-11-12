@@ -18,3 +18,6 @@ Roles: sirf admin, teacher, student. Parent ke liye alag login nahi (student log
 
 ## Public website (multi-page, black theme)
 index, about, academics, facilities, admission, gallery, contact .html — each has `<body data-page=..>` and is rendered by `assets/js/site.js` from `assets/js/site-data.js` (all text/photos, bilingual) + `config.js` (name/phone/address). Photos = Unsplash keys in `PH` (fallback illustration from art.js if a photo fails). Replace with own photos: set `PH.key='uploads/xyz.jpg'`.
+
+## Website Studio (hidden editor)
+`studio.html` (noindex, no link anywhere) — enter `owner/repo` + GitHub fine-grained token (Contents: Read and write, only this repo). Opens a live clone of the website; every card has ✏️ (edit text hi/en, icon, colour, photo upload/URL), 🗑 (delete), "＋ Naya add karo". Publish commits `content/site.json` (+ `uploads/*.jpg`) to GitHub; the public site merges that file over `site-data.js` at load. Logic: `assets/js/studio.js`, style `assets/css/studio.css`; renderer hooks `data-e` / `data-ea` attributes in `site.js`.
