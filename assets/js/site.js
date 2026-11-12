@@ -46,13 +46,13 @@ function hero(){
  return '<section class="hero"><div class="wrap hg"><div'+E('hero','pre,hl,sub,badge,happy,photos')+'><span class="badge">'+esc(L(h.badge))+'</span><h1>'+esc(L(h.pre))+' <span class="hlt">'+esc(L(h.hl))+UL+'</span></h1><p class="sub">'+esc(L(h.sub))+'</p>'
  +'<form class="quick" id="qf"><input name="phone" type="tel" required maxlength="15" placeholder="'+esc(s_('ph'))+'"><input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true"><button class="pill solid" type="submit">'+s_('call')+'</button></form><div class="qm" id="qm"></div>'
  +'<div class="happy"><div class="stack">'+[3,4,5,6].map(i=>'<i>'+avatar(i)+'</i>').join('')+'</div><span>'+esc(L(h.happy))+'</span></div></div>'
- +'<div class="hr"><div class="p p1">'+im(h.photos[0],avatar(0,{book:true,bg:'#b9a4ff'}),600)+'</div><div class="p p2">'+im(h.photos[1],avatar(1,{bg:'#8fe3d8'}),600)+'</div><div class="p p3">'+im(h.photos[2],avatar(2,{bg:'#ffe08a'}),600)+'</div><div class="p p4">'+im(h.photos[3],avatar(3,{bg:'#ffb8d9'}),600)+'</div>'
+ +'<div class="hr"'+E('hero','photos')+'><div class="p p1">'+im(h.photos[0],avatar(0,{book:true,bg:'#b9a4ff'}),600)+'</div><div class="p p2">'+im(h.photos[1],avatar(1,{bg:'#8fe3d8'}),600)+'</div><div class="p p3">'+im(h.photos[2],avatar(2,{bg:'#ffe08a'}),600)+'</div><div class="p p4">'+im(h.photos[3],avatar(3,{bg:'#ffb8d9'}),600)+'</div>'
  +'<div class="fb a"><span class="ic" style="background:#ffe7d1;color:#f97316">'+ic('award')+'</span><div><b>'+esc(s_('cong'))+'</b><small>'+esc(s_('cong2'))+'</small></div></div>'
  +'<div class="fb b"><span class="ic" style="background:#fff3c4;color:#f59e0b">'+ic('star')+'</span><div><b>4.9 ★</b><small>'+esc(s_('rate'))+'</small></div></div></div></div></section>';
 }
 function stats(){return '<section class="wrap"><div class="sg"'+EA('stats')+'>'+SITE.stats.map((x,i)=>'<div class="st"'+E('stats.'+i)+'><span class="ic" style="background:'+x.c+';color:'+x.k+'">'+ic(x.i)+'</span><div><b>'+esc(x.n)+'</b><span>'+esc(L(x.l))+'</span></div></div>').join('')+'</div></section>'}
 function whyUs(){const w=SITE.why;return sec('rv',head(L(w.e),hu(L(w.t),L(w.hl)),'',true,E('why','e,t,hl'))+'<div class="g3"'+EA('why.items')+'>'+w.items.map((x,i)=>'<div class="ft"'+E('why.items.'+i)+' style="background:'+x.c+'"><span class="ic">'+ic(x.i)+'</span><h3>'+esc(L(x.t))+'</h3><p>'+esc(L(x.x))+'</p></div>').join('')+'</div>')}
-function banner(){const b=SITE.banner;return sec('rv','<div class="bn"'+E('banner')+'><div><h2>'+esc(L(b.t))+' <em>'+esc(L(b.hl))+'</em></h2><p>'+esc(L(b.x))+'</p>'+pill('admission.html',esc(L(b.btn)),'solid')+'</div><div class="im">'+im(b.photo,scene(5,'star'),900)+'</div></div>')}
+function banner(){const b=SITE.banner;return sec('rv','<div class="bn"'+E('banner')+(b.c?' style="background:'+b.c+'"':'')+'><div><h2>'+esc(L(b.t))+' <em>'+esc(L(b.hl))+'</em></h2><p>'+esc(L(b.x))+'</p>'+pill('admission.html',esc(L(b.btn)),'solid')+'</div><div class="im">'+im(b.photo,scene(5,'star'),900)+'</div></div>')}
 function popular(){const p=SITE.popular;return sec('rv','<div class="pp"><div class="ppl"'+E('popular','e,title')+'><span class="eyebrow">'+esc(L(p.e))+'</span><h2>'+esc(L(p.title))+'</h2><p>'+esc(L(SITE.banner.x))+'</p></div><div class="pt"'+EA('popular.items')+'>'+p.items.map((x,i)=>'<div class="pc"'+E('popular.items.'+i)+' style="background:'+x.c+'"><span class="ic">'+ic(x.i)+'</span><b>'+esc(L(x.t))+'</b><span>'+esc(L(x.x))+'</span></div>').join('')+'</div></div>')}
 let pcat=0;
 function programs(lim){
@@ -63,7 +63,7 @@ function programs(lim){
 }
 function storyBlock(full){
  const s=SITE.story;
- return sec('rv','<div class="ab"><div class="abc"><div class="p a1">'+im(s.photos[0],scene(1,'book'),700)+'</div><div class="p a2">'+im(s.photos[1],avatar(5),500)+'</div><div class="p a3">'+im(s.photos[2],scene(2,'star'),700)+'</div></div>'
+ return sec('rv','<div class="ab"><div class="abc"'+E('story','photos')+'><div class="p a1">'+im(s.photos[0],scene(1,'book'),700)+'</div><div class="p a2">'+im(s.photos[1],avatar(5),500)+'</div><div class="p a3">'+im(s.photos[2],scene(2,'star'),700)+'</div></div>'
  +'<div class="abt"'+E('story','e,t,hl,p,photos')+'><span class="eyebrow">'+esc(L(s.e))+'</span><h2>'+hu(L(s.t),L(s.hl))+'</h2>'+s.p.map(x=>'<p class="big">'+esc(L(x))+'</p>').join('')
  +(full?'':'<ul class="pts">'+SITE.method.map(m=>'<li>'+ic('check')+esc(L(m.t))+'</li>').join('')+'</ul>'+pill('about.html',s_('more')+' →','solid'))+'</div></div>')
 }
@@ -78,7 +78,7 @@ function testimonials(){
 }
 function notices(){
  const row=(d,t,x,c,pa)=>{const f=fmtD(d);return '<div class="li"'+E(pa)+'><div class="db" style="background:'+c+'"><b>'+f.d+'</b><small>'+f.m+'</small></div><div><h4>'+esc(L(t))+'</h4>'+(x?'<p>'+esc(L(x))+'</p>':'')+'</div></div>'};
- return sec('rv','<div class="two"><div class="panel"'+EA('notices')+'><h3>'+s_('notices')+'</h3>'+SITE.notices.map((n,i)=>row(n.date,n.t,n.x,PASTEL[i%8],'notices.'+i)).join('')+'</div><div class="panel"'+EA('events')+'><h3>'+s_('events')+'</h3>'+SITE.events.map((n,i)=>row(n.date,n.t,'',PASTEL[(i+3)%8],'events.'+i)).join('')+'</div></div>')
+ return sec('rv','<div class="two"><div class="panel"'+EA('notices')+'><h3>'+s_('notices')+'</h3>'+SITE.notices.map((n,i)=>row(n.date,n.t,n.x,n.c||PASTEL[i%8],'notices.'+i)).join('')+'</div><div class="panel"'+EA('events')+'><h3>'+s_('events')+'</h3>'+SITE.events.map((n,i)=>row(n.date,n.t,'',n.c||PASTEL[(i+3)%8],'events.'+i)).join('')+'</div></div>')
 }
 function ctaForm(){
  const a=SITE.admission;
@@ -98,11 +98,11 @@ const PAGES={
   +sec('rv',head(s_('vision'),esc(s_('vision')))+'<div class="g3"'+EA('mvv')+'>'+SITE.mvv.map((x,i)=>'<div class="ft"'+E('mvv.'+i)+' style="background:'+x.c+'"><span class="ic">'+ic(x.i)+'</span><h3>'+esc(L(x.t))+'</h3><p>'+esc(L(x.x))+'</p></div>').join('')+'</div>')
   +sec('rv',head('',esc(s_('journey')))+'<div class="tl"'+EA('milestones')+' style="max-width:760px;margin:auto">'+SITE.milestones.map((m,i)=>'<div class="it"'+E('milestones.'+i)+'><b class="y">'+esc(m.y)+'</b><h4>'+esc(L(m.t))+'</h4><p>'+esc(L(m.x))+'</p></div>').join('')+'</div>')
   +principal()
-  +sec('rv',head('',esc(s_('team')))+'<div class="team"'+EA('staff')+'>'+SITE.staff.map((p,i)=>'<div class="tmc"'+E('staff.'+i)+' style="background:'+PASTEL[i%8]+'"><div class="pic">'+im(p.photo,avatar(i+1),400)+'</div><b>'+esc(p.name)+'</b><span>'+esc(L(p.role))+'</span><small>'+esc(p.q||'')+'</small></div>').join('')+'</div>')
+  +sec('rv',head('',esc(s_('team')))+'<div class="team"'+EA('staff')+'>'+SITE.staff.map((p,i)=>'<div class="tmc"'+E('staff.'+i)+' style="background:'+(p.c||PASTEL[i%8])+'"><div class="pic">'+im(p.photo,avatar(i+1),400)+'</div><b>'+esc(p.name)+'</b><span>'+esc(L(p.role))+'</span><small>'+esc(p.q||'')+'</small></div>').join('')+'</div>')
   +ctaForm(),
  acad:()=>pageHero('acad','class3')
   +sec('rv',head(L(SITE.levels.e),esc(L(SITE.levels.title)),'',true,E('levels','e,title'))+'<div class="g2"'+EA('levels.items')+'>'+SITE.levels.items.map((x,i)=>'<article class="fc"'+E('levels.items.'+i)+'><div class="im">'+im(x.photo,scene(i,x.i),800)+'<span class="tag">'+ic(x.i)+'</span><span class="gtag">'+esc(L(x.g))+'</span></div><div class="bd"><h3>'+esc(L(x.t))+'</h3><p>'+esc(L(x.x))+'</p><div class="chips">'+(x.s||[]).map(s=>'<i>'+esc(L(s))+'</i>').join('')+'</div></div></article>').join('')+'</div>')
-  +sec('rv',head('',esc(s_('method')))+'<div class="g4"'+EA('method')+'>'+SITE.method.map((m,i)=>'<div class="ft"'+E('method.'+i)+' style="background:'+PASTEL[i]+'"><span class="ic">'+ic(m.i)+'</span><h3>'+esc(L(m.t))+'</h3><p>'+esc(L(m.x))+'</p></div>').join('')+'</div>')
+  +sec('rv',head('',esc(s_('method')))+'<div class="g4"'+EA('method')+'>'+SITE.method.map((m,i)=>'<div class="ft"'+E('method.'+i)+' style="background:'+(m.c||PASTEL[i])+'"><span class="ic">'+ic(m.i)+'</span><h3>'+esc(L(m.t))+'</h3><p>'+esc(L(m.x))+'</p></div>').join('')+'</div>')
   +programs()+ctaForm(),
  fac:()=>pageHero('fac','smart')
   +sec('rv',head(L(SITE.facilities.e),esc(L(SITE.facilities.title)),'',true,E('facilities','e,title'))+'<div class="g3"'+EA('facilities.items')+'>'+SITE.facilities.items.map((x,i)=>'<article class="fc"'+E('facilities.items.'+i)+'><div class="im">'+im(x.photo,scene(i,x.i),700)+'<span class="tag">'+ic(x.i)+'</span></div><div class="bd"><h3>'+esc(L(x.t))+'</h3><p>'+esc(L(x.x))+'</p></div></article>').join('')+'</div>')
