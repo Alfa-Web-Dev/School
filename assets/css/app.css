@@ -84,3 +84,69 @@ body.rbody #rc:has(.rcard){max-width:680px}
 .idgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:12px 0}.idc{background:#fff;color:#000;border:1px solid #000;border-radius:10px;overflow:hidden;break-inside:avoid;font-size:12.5px;line-height:1.5}
 .idh{color:#fff;padding:6px 10px;font-weight:700;font-size:16px}.idh small{display:block;font-weight:400;font-size:10px}.idb{display:flex;gap:8px;padding:8px 10px}.idq svg{display:block}.idf{background:#eee;text-align:center;padding:3px;font-size:11px}
 @media print{.no-print{display:none!important}.idgrid{grid-template-columns:repeat(3,1fr)}main{padding:0!important}}
+
+/* ================= UI v2 (final polish): soft pastel, rounded, mobile-first ================= */
+:root{--r:22px;--sh:0 8px 28px rgba(15,23,42,.07);--p1:#d8f5e7;--p2:#ffe1d6;--p3:#e6defc;--p4:#fde2ef;--p5:#fff0bd}
+@media(prefers-color-scheme:dark){:root{--sh:0 8px 28px rgba(0,0,0,.35);--p1:#16342b;--p2:#3b2520;--p3:#2c2748;--p4:#3a2231;--p5:#38321a}}
+body{font-family:Inter,"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);background-image:linear-gradient(180deg,color-mix(in srgb,var(--c) 9%,var(--bg)),var(--bg) 340px);background-attachment:fixed;-webkit-font-smoothing:antialiased}
+h1{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px}h2{letter-spacing:-.01em}h3{font-size:18px;margin:22px 0 8px}
+.card{border:0;border-radius:var(--r);box-shadow:var(--sh)}
+input,select,textarea{border-radius:14px;border:1.5px solid var(--bd);padding:12px 14px;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 18%,transparent)}
+button{border-radius:999px;padding:12px 20px;font-weight:600;transition:transform .12s,opacity .15s,box-shadow .15s}
+button:not(.g):not(.tg):not(.chip):not(.tab){box-shadow:0 6px 16px color-mix(in srgb,var(--c) 30%,transparent)}
+button:hover{opacity:.92}button:active{transform:scale(.97)}button.g{background:var(--card);border:1.5px solid var(--bd);color:var(--tx);box-shadow:none}
+.tab,.chip{border-radius:999px}.bdg{border-radius:999px}
+
+/* panel shell */
+.app header{background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:0;padding:12px 16px;z-index:20}
+.brand{font-size:20px;font-weight:800;letter-spacing:-.02em;color:var(--c)}
+.uchip{display:flex;align-items:center;gap:8px}.un{color:var(--mu);font-size:14px}
+.av{width:36px;height:36px;border-radius:50%;background:var(--c);color:#fff;display:inline-grid;place-items:center;font-weight:700}.av.lg{width:56px;height:56px;font-size:22px}
+.app header button.s{width:38px;height:38px;padding:0;border-radius:50%;display:inline-grid;place-items:center;font-size:12px;box-shadow:none}
+.app header #lo{width:auto;padding:0 14px;border-radius:999px}
+.wrap{max-width:1180px;gap:22px;padding:18px 16px}
+nav{background:var(--card);border-radius:26px;box-shadow:var(--sh);padding:10px;min-width:220px;align-self:flex-start;position:sticky;top:76px;gap:4px}
+nav a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:16px;font-weight:600;font-size:15px;color:var(--mu);transition:background .15s}
+nav a .ic{width:21px;height:21px;flex:none}nav a:hover{background:color-mix(in srgb,var(--c) 10%,transparent);color:var(--tx)}
+nav a.on{background:var(--c);color:#fff;box-shadow:0 8px 18px color-mix(in srgb,var(--c) 35%,transparent)}
+@media(max-width:700px){
+ body.app{padding-bottom:96px}.wrap{padding:12px}.un{display:none}
+ nav{position:fixed;left:12px;right:12px;bottom:12px;top:auto;min-width:0;flex-direction:row;overflow-x:auto;gap:2px;border-radius:999px;padding:7px;z-index:30;box-shadow:0 12px 40px rgba(15,23,42,.22);scrollbar-width:none}
+ nav::-webkit-scrollbar{display:none}
+ nav a{flex-direction:column;gap:2px;padding:8px 12px;border-radius:999px;font-size:11px;white-space:nowrap;min-width:64px;justify-content:center}
+ nav a .ic{width:22px;height:22px}h1{font-size:25px}}
+
+/* dashboard tiles */
+.grid{gap:14px}.card.stat{text-align:left;padding:18px 20px;max-width:none}.card.stat .big{font-size:34px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.grid>.stat:nth-child(5n+1){background:var(--p1)}.grid>.stat:nth-child(5n+2){background:var(--p2)}.grid>.stat:nth-child(5n+3){background:var(--p3)}.grid>.stat:nth-child(5n+4){background:var(--p4)}.grid>.stat:nth-child(5n+5){background:var(--p5)}
+.card.stat .mu{margin:6px 0 0;color:color-mix(in srgb,var(--tx) 62%,transparent)}
+.hello{display:flex;align-items:center;gap:14px;margin:4px 0 18px}.hello div{display:flex;flex-direction:column;line-height:1.3}.hello small{color:var(--mu)}.hello b{font-size:24px;font-weight:800;letter-spacing:-.02em}.hello .mu{margin:0}
+
+/* tables = soft list cards */
+.tw{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:6px 10px}
+.tbl th{font-size:12px;text-transform:uppercase;letter-spacing:.05em}.tbl tr:last-child td{border-bottom:0}.tbl tbody tr:hover td{background:color-mix(in srgb,var(--c) 5%,transparent)}
+.tbl td,.tbl th{padding:12px 10px}
+
+/* dialogs, toast, notes */
+.dlg{border:0;border-radius:28px;box-shadow:0 24px 70px rgba(0,0,0,.3);padding:22px}.dlg::backdrop{background:#0b122099;backdrop-filter:blur(3px)}
+.toast{border-radius:999px;padding:12px 20px;box-shadow:var(--sh)}
+.ncard{border:0;border-radius:var(--r);box-shadow:var(--sh)}.nth,.nthumb{background:var(--p3)}.ngrid>.ncard:nth-child(4n+2) .nth{background:var(--p1)}.ngrid>.ncard:nth-child(4n+3) .nth{background:var(--p2)}.ngrid>.ncard:nth-child(4n+4) .nth{background:var(--p5)}
+.item,.ed fieldset{border-radius:18px}.sec{border-radius:16px}
+
+/* login */
+body:not(.app):not(.pub):not(.rbody){background-image:radial-gradient(circle at 20% 0%,color-mix(in srgb,var(--c) 28%,transparent),transparent 55%),radial-gradient(circle at 100% 100%,color-mix(in srgb,var(--c) 18%,transparent),transparent 50%)}
+body:not(.app):not(.pub):not(.rbody) .card{max-width:400px;padding:30px 26px;border-radius:30px}body:not(.app):not(.pub):not(.rbody) h1{font-size:30px}
+
+/* public website */
+.pub header{background:color-mix(in srgb,var(--c) 94%,transparent);backdrop-filter:blur(12px);box-shadow:0 4px 24px rgba(0,0,0,.12);padding:12px 20px}.pub header b{font-size:20px;letter-spacing:-.02em}
+.pub header button{border-radius:999px;padding:7px 14px;width:auto;box-shadow:none}
+.pub .hero{background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 55%,#000));border-radius:0 0 40px 40px;padding:84px 20px 92px}.pub .hero h1{font-size:clamp(30px,6vw,52px);color:#fff}.pub .hero p{font-size:18px;opacity:.92}
+.pub section h2{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:0 0 14px}.pub section{padding:36px 18px}
+.pub .grid .card,.pub #nl .card,.pub #el .card{padding:18px}.pub .grid>.card:nth-child(5n+1),.pub #nl>.card:nth-child(5n+1){background:var(--p1)}.pub .grid>.card:nth-child(5n+2),.pub #nl>.card:nth-child(5n+2){background:var(--p2)}.pub .grid>.card:nth-child(5n+3),.pub #nl>.card:nth-child(5n+3){background:var(--p3)}.pub .grid>.card:nth-child(5n+4),.pub #nl>.card:nth-child(5n+4){background:var(--p4)}.pub .grid>.card:nth-child(5n+5),.pub #nl>.card:nth-child(5n+5){background:var(--p5)}
+.pub #nl .card,.pub #el .card{margin-bottom:10px}.pub img{border-radius:var(--r)}
+.pub #ef{max-width:520px;padding:22px}.pub #ef input{margin-bottom:0}
+@media(max-width:700px){.pub header{gap:8px;padding:10px 14px}.pub header a{font-size:13px}.pub .hero{padding:60px 18px 70px;border-radius:0 0 30px 30px}}
+/* fix: place-items:center (login card) block layout mein bhi children ko shrink kar deta tha */
+body.pub,body.app,body.rbody{place-items:normal;justify-items:normal;align-items:normal}
+@media(max-width:700px){.grid:has(>.stat){grid-template-columns:repeat(2,1fr)}.card.stat{padding:16px}.card.stat .big{font-size:26px}nav a.on{min-width:76px}}

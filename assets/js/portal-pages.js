@@ -7,7 +7,7 @@ const badge=s=>el('span',{class:'bdg '+(s==='P'?'ok':s==='A'?'no':'lt')},s==='P'
 
 async function initSDash(){
  const m=page('n_dashboard'),r=await call('myDashboard'),p=r.profile;
- m.append(el('p',{class:'mu'},p.name+' · '+p.className+(p.roll?' · Roll '+p.roll:'')),
+ m.append(el('div',{class:'hello'},el('span',{class:'av lg'},(p.name||'?').charAt(0).toUpperCase()),el('div',{},el('small',{},'Hello,'),el('b',{},p.name),el('span',{class:'mu'},p.className+(p.roll?' · Roll '+p.roll:'')))),
   el('div',{class:'grid'},stat('Attendance',r.attendance.percent+'%',r.attendance.present+r.attendance.late+'/'+r.attendance.total+' din'),
    stat('Fee balance',rupee(r.fees.balance),'Paid '+rupee(r.fees.totalPaid)),stat('Class',p.className,p.classTeacher?'Teacher: '+p.classTeacher:'')),
   el('h3',{},'Aaj ki classes'),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Subject',f:l=>l.subject},{h:'Teacher',f:l=>l.teacher}],r.today,'Aaj koi class nahi'),
