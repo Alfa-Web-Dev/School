@@ -167,7 +167,7 @@ function doPost(e){
  }catch(err){return out({ok:false,error:'Server error'})}}
 
 // action -> function ka naam. Naye features yahin jodo.
-const ROUTES={noteOptions:'noteOptions',listNotes:'listNotes',uploadNote:'uploadNote',updateNote:'updateNote',deleteNote:'deleteNote',uploadNote:'uploadNote',listNotes:'listNotes',updateNote:'updateNote',deleteNote:'deleteNote',noteSubjects:'noteSubjects',deleteFee:'deleteFee',studentFees:'studentFees',voidPayment:'voidPayment',getReceipt:'getReceipt',defaulters:'defaulters',getMarks:'getMarks',deleteAssignment:'deleteAssignment',deleteLesson:'deleteLesson',deleteClassNotice:'deleteClassNotice',teacherHome:'teacherHome',resetSecret:'resetSecret',myDashboard:'myDashboard',myProfile:'myProfile',myAttendance:'myAttendance',myFees:'myFees',myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',saveClass:'saveClass',listSubjects:'listSubjects',saveSubject:'saveSubject',listLessons:'listLessons',saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',adminExams:'adminExams',deleteExam:'deleteExam',reportCard:'reportCard',saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',backupNow:'backupNow'};
+const ROUTES={noteOptions:'noteOptions',listNotes:'listNotes',uploadNote:'uploadNote',updateNote:'updateNote',deleteNote:'deleteNote',uploadNote:'uploadNote',listNotes:'listNotes',updateNote:'updateNote',deleteNote:'deleteNote',noteSubjects:'noteSubjects',deleteFee:'deleteFee',studentFees:'studentFees',voidPayment:'voidPayment',getReceipt:'getReceipt',defaulters:'defaulters',getMarks:'getMarks',deleteAssignment:'deleteAssignment',deleteLesson:'deleteLesson',deleteClassNotice:'deleteClassNotice',teacherHome:'teacherHome',resetSecret:'resetSecret',myDashboard:'myDashboard',myProfile:'myProfile',myAttendance:'myAttendance',myFees:'myFees',myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',saveClass:'saveClass',listSubjects:'listSubjects',saveSubject:'saveSubject',listLessons:'listLessons',saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',issueCertificate:'issueCertificate',adminExams:'adminExams',deleteExam:'deleteExam',reportCard:'reportCard',saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',backupNow:'backupNow'};
 
 // Student portal (Phase 3): student sirf apni hi data dekh sakta hai. changeSecret sab roles ke liye.
 const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],TZ='Asia/Kolkata';
@@ -299,6 +299,20 @@ function promoteStudents(b){
     setRow('Students',r._row,to==='PASSOUT'?{status:'passed-out'}:{classId:to,roll:''});n++}});
   log(s.userId,'promote',from+'->'+to+' ('+n+')');
   return{ok:true,moved:n}}))}
+
+// Phase 10: certificate / ID data. Har issue ka serial number Logs se banta hai (kaun, kab, kis ko = log mein).
+const CERT_TYPES={bonafide:'BON',tc:'TC',character:'CHR'};
+function issueCertificate(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{
+  const type=String(b.type||''),pre=CERT_TYPES[type];if(!pre)throw new Error('Certificate type galat hai');
+  const st=find('Students',x=>String(x.studentId)===String(b.studentId));if(!st)throw new Error('Student nahi mila');
+  const yr=todayStr().slice(0,4),key=pre+'/'+yr+'/';
+  const n=table('Logs').rows.filter(l=>String(l.action)==='certificate'&&String(l.details).indexOf(key)===0).length+1;
+  const ref=key+String(n).padStart(4,'0');
+  log(s.userId,'certificate',ref+' '+st.studentId);
+  const cl=find('Classes',c=>String(c.classId)===String(st.classId))||{},ay=find('AcademicYears',a=>String(a.current).toUpperCase()==='TRUE')||{};
+  return{ok:true,ref,date:todayStr(),year:String(ay.name||ay.year||''),student:{studentId:String(st.studentId),admNo:String(st.admNo||''),name:st.name,gender:String(st.gender||''),dob:dstr(st.dob),parentName:String(st.parentName||''),address:String(st.address||''),className:cl.name||String(st.classId),roll:String(st.roll||''),status:String(st.status)}}}))}
 
 // Teachers (Phase 2) + PIN/password reset
 function listTeachers(b){
