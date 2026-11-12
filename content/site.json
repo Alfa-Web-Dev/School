@@ -523,10 +523,192 @@
      "photo": "chess"
     }
    ]
-  }
+  },
+  "gallery": [
+   {
+    "k": "class1",
+    "c": 1,
+    "t": {
+     "hi": "कक्षा में पढ़ाई",
+     "en": "Classroom learning"
+    }
+   },
+   {
+    "k": "lab",
+    "c": 1,
+    "t": {
+     "hi": "विज्ञान प्रयोग",
+     "en": "Science experiment"
+    }
+   },
+   {
+    "k": "read",
+    "c": 1,
+    "t": {
+     "hi": "पुस्तकालय में पढ़ना",
+     "en": "Reading in the library"
+    }
+   },
+   {
+    "k": "pc",
+    "c": 1,
+    "t": {
+     "hi": "कंप्यूटर लैब",
+     "en": "Computer lab"
+    }
+   },
+   {
+    "k": "play",
+    "c": 2,
+    "t": {
+     "hi": "खेल का समय",
+     "en": "Play time"
+    }
+   },
+   {
+    "k": "field",
+    "c": 2,
+    "t": {
+     "hi": "खेल का मैदान",
+     "en": "Sports ground"
+    }
+   },
+   {
+    "k": "football",
+    "c": 2,
+    "t": {
+     "hi": "फुटबॉल अभ्यास",
+     "en": "Football practice"
+    }
+   },
+   {
+    "k": "swing",
+    "c": 2,
+    "t": {
+     "hi": "झूला",
+     "en": "Playground"
+    }
+   },
+   {
+    "k": "stage",
+    "c": 3,
+    "t": {
+     "hi": "वार्षिक उत्सव",
+     "en": "Annual day"
+    }
+   },
+   {
+    "k": "hug",
+    "c": 3,
+    "t": {
+     "hi": "दोस्ती के पल",
+     "en": "Friends forever"
+    }
+   },
+   {
+    "k": "kids",
+    "c": 3,
+    "t": {
+     "hi": "पिकनिक",
+     "en": "School trip"
+    }
+   },
+   {
+    "k": "group",
+    "c": 3,
+    "t": {
+     "hi": "कक्षा 5 के बच्चे",
+     "en": "Class 5 kids"
+    }
+   },
+   {
+    "k": "girls",
+    "c": 4,
+    "t": {
+     "hi": "साथ में सीखना",
+     "en": "Learning together"
+    }
+   },
+   {
+    "k": "blue",
+    "c": 4,
+    "t": {
+     "hi": "हमारे छात्र",
+     "en": "Our students"
+    }
+   },
+   {
+    "k": "smart",
+    "c": 4,
+    "t": {
+     "hi": "स्मार्ट क्लास",
+     "en": "Smart class"
+    }
+   },
+   {
+    "k": "chess",
+    "c": 4,
+    "t": {
+     "hi": "शतरंज प्रतियोगिता",
+     "en": "Chess competition"
+    }
+   },
+   {
+    "k": "u179452742160779",
+    "c": 3,
+    "t": {
+     "hi": "शतरंज प्रतियोगिता",
+     "en": "Chess competition"
+    }
+   }
+  ],
+  "stats": [
+   {
+    "i": "users",
+    "n": "1200+",
+    "l": {
+     "hi": "छात्र",
+     "en": "Students"
+    },
+    "c": "#ede9fe",
+    "k": "#111"
+   },
+   {
+    "i": "book",
+    "n": "60+",
+    "l": {
+     "hi": "अनुभवी शिक्षक",
+     "en": "Expert teachers"
+    },
+    "c": "#ffedd5",
+    "k": "#f97316"
+   },
+   {
+    "i": "award",
+    "n": "25+",
+    "l": {
+     "hi": "वर्षों का अनुभव",
+     "en": "Years of trust"
+    },
+    "c": "#fce7f3",
+    "k": "#ec4899"
+   },
+   {
+    "i": "star",
+    "n": "98%",
+    "l": {
+     "hi": "बोर्ड रिज़ल्ट",
+     "en": "Board results"
+    },
+    "c": "#d1fae5",
+    "k": "#10b981"
+   }
+  ]
  },
  "PH": {
-  "u179452630418030": "uploads/u179452630418030.jpg"
+  "u179452630418030": "uploads/u179452630418030.jpg",
+  "u179452742160779": "uploads/u179452742160779.jpg",
+  "u179452747150283": "uploads/u179452747150283.jpg"
  },
  "CFG": {}
 }
