@@ -8,6 +8,10 @@ notes:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/>',homework:'<
 enquiries:'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 7l9 6 9-6"/>',certificates:'<circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 22l5-3 5 3-1.5-8"/>',content:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
 logs:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',settings:'<rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'};
 const icon=k=>'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(IC[k]||'<circle cx="12" cy="12" r="3"/>')+'</svg>';
+// Install (PWA): har role ka apna manifest/scope hai (admin/, teacher/, student/). Sirf wahi app install hota hai.
+let _ip=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_ip=e;const b=document.getElementById('inst');if(b)b.hidden=false});
+window.addEventListener('appinstalled',()=>{_ip=null;const b=document.getElementById('inst');if(b)b.hidden=true});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 const HOME={admin:'admin',teacher:'teacher',student:'student'};
 async function initShell(role,page,phase){
  applyI18n();
@@ -18,10 +22,11 @@ async function initShell(role,page,phase){
  const nav=NAV[role].map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('');
  document.getElementById('shell').innerHTML=
   '<header><b class="brand">'+CFG.shortName+'</b><span class="sp"></span><span class="uchip"><span class="av">'+(u.name||'?').trim().charAt(0).toUpperCase()+'</span><span class="un">'+u.name+'</span></span>'+
-  '<button class="g s" id="lg">'+(getLang()==='hi'?'EN':'हिं')+'</button><button class="g s" id="lo" data-i="logout"></button></header>'+
+  '<button class="g" id="inst" hidden>Install app</button><button class="g s" id="lg">'+(getLang()==='hi'?'EN':'हिं')+'</button><button class="g s" id="lo" data-i="logout"></button></header>'+
   '<div class="wrap"><nav>'+nav+'</nav><main id="main"></main></div>';
  document.getElementById('lg').onclick=()=>{setLang(getLang()==='hi'?'en':'hi');location.reload()};
  document.getElementById('lo').onclick=async()=>{try{await api('logout')}catch(e){}sessionStorage.clear();location.href='../login.html'};
+ const ib=document.getElementById('inst');if(ib){ib.hidden=!_ip;ib.onclick=async()=>{if(!_ip)return;_ip.prompt();await _ip.userChoice;_ip=null;ib.hidden=true}}
  applyI18n();
  const m=document.getElementById('main');
  if(!phase)return u;
