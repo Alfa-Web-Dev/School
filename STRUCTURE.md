@@ -1,9 +1,8 @@
 # Structure
 
 ```
-index.html      app entry: link kholte hi login page par bhejta hai (config.js: entry:"website" se public site)
+index.html      public school website (link kholte hi yahi khulti hai; content/*.json se). Menu mein "Login" link
 login.html      Admin / Teacher / Student login (neeche "Visit website" link)
-website.html    public school website (content/*.json se)
 dashboard.html  login ke baad role ke panel par bhejta hai
 config.js       school ki settings
 admin/ teacher/ student/   har role ka alag app-jaisa panel (apne alag pages)
