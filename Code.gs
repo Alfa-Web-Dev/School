@@ -799,9 +799,39 @@ function dashboardStats(b){
   teachers:table('Users').rows.filter(r=>r.role==='teacher'&&String(r.active).toUpperCase()==='TRUE').length,
   classes:classes.length,
   newEnquiries:table('Enquiries').rows.filter(r=>String(r.status)==='new').length,
+  today:todayAtt(),monthFees:monthFees(),
   byClass:classes.map(c=>({classId:String(c.classId),name:c.name,count:cnt[String(c.classId)]||0}))}}}
-function listLogs(b){return{ok:false,error:'Not built yet (Phase 9)'}}
 
-// Backup: Phase 9 me banega. Abhi sirf skeleton.
-function backupNow(b){return{ok:false,error:'Not built yet (Phase 9)'}}
+// Aaj ki attendance (latest row per student) aur is mahine ki fee collection (void rows judti hain)
+function todayAtt(){const t=todayStr(),by={};table('Attendance').rows.forEach(r=>{if(dstr(r.date)===t)by[String(r.studentId)]=String(r.status).toUpperCase()});
+ const act={};table('Students').rows.forEach(r=>{if(String(r.status).toLowerCase()==='active')act[String(r.studentId)]=1});
+ let p=0,a=0;Object.keys(by).forEach(k=>{if(!act[k])return;if(by[k]==='A')a++;else if(by[k]==='P'||by[k]==='L')p++});
+ return{present:p,absent:a,marked:p+a,total:Object.keys(act).length}}
+function monthFees(){const m=todayStr().slice(0,7);let sum=0;table('Payments').rows.forEach(r=>{if(dstr(r.date).slice(0,7)===m)sum+=Number(r.amount)||0});return Math.round(sum*100)/100}
+
+function listLogs(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>{const q=clean(b.q,40).toLowerCase(),rows=table('Logs').rows.map(r=>({time:r.time instanceof Date?Utilities.formatDate(r.time,'Asia/Kolkata','yyyy-MM-dd HH:mm'):String(r.time),userId:String(r.userId),action:String(r.action),details:String(r.details)}));
+  const f=q?rows.filter(r=>(r.userId+' '+r.action+' '+r.details).toLowerCase().indexOf(q)>=0):rows;
+  return{ok:true,logs:f.slice(-300).reverse(),total:f.length}})}
+
+// Backup: poori Sheet ki copy Drive ke "School Backups" folder mein. Purani copies (14 se zyada) trash ho jaati hain.
+const BACKUP_KEEP=14;
+function runBackup(by){
+ const ss=SpreadsheetApp.getActive(),it=DriveApp.getFoldersByName('School Backups'),dir=it.hasNext()?it.next():DriveApp.createFolder('School Backups');
+ const name=ss.getName()+' backup '+Utilities.formatDate(new Date(),'Asia/Kolkata','yyyy-MM-dd HH:mm');
+ const f=DriveApp.getFileById(ss.getId()).makeCopy(name,dir);
+ const files=[],all=dir.getFiles();while(all.hasNext())files.push(all.next());
+ files.sort((a,b)=>b.getDateCreated()-a.getDateCreated());
+ let removed=0;files.slice(BACKUP_KEEP).forEach(x=>{x.setTrashed(true);removed++});
+ log(by,'backup',name+(removed?' (purani '+removed+' hataai)':''));
+ return{name,url:f.getUrl(),removed,kept:Math.min(files.length,BACKUP_KEEP)}}
+function backupNow(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>Object.assign({ok:true},runBackup(s.userId)))}
+function autoBackup(){try{runBackup('system')}catch(e){log('system','backup_fail',String(e.message||e).slice(0,120))}}
+// Editor mein ek baar chalao: roz raat auto backup
+function enableAutoBackup(){
+ if(!ScriptApp.getProjectTriggers().some(t=>t.getHandlerFunction()==='autoBackup'))ScriptApp.newTrigger('autoBackup').timeBased().atHour(2).everyDays(1).create();
+ runBackup('system')}
 

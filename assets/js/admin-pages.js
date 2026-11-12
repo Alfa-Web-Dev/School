@@ -7,7 +7,7 @@ const tname=id=>(TE.find(t=>t.userId===id)||{}).name||'';
 async function initDash(){
  const m=$('#main');m.innerHTML='';m.append(el('h1',{'data-i':'n_dashboard'}));
  const r=await call('dashboardStats'),s=r.stats;
- m.append(el('div',{class:'grid'},[['Students',s.students],['Teachers',s.teachers],['Classes',s.classes],['New enquiries',s.newEnquiries]].map(([l,v])=>el('div',{class:'card stat'},el('div',{class:'big'},v),el('div',{class:'mu'},l)))));
+ m.append(el('div',{class:'grid'},[['Students',s.students],['Teachers',s.teachers],['Classes',s.classes],['New enquiries',s.newEnquiries],['Aaj present',s.today.marked?s.today.present+' / '+s.today.marked:'-'],['Is mahine ki fee','₹'+Number(s.monthFees).toLocaleString('en-IN')]].map(([l,v])=>el('div',{class:'card stat'},el('div',{class:'big'},v),el('div',{class:'mu'},l)))));
  m.append(el('h3',{},'Class-wise students'),tableEl([{h:'Class',f:r=>r.name},{h:'Students',f:r=>r.count}],s.byClass,'Abhi koi class nahi'));
  applyI18n()}
 
