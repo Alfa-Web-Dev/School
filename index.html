@@ -1,20 +1,5 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>School</title><meta name="description" content="School website"><link rel="stylesheet" href="assets/css/app.css"><link rel="manifest" href="manifest-student.webmanifest"><meta name="theme-color" content="#1d4ed8"><link rel="apple-touch-icon" href="assets/img/icon-192.png"></head>
-<body class="pub">
-<header><img id="logo" style="height:32px;display:none"><b id="sn"></b><span class="sp"></span>
-<a href="#about" data-i="about"></a><a href="#notices" data-i="notices"></a><a href="#events" data-i="events"></a><a href="#staff" data-i="staff"></a><a href="#downloads" data-i="downloads"></a><a href="#gallery" data-i="gallery"></a><a href="#contact" data-i="contact"></a>
-<a href="login.html" data-i="login"></a><button id="lg"></button></header>
-<section class="hero" id="hero"><h1 id="ht"></h1><p id="hs"></p></section>
-<section id="about"><h2 data-i="about"></h2><p id="ab"></p><h3 data-i="principal"></h3><p id="pr"></p></section>
-<section id="academics"><h2 data-i="academics"></h2><div class="grid" id="ac"></div><div class="grid" id="av"></div></section>
-<section id="notices"><h2 data-i="notices"></h2><div id="nl"></div></section>
-<section id="events"><h2 data-i="events"></h2><div id="el"></div></section>
-<section id="staff"><h2 data-i="staff"></h2><div class="grid" id="sl"></div></section>
-<section id="downloads"><h2 data-i="downloads"></h2><div id="dl"></div></section>
-<section id="gallery"><h2 data-i="gallery"></h2><div id="gl"></div></section>
-<section id="admission"><h2 data-i="admission"></h2><p id="ad"></p>
- <form id="ef" class="card"><input name="name" data-ph="name" required><input name="phone" data-ph="phone" required style="margin-top:8px"><input name="message" data-ph="msg" style="margin-top:8px">
- <input name="website" style="display:none" tabindex="-1" autocomplete="off"><button data-i="send"></button><div id="m"></div></form></section>
-<section id="contact"><h2 data-i="contact"></h2><p id="ct"></p>
- <a href="#" id="tel" data-i="call"></a> · <a href="#" id="wa">WhatsApp</a></section>
-<script src="config.js"></script><script src="assets/js/i18n.js"></script><script src="assets/js/i18n-extra.js"></script><script src="assets/js/api.js"></script><script src="assets/js/site.js"></script>
-</body></html>
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>School</title><link rel="manifest" href="manifest-student.webmanifest"><meta name="theme-color" content="#1d4ed8"><link rel="apple-touch-icon" href="assets/img/icon-192.png">
+<script src="config.js"></script></head><body>
+<!-- App ka entry point. Link kholne par seedha login page (CFG.entry = "website" karo to public website khulegi). -->
+<script>location.replace((CFG.entry==='website'?'website.html':'login.html')+location.hash)</script>
+<noscript><a href="login.html">Login</a> · <a href="website.html">Website</a></noscript></body></html>

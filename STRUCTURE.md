@@ -1,11 +1,13 @@
-# Structure (skeleton - abhi sirf dhancha, features phase-wise aayenge)
+# Structure
 
 ```
-config.js  index.html  login.html  dashboard.html
-content/*.json          public site ka sara content
-uploads/  assets/img/   photos, PDFs
+index.html      app entry: link kholte hi login page par bhejta hai (config.js: entry:"website" se public site)
+login.html      Admin / Teacher / Student login (neeche "Visit website" link)
+website.html    public school website (content/*.json se)
+dashboard.html  login ke baad role ke panel par bhejta hai
+config.js       school ki settings
+admin/ teacher/ student/   har role ka alag app-jaisa panel (apne alag pages)
 assets/js/  api.js i18n.js i18n-extra.js shell.js site.js
-admin/ teacher/ student/   har role ke pages (login guard shell.js se)
 backend/*.gs            Apps Script (Main.gs ROUTES me action -> function)
 manifest-*.webmanifest  sw.js  robots.txt  sitemap.xml
 ```
