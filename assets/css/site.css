@@ -121,3 +121,4 @@ footer{margin-top:90px;background:#0b0b0e;color:#b8b8c4;padding:60px 0 0}.fg{dis
 .rv{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}.rv.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.fb{animation:none}html{scroll-behavior:auto}}
 .hg>*,.ab>*,.pp>*,.bn>*,.two>*,.cta-band>*,.pr>*,.cg>*{min-width:0}
+.dl2li{display:flex;gap:12px;align-items:center;background:#fff;border:1.5px solid var(--bd);border-radius:16px;padding:14px 18px;font-weight:600;text-decoration:none;position:relative}.dl2li svg{color:var(--o);font-size:20px}.dl2li time{margin-left:auto;color:var(--mu);font-size:13px}a.dl2li:hover{box-shadow:var(--sh)}

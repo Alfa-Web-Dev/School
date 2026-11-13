@@ -91,5 +91,8 @@ const SITE={
   {k:"girls",c:4,t:b("साथ में सीखना","Learning together")},{k:"blue",c:4,t:b("हमारे छात्र","Our students")},{k:"smart",c:4,t:b("स्मार्ट क्लास","Smart class")},{k:"chess",c:4,t:b("शतरंज प्रतियोगिता","Chess competition")}],
  galleryCats:[b("सभी","All"),b("कक्षा","Classroom"),b("खेल","Sports"),b("उत्सव","Events"),b("सीखना","Learning")],
  hours:[{d:b("सोमवार - शनिवार","Monday - Saturday"),t:b("सुबह 8:00 से दोपहर 2:00 बजे","8:00 AM - 2:00 PM")},{d:b("कार्यालय समय","Office hours"),t:b("सुबह 9:00 से दोपहर 3:00 बजे","9:00 AM - 3:00 PM")},{d:b("रविवार","Sunday"),t:b("बंद","Closed")}],
- downloads:[]
+ downloads:[
+ {t:b("प्रॉस्पेक्टस","Prospectus"),f:"",size:"PDF"},{t:b("प्रवेश फ़ॉर्म","Admission form"),f:"",size:"PDF"},{t:b("फ़ीस ढाँचा","Fee structure"),f:"",size:"PDF"},{t:b("शैक्षणिक कैलेंडर","Academic calendar"),f:"",size:"PDF"}],
+ results:{e:b("शानदार नतीजे","Proud results"),title:b("हमारे टॉपर्स","Our toppers"),items:[
+  {n:b("आरव शर्मा","Aarav Sharma"),c:b("कक्षा 10","Class 10"),m:"96.4%",y:"2025-26"},{n:b("दिया वर्मा","Diya Verma"),c:b("कक्षा 10","Class 10"),m:"95.2%",y:"2025-26"},{n:b("कबीर सिंह","Kabir Singh"),c:b("कक्षा 8","Class 8"),m:"94.8%",y:"2025-26"},{n:b("अनन्या गुप्ता","Ananya Gupta"),c:b("कक्षा 5","Class 5"),m:"98%",y:"2025-26"}]}
 };

@@ -1,7 +1,7 @@
 // Hidden Website Studio: edits site content visually, publishes to GitHub as content/site.json (+ uploads/*.jpg)
 (()=>{
 const ST={repo:'',tok:'',br:'main',dS:new Set(),dP:new Set(),dC:new Set(),rs:new Set()};
-let DEF={};
+let DEF={};ST.pf={};
 const q=(s,r)=>(r||document).querySelector(s),qa=(s,r)=>[...(r||document).querySelectorAll(s)];
 const h=(t,a,c)=>{const e=document.createElement(t);for(const k in a||{})k==='class'?e.className=a[k]:k==='text'?e.textContent=a[k]:e.setAttribute(k,a[k]);(c||[]).forEach(x=>e.append(x));return e};
 const isBi=o=>o&&typeof o==='object'&&!Array.isArray(o)&&'hi' in o&&'en' in o&&Object.keys(o).length===2;
@@ -28,7 +28,8 @@ function imgField(label,get,set){
 }
 // ---------- generic form ----------
 function field(obj,key,ctx){
- const v=obj[key],label=({t:'Title',x:'Text',e:'Small label',hl:'Highlighted words',n:'Number / value',l:'Label',i:'Icon',g:'Grade / group',s:'Chips',p:'Paragraphs',q:'Qualification',r:'Rating / role',m:'Class range',by:'By',y:'Year',d:'Date (YYYY-MM-DD)',c:'Colour / category',a:'Age',pre:'Heading',sub:'Sub text',btn:'Button text',n:'Name / number',photo:'Photo',photos:'Photos',k:'Photo',cat:'Category',msg:'Message',badge:'Badge',happy:'Happy parents text',name:'Name',nameHi:'School name (Hindi)',shortName:'Short name',phone:'Phone',whatsapp:'WhatsApp number',email:'Email',address:'Address',addressHi:'Address (Hindi)',mapEmbed:'Map embed link'})[key]||key;
+ const v=obj[key],label=({t:'Title',x:'Text',e:'Small label',hl:'Highlighted words',n:'Number / value',l:'Label',i:'Icon',g:'Grade / group',s:'Chips',p:'Paragraphs',q:'Qualification',r:'Rating / role',m:'Class range',by:'By',y:'Year',d:'Date (YYYY-MM-DD)',c:'Colour / category',a:'Age',pre:'Heading',sub:'Sub text',btn:'Button text',n:'Name / number',photo:'Photo',photos:'Photos',k:'Photo',cat:'Category',msg:'Message',accent:'Accent colour',social:'Social links',facebook:'Facebook link',instagram:'Instagram link',youtube:'YouTube link',size:'File type / size',badge:'Badge',happy:'Happy parents text',name:'Name',nameHi:'School name (Hindi)',shortName:'Short name',phone:'Phone',whatsapp:'WhatsApp number',email:'Email',address:'Address',addressHi:'Address (Hindi)',mapEmbed:'Map embed link'})[key]||key;
+ if(key==='f'&&typeof v==='string'){const fi=h('input',{type:'file',accept:'.pdf,.doc,.docx,.jpg,.png',hidden:''}),st=h('span',{class:'mu',text:v||'No file'});fi.onchange=()=>{const f=fi.files[0];if(!f)return;if(f.size>5*1024*1024){toast('File is larger than 5 MB',1);return}const r=new FileReader();r.onload=()=>{const nm='uploads/f'+Date.now()+'-'+f.name.replace(/[^\w.-]/g,'_');ST.pf[nm]=r.result;obj[key]=nm;st.textContent=nm};r.readAsDataURL(f)};const b=h('button',{type:'button',class:'sb',text:'📎 Upload file'});b.onclick=()=>fi.click();const c=h('button',{type:'button',class:'sb',text:'✕'});c.onclick=()=>{obj[key]='';st.textContent='No file'};return h('div',{class:'sf'},[h('label',{text:'File (PDF)'}),h('div',{class:'sf-bt'},[b,c,fi]),st])}
  if(IMGK.includes(key)&&typeof v==='string')return imgField(label,()=>obj[key],x=>obj[key]=x);
  if(key==='photos'&&Array.isArray(v))return h('div',{class:'sf grp'},[h('label',{text:label}),...v.map((_,i)=>imgField('#'+(i+1),()=>v[i],x=>v[i]=x))]);
  if(isBi(v)){const mk=l=>{const long=(v[l]||'').length>60||key==='message'||key==='a'||key==='x',e=h(long?'textarea':'input',long?{rows:3}:{type:'text'});e.value=v[l]||'';e.oninput=()=>v[l]=e.value;return h('div',{class:'bi'},[h('span',{text:l==='hi'?'हिं':'EN'}),e])};return h('div',{class:'sf'},[h('label',{text:label}),mk('hi'),mk('en')])}
@@ -111,10 +112,11 @@ async function publish(){
   const strs=new Set(['group','class3','smart','girlsclass','twoboys','kids']);(function w(o){if(typeof o==='string')strs.add(o);else if(o&&typeof o==='object')Object.values(o).forEach(w)})(SITE);
   const used=new Set();strs.forEach(k=>{const v=out.PH[k]!==undefined?out.PH[k]:PH[k];if(/^uploads\//.test(v||''))used.add(v);if(/^uploads\//.test(k))used.add(k)});
   Object.keys(out.PH).forEach(k=>{if(/^u\d+$/.test(k)&&!strs.has(k))delete out.PH[k]});
+  {const ref=JSON.stringify(SITE);for(const nm of Object.keys(ST.pf)){if(ref.includes(nm)){await put(nm,ST.pf[nm].split(',')[1],'Studio: file '+nm)}}}
   await put('content/site.json',b64(JSON.stringify(out,null,1)),'Studio: website content update',old&&old.sha);
   let gone=0;
   try{const r=await gh('/repos/'+ST.repo+'/contents/uploads?t='+Date.now());if(r.ok){const fl=await r.json();for(const f of fl){if(/^u\d+\.jpg$/.test(f.name)&&!used.has('uploads/'+f.name)){const d=await gh('/repos/'+ST.repo+'/contents/'+f.path,{method:'DELETE',body:JSON.stringify({message:'Studio: remove unused photo '+f.name,sha:f.sha})});if(d.ok)gone++}}}}catch(e){}
-  ST.dS.clear();ST.dP.clear();ST.dC.clear();ST.rs.clear();upd();toast('✅ Published! The live site will update in 1-2 minutes.'+(gone?' Removed '+gone+' unused photo(s).':''));
+  ST.pf={};ST.dS.clear();ST.dP.clear();ST.dC.clear();ST.rs.clear();upd();toast('✅ Published! The live site will update in 1-2 minutes.'+(gone?' Removed '+gone+' unused photo(s).':''));
  }catch(e){toast('Publish failed: '+e.message,1);upd()}
 }
 async function cleanHistory(){
