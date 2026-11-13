@@ -105,8 +105,14 @@ async function publish(){
   for(const k of ST.dP){const v=PH[k];if(/^data:image\//.test(v)){const path='uploads/'+k+'.jpg';await put(path,v.split(',')[1],'Studio: photo '+k);out.PH[k]=path}else out.PH[k]=v}
   ST.dS.forEach(k=>out.SITE[k]=SITE[k]);ST.dC.forEach(k=>out.CFG[k]=CFG[k]);
   // keep only photos still referenced? keep all (small)
+  // drop photo keys no longer used anywhere on the site (only studio-made keys u<digits>)
+  const strs=new Set(['group','class3','smart','girlsclass','twoboys','kids']);(function w(o){if(typeof o==='string')strs.add(o);else if(o&&typeof o==='object')Object.values(o).forEach(w)})(SITE);
+  const used=new Set();strs.forEach(k=>{const v=out.PH[k]!==undefined?out.PH[k]:PH[k];if(/^uploads\//.test(v||''))used.add(v);if(/^uploads\//.test(k))used.add(k)});
+  Object.keys(out.PH).forEach(k=>{if(/^u\d+$/.test(k)&&!strs.has(k))delete out.PH[k]});
   await put('content/site.json',b64(JSON.stringify(out,null,1)),'Studio: website content update',old&&old.sha);
-  ST.dS.clear();ST.dP.clear();ST.dC.clear();upd();toast('✅ Published! The live site will update in 1-2 minutes.');
+  let gone=0;
+  try{const r=await gh('/repos/'+ST.repo+'/contents/uploads?t='+Date.now());if(r.ok){const fl=await r.json();for(const f of fl){if(/^u\d+\.jpg$/.test(f.name)&&!used.has('uploads/'+f.name)){const d=await gh('/repos/'+ST.repo+'/contents/'+f.path,{method:'DELETE',body:JSON.stringify({message:'Studio: remove unused photo '+f.name,sha:f.sha})});if(d.ok)gone++}}}}catch(e){}
+  ST.dS.clear();ST.dP.clear();ST.dC.clear();upd();toast('✅ Published! The live site will update in 1-2 minutes.'+(gone?' Removed '+gone+' unused photo(s).':''));
  }catch(e){toast('Publish failed: '+e.message,1);upd()}
 }
 async function login(){
