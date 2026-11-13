@@ -1,6 +1,7 @@
 // Hidden Website Studio: edits site content visually, publishes to GitHub as content/site.json (+ uploads/*.jpg)
 (()=>{
-const ST={repo:'',tok:'',dS:new Set(),dP:new Set(),dC:new Set()};
+const ST={repo:'',tok:'',br:'main',dS:new Set(),dP:new Set(),dC:new Set(),rs:new Set()};
+let DEF={};
 const q=(s,r)=>(r||document).querySelector(s),qa=(s,r)=>[...(r||document).querySelectorAll(s)];
 const h=(t,a,c)=>{const e=document.createElement(t);for(const k in a||{})k==='class'?e.className=a[k]:k==='text'?e.textContent=a[k]:e.setAttribute(k,a[k]);(c||[]).forEach(x=>e.append(x));return e};
 const isBi=o=>o&&typeof o==='object'&&!Array.isArray(o)&&'hi' in o&&'en' in o&&Object.keys(o).length===2;
@@ -56,6 +57,7 @@ function editor(path,only){
  if(Array.isArray(work))form.append(arr(work,path.split('.').pop(),ctx));
  else{const keys=only?only.split(','):Object.keys(work);keys.filter(k=>k in work).forEach(k=>form.append(field(work,k,ctx)))}
  const ov=h('div',{class:'smd'}),close=()=>ov.remove();
+ const rb=h('button',{class:'pill ghost',type:'button',text:'↺ Reset to default'});rb.onclick=()=>{if(rt==='CFG'||!DEF[rt]){toast('Nothing to reset here',1);return}if(!confirm('Reset the whole "'+rt+'" section to its original default?'))return;SITE[rt]=clone(DEF[rt]);ST.dS.add(rt);ST.rs.add(rt);close();render();upd()};
  const sv=h('button',{class:'pill orange',type:'button',text:'Apply'}),cn=h('button',{class:'pill ghost',type:'button',text:'Cancel'});
  cn.onclick=close;
  sv.onclick=()=>{
@@ -63,7 +65,7 @@ function editor(path,only){
   else{(only?only.split(','):Object.keys(work)).forEach(k=>{if(k in work)tgt[k]=work[k]})}
   if(rt==='CFG'){(only?only.split(','):Object.keys(work)).forEach(k=>ST.dC.add(k))}else ST.dS.add(rt);
   close();render();upd()};
- ov.append(h('div',{class:'sbx'},[h('div',{class:'sh2'},[h('b',{text:'✏️ Edit'}),h('small',{text:path})]),form,h('div',{class:'sact'},[cn,sv])]));
+ ov.append(h('div',{class:'sbx'},[h('div',{class:'sh2'},[h('b',{text:'✏️ Edit'}),h('small',{text:path})]),form,h('div',{class:'sact'},[rb,cn,sv])]));
  document.body.append(ov);
 }
 // ---------- overlay on rendered site ----------
@@ -88,8 +90,8 @@ function go(p){document.body.dataset.page=p;render();scrollTo(0,0);qa('.sbar .ta
 function bar(){
  const sb=h('div',{class:'sbar'},[h('b',{text:'✏️ Website Studio'}),h('div',{class:'tabsb'},PGS.map(p=>{const t=h('button',{class:'tab'+(p[0]===document.body.dataset.page?' on':''),type:'button',text:p[1]});t.dataset.p=p[0];t.onclick=()=>go(p[0]);return t})),
   h('span',{class:'sp'}),h('button',{class:'pill sm ghost',type:'button',text:'Exit',id:'sx'})]);
- document.body.prepend(sb);document.body.append(h('div',{class:'pubbar'},[h('span',{id:'pubn',class:'pubn'}),h('button',{id:'spub',class:'pill orange',type:'button',text:'Publish',disabled:''})]));
- q('#spub').onclick=publish;q('#sx').onclick=()=>{if((ST.dS.size+ST.dP.size+ST.dC.size)&&!confirm('You have unsaved changes. Exit?'))return;sessionStorage.removeItem('st_tok');localStorage.removeItem('st_tok');location.href='index.html'};
+ document.body.prepend(sb);document.body.append(h('div',{class:'pubbar'},[h('span',{id:'pubn',class:'pubn'}),h('button',{id:'shist',class:'pill sm ghost',type:'button',text:'Clean history'}),h('button',{id:'spub',class:'pill orange',type:'button',text:'Publish',disabled:''})]));
+ q('#spub').onclick=publish;q('#shist').onclick=cleanHistory;q('#sx').onclick=()=>{if((ST.dS.size+ST.dP.size+ST.dC.size)&&!confirm('You have unsaved changes. Exit?'))return;sessionStorage.removeItem('st_tok');localStorage.removeItem('st_tok');location.href='index.html'};
  document.addEventListener('click',e=>{const a=e.target.closest('a');if(!a||e.target.closest('.sbar'))return;e.preventDefault();const f=(a.getAttribute('href')||'').split('/').pop();const m=PGS.find(p=>p[2]===f);if(m)go(m[0])},true);
  window.addEventListener('beforeunload',e=>{if(ST.dS.size+ST.dP.size+ST.dC.size){e.preventDefault();e.returnValue=''}});
 }
@@ -103,7 +105,7 @@ async function publish(){
   toast('Publishing…');
   let old=await getFile('content/site.json'),out=old?JSON.parse(old.text):{};out.SITE=out.SITE||{};out.PH=out.PH||{};out.CFG=out.CFG||{};
   for(const k of ST.dP){const v=PH[k];if(/^data:image\//.test(v)){const path='uploads/'+k+'.jpg';await put(path,v.split(',')[1],'Studio: photo '+k);out.PH[k]=path}else out.PH[k]=v}
-  ST.dS.forEach(k=>out.SITE[k]=SITE[k]);ST.dC.forEach(k=>out.CFG[k]=CFG[k]);
+  ST.dS.forEach(k=>{if(ST.rs.has(k))delete out.SITE[k];else out.SITE[k]=SITE[k]});ST.dC.forEach(k=>out.CFG[k]=CFG[k]);
   // keep only photos still referenced? keep all (small)
   // drop photo keys no longer used anywhere on the site (only studio-made keys u<digits>)
   const strs=new Set(['group','class3','smart','girlsclass','twoboys','kids']);(function w(o){if(typeof o==='string')strs.add(o);else if(o&&typeof o==='object')Object.values(o).forEach(w)})(SITE);
@@ -112,8 +114,21 @@ async function publish(){
   await put('content/site.json',b64(JSON.stringify(out,null,1)),'Studio: website content update',old&&old.sha);
   let gone=0;
   try{const r=await gh('/repos/'+ST.repo+'/contents/uploads?t='+Date.now());if(r.ok){const fl=await r.json();for(const f of fl){if(/^u\d+\.jpg$/.test(f.name)&&!used.has('uploads/'+f.name)){const d=await gh('/repos/'+ST.repo+'/contents/'+f.path,{method:'DELETE',body:JSON.stringify({message:'Studio: remove unused photo '+f.name,sha:f.sha})});if(d.ok)gone++}}}}catch(e){}
-  ST.dS.clear();ST.dP.clear();ST.dC.clear();upd();toast('✅ Published! The live site will update in 1-2 minutes.'+(gone?' Removed '+gone+' unused photo(s).':''));
+  ST.dS.clear();ST.dP.clear();ST.dC.clear();ST.rs.clear();upd();toast('✅ Published! The live site will update in 1-2 minutes.'+(gone?' Removed '+gone+' unused photo(s).':''));
  }catch(e){toast('Publish failed: '+e.message,1);upd()}
+}
+async function cleanHistory(){
+ if((ST.dS.size+ST.dP.size+ST.dC.size)){toast('Publish your changes first',1);return}
+ if(!confirm('Clean history?\n\nThis replaces the WHOLE repository history with one single commit. Old versions of text, photos and code can no longer be restored from GitHub. The website itself stays exactly as it is.'))return;
+ if(prompt('Type CLEAN to confirm')!=='CLEAN')return;
+ try{toast('Cleaning history…');
+  const rf=await gh('/repos/'+ST.repo+'/git/ref/heads/'+ST.br);if(!rf.ok)throw new Error('branch not found');const sha=(await rf.json()).object.sha;
+  const cm=await (await gh('/repos/'+ST.repo+'/git/commits/'+sha)).json();
+  const nc=await gh('/repos/'+ST.repo+'/git/commits',{method:'POST',body:JSON.stringify({message:'Clean history (single commit)',tree:cm.tree.sha,parents:[]})});if(!nc.ok)throw new Error('commit failed '+nc.status);
+  const nsha=(await nc.json()).sha;
+  const up=await gh('/repos/'+ST.repo+'/git/refs/heads/'+ST.br,{method:'PATCH',body:JSON.stringify({sha:nsha,force:true})});if(!up.ok){const j=await up.json().catch(()=>({}));throw new Error(j.message||('GitHub '+up.status))}
+  toast('✅ History cleaned. Only one commit remains.');
+ }catch(e){toast('Clean failed: '+e.message,1)}
 }
 async function login(){
  const ov=h('div',{class:'smd lg'}),guess=(location.hostname.split('.')[0]||'')+'/'+(location.pathname.split('/')[1]||'');
@@ -123,11 +138,11 @@ async function login(){
   h('details',{},[h('summary',{text:'How to create a token?'}),h('p',{class:'mu',text:'GitHub → Settings → Developer settings → Personal access tokens → Fine-grained → Generate. Repository access: only this school repo. Permissions: Contents = Read and write. Set the expiry as you like.'})])]));
  document.body.append(ov);
  return new Promise(res=>{go_.onclick=async()=>{er.textContent='';ST.repo=rp.value.trim();ST.tok=tk.value.trim();if(!/^[\w.-]+\/[\w.-]+$/.test(ST.repo)||!ST.tok){er.textContent='Enter both repo and token';return}
-  go_.disabled=true;try{const r=await gh('/repos/'+ST.repo);if(!r.ok)throw new Error(r.status===401?'The token is wrong':r.status===404?'Repo not found / the token has no access':'GitHub '+r.status);const j=await r.json();if(!j.permissions||!j.permissions.push)throw new Error('This token needs write permission (Contents: Read and write)');
+  go_.disabled=true;try{const r=await gh('/repos/'+ST.repo);if(!r.ok)throw new Error(r.status===401?'The token is wrong':r.status===404?'Repo not found / the token has no access':'GitHub '+r.status);const j=await r.json();ST.br=j.default_branch||'main';if(!j.permissions||!j.permissions.push)throw new Error('This token needs write permission (Contents: Read and write)');
    sessionStorage.setItem('st_tok',ST.tok);localStorage.setItem('st_repo',ST.repo);rm.checked?localStorage.setItem('st_tok',ST.tok):localStorage.removeItem('st_tok');ov.remove();res()}catch(e){er.textContent=e.message;go_.disabled=false}}});
 }
 (async()=>{
- await login();bar();
+ await login();bar();DEF=clone(SITE);
  try{const f=await getFile('content/site.json');if(f)applyOv(JSON.parse(f.text))}catch(e){toast('Could not load saved content: '+e.message,1)}
  render();upd();
 })();
