@@ -21,3 +21,6 @@ index, about, academics, facilities, admission, gallery, contact .html — each 
 
 ## Website Studio (hidden editor)
 `studio.html` (noindex, no link anywhere) — enter `owner/repo` + GitHub fine-grained token (Contents: Read and write, only this repo). Opens a live clone of the website; every card has ✏️ (edit text hi/en, icon, colour, photo upload/URL), 🗑 (delete), "＋ Naya add karo". Publish commits `content/site.json` (+ `uploads/*.jpg`) to GitHub; the public site merges that file over `site-data.js` at load. Logic: `assets/js/studio.js`, style `assets/css/studio.css`; renderer hooks `data-e` / `data-ea` attributes in `site.js`.
+
+## Language (Hindi / English, one at a time)
+`assets/js/lang.js` (loaded on every panel page, login, receipt, report card, studio) maps every visible phrase to clean English or Hindi at runtime (text, placeholders, alert/confirm/prompt, server messages). New UI text: add one line `[source, hindi]` (or `[source, english, hindi]` if the source is Hinglish) to the list in lang.js. Website text lives bilingual in `site-data.js` / `site.js` (`b(hi,en)`); school name/address: `CFG.name`/`CFG.nameHi`, `CFG.address`/`CFG.addressHi`. Typed data (student names etc.) is shown as entered.

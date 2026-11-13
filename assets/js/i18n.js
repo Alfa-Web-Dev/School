@@ -7,3 +7,4 @@ function applyI18n(){document.documentElement.lang=getLang();
  document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(e.dataset.i));
  document.querySelectorAll('[data-ph]').forEach(e=>e.placeholder=t(e.dataset.ph))}
 function setLang(l){localStorage.setItem('sp_lang',l);applyI18n()}
+const SN=()=>getLang()==='hi'&&CFG.nameHi?CFG.nameHi:CFG.name,SA=()=>getLang()==='hi'&&CFG.addressHi?CFG.addressHi:CFG.address;

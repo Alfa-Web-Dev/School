@@ -1,7 +1,7 @@
 // Printable report card: reportcard.html?exam=E001 (student apna) | ?exam=E001&student=S001 | ?exam=E001&all=1 (admin / class teacher)
 const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function cardHtml(r){const s=r.student,x=r.exam;
- return '<div class="rcpt rcard"><div class="rh"><h2>'+E(CFG.name)+'</h2><div class="mu">'+E(CFG.address)+' · '+E(CFG.phone)+'</div><h3>REPORT CARD · '+E(x.title)+'</h3></div>'
+ return '<div class="rcpt rcard"><div class="rh"><h2>'+E(SN())+'</h2><div class="mu">'+E(SA())+' · '+E(CFG.phone)+'</div><h3>REPORT CARD · '+E(x.title)+'</h3></div>'
   +'<table class="rt"><tr><td class="mu">Student</td><td><b>'+E(s.name)+'</b></td><td class="mu">Class</td><td><b>'+E(s.className)+'</b></td></tr>'
   +'<tr><td class="mu">ID / Adm no</td><td><b>'+E(s.studentId)+(s.admNo?' / '+E(s.admNo):'')+'</b></td><td class="mu">Roll no</td><td><b>'+E(s.roll)+'</b></td></tr>'
   +'<tr><td class="mu">Parent</td><td><b>'+E(s.parentName)+'</b></td><td class="mu">Exam date</td><td><b>'+E(x.date)+'</b></td></tr></table>'

@@ -1,15 +1,18 @@
 // Phase 10: Certificates (Bonafide, TC, Character) + ID cards. ui.js, qr.js ke baad load hota hai.
 const E2=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const hdr=t=>'<div class="rh"><h2>'+E2(CFG.name)+'</h2><div class="mu">'+E2(CFG.address)+' · '+E2(CFG.phone)+'</div><h3>'+t+'</h3></div>';
-const heshe=g=>g==='F'?['She','her','daughter']:['He','his','son'];
+const hdr=t=>'<div class="rh"><h2>'+E2(SN())+'</h2><div class="mu">'+E2(SA())+' · '+E2(CFG.phone)+'</div><h3>'+t+'</h3></div>';
+const heshe=g=>g==='F'?['She','her','daughter']:['He','his','son'],H=()=>getLang()==='hi';
 const sig=()=>'<div class="sig"><span>Class teacher</span><span>Principal / Seal</span></div>';
 function certHtml(type,r,x){const s=r.student,[he,his,child]=heshe(s.gender),meta='<div class="cmeta"><span>Ref: '+r.ref+'</span><span>Date: '+r.date+'</span></div>',
- who='<b>'+E2(s.name)+'</b>, '+child+' of <b>'+E2(s.parentName||'-')+'</b>',dob=s.dob?' (Date of birth: '+E2(s.dob)+')':'',adm=s.admNo?' (Admission no: '+E2(s.admNo)+')':'';
+ who='<b>'+E2(s.name)+'</b>, '+(H()?(s.gender==='F'?'पुत्री':'पुत्र'):child)+' '+(H()?'':'of ')+'<b>'+E2(s.parentName||'-')+'</b>',dob=s.dob?(H()?' (जन्म तिथि: ':' (Date of birth: ')+E2(s.dob)+')':'',adm=s.admNo?(H()?' (प्रवेश संख्या: ':' (Admission no: ')+E2(s.admNo)+')':'';
+ const hs=s.gender==='F'?'छात्रा':'छात्र';
+ if(H()&&type==='bonafide')return hdr('BONAFIDE CERTIFICATE')+meta+'<p class="cbody">प्रमाणित किया जाता है कि '+who+dob+' इस विद्यालय का/की नियमित '+hs+' है'+(r.year?' और सत्र <b>'+E2(r.year)+'</b> में':' और')+' कक्षा <b>'+E2(s.className)+'</b> में अध्ययनरत है'+adm+'।'+(x.purpose?' यह प्रमाण पत्र <b>'+E2(x.purpose)+'</b> के लिए जारी किया गया है।':'')+'</p>'+sig();
+ if(H()&&type==='character')return hdr('CHARACTER CERTIFICATE')+meta+'<p class="cbody">प्रमाणित किया जाता है कि '+who+dob+' ने इस विद्यालय में कक्षा <b>'+E2(s.className)+'</b> में अध्ययन किया है'+adm+'। हमारी जानकारी के अनुसार उसका चरित्र अच्छा है और उसका आचरण <b>'+E2(x.conduct||'अच्छा')+'</b> रहा है।</p>'+sig();
  if(type==='bonafide')return hdr('BONAFIDE CERTIFICATE')+meta+'<p class="cbody">This is to certify that '+who+dob+' is a bonafide student of this school, studying in <b>'+E2(s.className)+'</b>'+(r.year?' during the session <b>'+E2(r.year)+'</b>':'')+adm+'.'+(x.purpose?' This certificate is issued for <b>'+E2(x.purpose)+'</b>.':'')+'</p>'+sig();
  if(type==='character')return hdr('CHARACTER CERTIFICATE')+meta+'<p class="cbody">This is to certify that '+who+dob+' has studied in this school in <b>'+E2(s.className)+'</b>'+adm+'. To the best of our knowledge, '+he.toLowerCase()+' bears a good moral character and '+his+' conduct has been <b>'+E2(x.conduct||'Good')+'</b>.</p>'+sig();
  const row=(a,b)=>'<tr><td class="mu">'+a+'</td><td><b>'+E2(b||'-')+'</b></td></tr>';
  return hdr('TRANSFER CERTIFICATE')+meta+'<table class="rt">'+row('Student name',s.name)+row('Admission no',s.admNo||s.studentId)+row("Father's / Guardian's name",s.parentName)+row('Date of birth',s.dob)+row('Class last studied',s.className)
-  +row('Date of leaving',x.leaveDate)+row('Reason for leaving',x.reason)+row('Conduct',x.conduct||'Good')+row('Fees paid up to date',x.feesPaid||'Yes')+row('Remarks',x.remarks)+'</table>'+sig()}
+  +row('Date of leaving',x.leaveDate)+row('Reason for leaving',x.reason)+row('Conduct',x.conduct||(H()?'अच्छा':'Good'))+row('Fees paid up to date',x.feesPaid||(H()?'हाँ':'Yes'))+row('Remarks',x.remarks)+'</table>'+sig()}
 
 async function initCerts(){
  const m=$('#main');m.innerHTML='';const ls=await call('listStudents'),st=ls.students,cl=ls.classes,out=el('div',{id:'cert'});
@@ -29,5 +32,5 @@ async function initCerts(){
 function idCards(sel,all,out){
  const cid=sel.value,cname=sel.selectedOptions[0]?sel.selectedOptions[0].text:cid,rows=all.filter(s=>String(s.classId)===cid&&String(s.status).toLowerCase()==='active');
  if(!rows.length){toast('Is class mein student nahi',1);return}
- out.innerHTML='<div class="idgrid">'+rows.map(s=>'<div class="idc"><div class="idh" style="background:'+E2(CFG.color)+'">'+E2(CFG.shortName||CFG.name)+'<small>'+E2(CFG.name)+'</small></div><div class="idb"><div class="idq">'+(typeof qrSvg==='function'?qrSvg(String(s.studentId),84):'')+'</div><div><b>'+E2(s.name)+'</b><br>ID: '+E2(s.studentId)+'<br>Class: '+E2(cname)+(s.roll?' · Roll '+E2(s.roll):'')+'<br>Parent: '+E2(s.parentName)+'<br>Ph: '+E2(s.parentPhone)+'</div></div><div class="idf">'+E2(CFG.phone)+'</div></div>').join('')+'</div>';
+ out.innerHTML='<div class="idgrid">'+rows.map(s=>'<div class="idc"><div class="idh" style="background:'+E2(CFG.color)+'">'+E2(CFG.shortName||SN())+'<small>'+E2(SN())+'</small></div><div class="idb"><div class="idq">'+(typeof qrSvg==='function'?qrSvg(String(s.studentId),84):'')+'</div><div><b>'+E2(s.name)+'</b><br>ID: '+E2(s.studentId)+'<br>Class: '+E2(cname)+(s.roll?' · Roll '+E2(s.roll):'')+'<br>Parent: '+E2(s.parentName)+'<br>Ph: '+E2(s.parentPhone)+'</div></div><div class="idf">'+E2(CFG.phone)+'</div></div>').join('')+'</div>';
  out.append(btn('Print / Save as PDF',()=>window.print()))}

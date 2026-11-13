@@ -5,11 +5,11 @@
 <label data-i="uid"></label><input name="uid" required>
 <label data-i="pw"></label><input name="secret" type="password" required>
 <button data-i="go"></button><button type="button" class="g" id="lang"></button><div id="m"></div><p style="text-align:center;margin:14px 0 0"><a href="index.html" data-i="website" style="color:var(--c);text-decoration:none;font-weight:600"></a></p></form>
-<script src="config.js"></script><script src="assets/js/i18n.js"></script><script src="assets/js/i18n-extra.js"></script><script src="assets/js/api.js"></script>
+<script src="config.js"></script><script src="assets/js/i18n.js"></script><script src="assets/js/i18n-extra.js"></script><script src="assets/js/lang.js"></script><script src="assets/js/api.js"></script>
 <script>
 const f=document.getElementById('f'),m=document.getElementById('m'),lb=document.getElementById('lang');
 const paint=()=>{applyI18n();lb.textContent=t('lang')};
-document.getElementById('sn').textContent=CFG.name;paint();
+document.getElementById('sn').textContent=SN();paint();
 lb.onclick=()=>{setLang(getLang()==='hi'?'en':'hi');paint()};
 f.onsubmit=async e=>{e.preventDefault();m.textContent=t('wait');
  try{const r=await api('login',{role:f.role.value,id:f.uid.value,secret:f.secret.value});

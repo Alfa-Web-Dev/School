@@ -11,7 +11,7 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 const b64=s=>btoa(unescape(encodeURIComponent(s)));
 const IMGK=['photo','k'];
 let toastT;const toast=(m,bad)=>{let t=q('#stt');if(!t){t=h('div',{id:'stt',class:'stt'});document.body.append(t)}t.textContent=m;t.className='stt show'+(bad?' bad':'');clearTimeout(toastT);toastT=setTimeout(()=>t.className='stt',bad?6000:3500)};
-const upd=()=>{const n=ST.dS.size+ST.dP.size+ST.dC.size;const b=q('#spub');if(b){b.textContent=n?'Publish ('+n+')':'Publish';b.disabled=!n;const pn=q('#pubn');if(pn)pn.textContent=n?n+' unsaved change(s)':'Sab saved hai'}};
+const upd=()=>{const n=ST.dS.size+ST.dP.size+ST.dC.size;const b=q('#spub');if(b){b.textContent=n?'Publish ('+n+')':'Publish';b.disabled=!n;const pn=q('#pubn');if(pn)pn.textContent=n?n+' unsaved change(s)':'All saved'}};
 
 // ---------- image helpers ----------
 const thumb=v=>PH[v]!==undefined?U(v,300):pu(v,300);
@@ -19,15 +19,15 @@ function resize(file,max){return new Promise((res,rej)=>{const r=new FileReader(
 function imgField(label,get,set){
  const img=h('img',{class:'sf-th',alt:''}),setImg=()=>{const v=get();img.src=v?thumb(v):'';img.style.visibility=v?'visible':'hidden'};
  const fi=h('input',{type:'file',accept:'image/*',hidden:''});
- fi.onchange=async()=>{if(!fi.files[0])return;try{const d=await resize(fi.files[0],1400),k='u'+Date.now()+Math.floor(Math.random()*99);PH[k]=d;ST.dP.add(k);set(k);setImg()}catch(e){toast('Photo load nahi hui',1)}};
- const up=h('button',{type:'button',class:'sb',text:'📷 Photo badlo'});up.onclick=()=>fi.click();
+ fi.onchange=async()=>{if(!fi.files[0])return;try{const d=await resize(fi.files[0],1400),k='u'+Date.now()+Math.floor(Math.random()*99);PH[k]=d;ST.dP.add(k);set(k);setImg()}catch(e){toast('Could not load the photo',1)}};
+ const up=h('button',{type:'button',class:'sb',text:'📷 Change photo'});up.onclick=()=>fi.click();
  const ur=h('button',{type:'button',class:'sb',text:'🔗 Image URL'});ur.onclick=()=>{const u=prompt('https:// image link');if(u&&/^https:\/\//.test(u)){const k='u'+Date.now()+Math.floor(Math.random()*99);PH[k]=u.trim();ST.dP.add(k);set(k);setImg()}};
- const cl=h('button',{type:'button',class:'sb',text:'✕'});cl.title='Photo hatao';cl.onclick=()=>{set('');setImg()};
+ const cl=h('button',{type:'button',class:'sb',text:'✕'});cl.title='Remove photo';cl.onclick=()=>{set('');setImg()};
  setImg();return h('div',{class:'sf'},[h('label',{text:label}),h('div',{class:'sf-im'},[img,h('div',{class:'sf-bt'},[up,ur,cl,fi])])]);
 }
 // ---------- generic form ----------
 function field(obj,key,ctx){
- const v=obj[key],label=({t:'Title',x:'Text',e:'Small label',hl:'Highlighted words',n:'Number / value',l:'Label',i:'Icon',g:'Grade / group',s:'Chips',p:'Paragraphs',q:'Qualification',r:'Rating / role',m:'Class range',by:'By',y:'Year',d:'Date (YYYY-MM-DD)',c:'Colour / category',a:'Age',pre:'Heading',sub:'Sub text',btn:'Button text',n:'Name / number',photo:'Photo',photos:'Photos',k:'Photo',cat:'Category',msg:'Message',q_:''})[key]||key;
+ const v=obj[key],label=({t:'Title',x:'Text',e:'Small label',hl:'Highlighted words',n:'Number / value',l:'Label',i:'Icon',g:'Grade / group',s:'Chips',p:'Paragraphs',q:'Qualification',r:'Rating / role',m:'Class range',by:'By',y:'Year',d:'Date (YYYY-MM-DD)',c:'Colour / category',a:'Age',pre:'Heading',sub:'Sub text',btn:'Button text',n:'Name / number',photo:'Photo',photos:'Photos',k:'Photo',cat:'Category',msg:'Message',badge:'Badge',happy:'Happy parents text',name:'Name',nameHi:'School name (Hindi)',shortName:'Short name',phone:'Phone',whatsapp:'WhatsApp number',email:'Email',address:'Address',addressHi:'Address (Hindi)',mapEmbed:'Map embed link'})[key]||key;
  if(IMGK.includes(key)&&typeof v==='string')return imgField(label,()=>obj[key],x=>obj[key]=x);
  if(key==='photos'&&Array.isArray(v))return h('div',{class:'sf grp'},[h('label',{text:label}),...v.map((_,i)=>imgField('#'+(i+1),()=>v[i],x=>v[i]=x))]);
  if(isBi(v)){const mk=l=>{const long=(v[l]||'').length>60||key==='message'||key==='a'||key==='x',e=h(long?'textarea':'input',long?{rows:3}:{type:'text'});e.value=v[l]||'';e.oninput=()=>v[l]=e.value;return h('div',{class:'bi'},[h('span',{text:l==='hi'?'हिं':'EN'}),e])};return h('div',{class:'sf'},[h('label',{text:label}),mk('hi'),mk('en')])}
@@ -73,11 +73,11 @@ function afterRender(){
   const [path,only]=el.dataset.e.split('|');
   const b=h('button',{class:'ed',type:'button',title:'Edit',text:'✏️'});b.onclick=e=>{e.stopPropagation();e.preventDefault();editor(path,only)};const host=el.tagName==='DETAILS'?q('summary',el):el;host.append(b);
   const par=parentOf(path),last=path.split('.').pop();
-  if(Array.isArray(par)&&/^\d+$/.test(last)){const d=h('button',{class:'ed del',type:'button',title:'Delete',text:'🗑'});d.onclick=e=>{e.stopPropagation();e.preventDefault();if(!confirm('Yeh item delete karein?'))return;par.splice(+last,1);ST.dS.add(path.split('.')[0]);render();upd()};host.append(d)}
+  if(Array.isArray(par)&&/^\d+$/.test(last)){const d=h('button',{class:'ed del',type:'button',title:'Delete',text:'🗑'});d.onclick=e=>{e.stopPropagation();e.preventDefault();if(!confirm('Delete this item?'))return;par.splice(+last,1);ST.dS.add(path.split('.')[0]);render();upd()};host.append(d)}
  });
  qa('[data-ea]').forEach(el=>{
   const path=el.dataset.ea,a=getAt(path);if(!Array.isArray(a))return;
-  const b=h('button',{class:'addb',type:'button',text:'＋ Naya add karo'});
+  const b=h('button',{class:'addb',type:'button',text:'＋ Add new'});
   b.onclick=()=>{if(!a.length)return;a.push(clone(a[a.length-1]));ST.dS.add(path.split('.')[0]);render();upd();editor(path+'.'+(a.length-1))};
   el.classList.contains('panel')?el.append(b):el.insertAdjacentElement('afterend',b)});
 }
@@ -89,7 +89,7 @@ function bar(){
  const sb=h('div',{class:'sbar'},[h('b',{text:'✏️ Website Studio'}),h('div',{class:'tabsb'},PGS.map(p=>{const t=h('button',{class:'tab'+(p[0]===document.body.dataset.page?' on':''),type:'button',text:p[1]});t.dataset.p=p[0];t.onclick=()=>go(p[0]);return t})),
   h('span',{class:'sp'}),h('button',{class:'pill sm ghost',type:'button',text:'Exit',id:'sx'})]);
  document.body.prepend(sb);document.body.append(h('div',{class:'pubbar'},[h('span',{id:'pubn',class:'pubn'}),h('button',{id:'spub',class:'pill orange',type:'button',text:'Publish',disabled:''})]));
- q('#spub').onclick=publish;q('#sx').onclick=()=>{if((ST.dS.size+ST.dP.size+ST.dC.size)&&!confirm('Unsaved changes hain. Exit?'))return;sessionStorage.removeItem('st_tok');localStorage.removeItem('st_tok');location.href='index.html'};
+ q('#spub').onclick=publish;q('#sx').onclick=()=>{if((ST.dS.size+ST.dP.size+ST.dC.size)&&!confirm('You have unsaved changes. Exit?'))return;sessionStorage.removeItem('st_tok');localStorage.removeItem('st_tok');location.href='index.html'};
  document.addEventListener('click',e=>{const a=e.target.closest('a');if(!a||e.target.closest('.sbar'))return;e.preventDefault();const f=(a.getAttribute('href')||'').split('/').pop();const m=PGS.find(p=>p[2]===f);if(m)go(m[0])},true);
  window.addEventListener('beforeunload',e=>{if(ST.dS.size+ST.dP.size+ST.dC.size){e.preventDefault();e.returnValue=''}});
 }
@@ -100,29 +100,29 @@ async function put(p,content,msg,sha){const r=await gh('/repos/'+ST.repo+'/conte
 async function publish(){
  const btn=q('#spub');btn.disabled=true;
  try{
-  toast('Publish ho raha hai…');
+  toast('Publishing…');
   let old=await getFile('content/site.json'),out=old?JSON.parse(old.text):{};out.SITE=out.SITE||{};out.PH=out.PH||{};out.CFG=out.CFG||{};
   for(const k of ST.dP){const v=PH[k];if(/^data:image\//.test(v)){const path='uploads/'+k+'.jpg';await put(path,v.split(',')[1],'Studio: photo '+k);out.PH[k]=path}else out.PH[k]=v}
   ST.dS.forEach(k=>out.SITE[k]=SITE[k]);ST.dC.forEach(k=>out.CFG[k]=CFG[k]);
   // keep only photos still referenced? keep all (small)
   await put('content/site.json',b64(JSON.stringify(out,null,1)),'Studio: website content update',old&&old.sha);
-  ST.dS.clear();ST.dP.clear();ST.dC.clear();upd();toast('✅ Publish ho gaya! Live site 1-2 minute me update hogi.');
- }catch(e){toast('Publish fail: '+e.message,1);upd()}
+  ST.dS.clear();ST.dP.clear();ST.dC.clear();upd();toast('✅ Published! The live site will update in 1-2 minutes.');
+ }catch(e){toast('Publish failed: '+e.message,1);upd()}
 }
 async function login(){
  const ov=h('div',{class:'smd lg'}),guess=(location.hostname.split('.')[0]||'')+'/'+(location.pathname.split('/')[1]||'');
  const rp=h('input',{type:'text',placeholder:'owner/repo',value:localStorage.getItem('st_repo')||guess}),tk=h('input',{type:'password',placeholder:'GitHub token (github_pat_…)',autocomplete:'off'}),rm=h('input',{type:'checkbox'}),er=h('div',{class:'em'}),go_=h('button',{class:'pill solid',type:'button',text:'Open Studio'});
  const saved=sessionStorage.getItem('st_tok')||localStorage.getItem('st_tok');if(saved)tk.value=saved;
- ov.append(h('div',{class:'sbx narrow'},[h('h3',{text:'🔒 Website Studio'}),h('p',{class:'mu',text:'Sirf website admin ke liye. Token sirf is browser me rahega.'}),h('label',{text:'Repository'}),rp,h('label',{text:'GitHub token'}),tk,h('label',{class:'ck'},[rm,document.createTextNode(' Is device par yaad rakho')]),er,go_,
-  h('details',{},[h('summary',{text:'Token kaise banayein?'}),h('p',{class:'mu',text:'GitHub → Settings → Developer settings → Personal access tokens → Fine-grained → Generate. Repository access: sirf yeh school repo. Permissions: Contents = Read and write. Expiry apni marzi se.'})])]));
+ ov.append(h('div',{class:'sbx narrow'},[h('h3',{text:'🔒 Website Studio'}),h('p',{class:'mu',text:'For the website admin only. The token stays only in this browser.'}),h('label',{text:'Repository'}),rp,h('label',{text:'GitHub token'}),tk,h('label',{class:'ck'},[rm,document.createTextNode(' Remember on this device')]),er,go_,
+  h('details',{},[h('summary',{text:'How to create a token?'}),h('p',{class:'mu',text:'GitHub → Settings → Developer settings → Personal access tokens → Fine-grained → Generate. Repository access: only this school repo. Permissions: Contents = Read and write. Set the expiry as you like.'})])]));
  document.body.append(ov);
- return new Promise(res=>{go_.onclick=async()=>{er.textContent='';ST.repo=rp.value.trim();ST.tok=tk.value.trim();if(!/^[\w.-]+\/[\w.-]+$/.test(ST.repo)||!ST.tok){er.textContent='Repo aur token dono bharein';return}
-  go_.disabled=true;try{const r=await gh('/repos/'+ST.repo);if(!r.ok)throw new Error(r.status===401?'Token galat hai':r.status===404?'Repo nahi mila / token ko access nahi':'GitHub '+r.status);const j=await r.json();if(!j.permissions||!j.permissions.push)throw new Error('Is token ko write (Contents: Read and write) permission chahiye');
+ return new Promise(res=>{go_.onclick=async()=>{er.textContent='';ST.repo=rp.value.trim();ST.tok=tk.value.trim();if(!/^[\w.-]+\/[\w.-]+$/.test(ST.repo)||!ST.tok){er.textContent='Enter both repo and token';return}
+  go_.disabled=true;try{const r=await gh('/repos/'+ST.repo);if(!r.ok)throw new Error(r.status===401?'The token is wrong':r.status===404?'Repo not found / the token has no access':'GitHub '+r.status);const j=await r.json();if(!j.permissions||!j.permissions.push)throw new Error('This token needs write permission (Contents: Read and write)');
    sessionStorage.setItem('st_tok',ST.tok);localStorage.setItem('st_repo',ST.repo);rm.checked?localStorage.setItem('st_tok',ST.tok):localStorage.removeItem('st_tok');ov.remove();res()}catch(e){er.textContent=e.message;go_.disabled=false}}});
 }
 (async()=>{
  await login();bar();
- try{const f=await getFile('content/site.json');if(f)applyOv(JSON.parse(f.text))}catch(e){toast('Saved content load nahi hua: '+e.message,1)}
+ try{const f=await getFile('content/site.json');if(f)applyOv(JSON.parse(f.text))}catch(e){toast('Could not load saved content: '+e.message,1)}
  render();upd();
 })();
 })();
