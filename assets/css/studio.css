@@ -24,3 +24,4 @@ body.studio{padding-top:54px}.studio .nav{top:54px}.studio .wa{display:none}
 .smd.lg .sbx{margin-top:10vh}.sbx details{margin-top:14px;font-size:14px}.sbx summary{cursor:pointer;font-weight:600}.sbx .pill{width:100%}
 summary{position:relative}summary .ed{top:50%;margin-top:-17px;right:44px}summary .ed.del{right:84px}
 .pubbar{position:fixed;left:0;right:0;bottom:0;z-index:210;background:#000;border-top:2px solid var(--o);display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom))}.pubn{color:#cfcfd8;font-size:14px}body.studio{padding-bottom:70px}.stt{bottom:84px}
+.rst{margin-left:auto;width:34px;height:34px;border-radius:50%;border:1.5px solid #e9e6df;background:#fff;font-size:17px;cursor:pointer;line-height:1}.rst:hover{background:#f6f3ee}

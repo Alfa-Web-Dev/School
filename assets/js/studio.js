@@ -28,9 +28,9 @@ function imgField(label,get,set){
 }
 // ---------- generic form ----------
 function field(obj,key,ctx){
- const v=obj[key],label=({t:'Title',x:'Text',e:'Small label',hl:'Highlighted words',n:'Number / value',l:'Label',i:'Icon',g:'Grade / group',s:'Chips',p:'Paragraphs',q:'Qualification',r:'Rating / role',m:'Class range',by:'By',y:'Year',d:'Date (YYYY-MM-DD)',c:'Colour / category',a:'Age',pre:'Heading',sub:'Sub text',btn:'Button text',n:'Name / number',photo:'Photo',photos:'Photos',k:'Photo',cat:'Category',msg:'Message',accent:'Accent colour',social:'Social links',facebook:'Facebook link',instagram:'Instagram link',youtube:'YouTube link',size:'File type / size',badge:'Badge',happy:'Happy parents text',name:'Name',nameHi:'School name (Hindi)',shortName:'Short name',phone:'Phone',whatsapp:'WhatsApp number',email:'Email',address:'Address',addressHi:'Address (Hindi)',mapEmbed:'Map embed link'})[key]||key;
+ const v=obj[key],label=({t:'Title',x:'Text',e:'Small label',hl:'Highlighted words',n:'Number / value',l:'Label',i:'Icon',g:'Grade / group',s:'Chips',p:'Paragraphs',q:'Qualification',r:'Rating / role',m:'Class range',by:'By',y:'Year',d:'Date (YYYY-MM-DD)',c:'Card colour',c2:'Card colour',a:'Age',pre:'Heading',sub:'Sub text',btn:'Button text',n:'Name / number',photo:'Photo',photos:'Photos',k:'Photo',cat:'Category',msg:'Message',accent:'Accent colour',social:'Social links',facebook:'Facebook link',instagram:'Instagram link',youtube:'YouTube link',size:'File type / size',badge:'Badge',happy:'Happy parents text',name:'Name',nameHi:'School name (Hindi)',shortName:'Short name',phone:'Phone',whatsapp:'WhatsApp number',email:'Email',address:'Address',addressHi:'Address (Hindi)',mapEmbed:'Map embed link'})[key]||key;
  if(key==='f'&&typeof v==='string'){const fi=h('input',{type:'file',accept:'.pdf,.doc,.docx,.jpg,.png',hidden:''}),st=h('span',{class:'mu',text:v||'No file'});fi.onchange=()=>{const f=fi.files[0];if(!f)return;if(f.size>5*1024*1024){toast('File is larger than 5 MB',1);return}const r=new FileReader();r.onload=()=>{const nm='uploads/f'+Date.now()+'-'+f.name.replace(/[^\w.-]/g,'_');ST.pf[nm]=r.result;obj[key]=nm;st.textContent=nm};r.readAsDataURL(f)};const b=h('button',{type:'button',class:'sb',text:'📎 Upload file'});b.onclick=()=>fi.click();const c=h('button',{type:'button',class:'sb',text:'✕'});c.onclick=()=>{obj[key]='';st.textContent='No file'};return h('div',{class:'sf'},[h('label',{text:'File (PDF)'}),h('div',{class:'sf-bt'},[b,c,fi]),st])}
- if(IMGK.includes(key)&&typeof v==='string')return imgField(label,()=>obj[key],x=>obj[key]=x);
+ if(IMGK.includes(key)&&typeof v==='string'&&!/^#/.test(v))return imgField(label,()=>obj[key],x=>obj[key]=x);
  if(key==='photos'&&Array.isArray(v))return h('div',{class:'sf grp'},[h('label',{text:label}),...v.map((_,i)=>imgField('#'+(i+1),()=>v[i],x=>v[i]=x))]);
  if(isBi(v)){const mk=l=>{const long=(v[l]||'').length>60||key==='message'||key==='a'||key==='x',e=h(long?'textarea':'input',long?{rows:3}:{type:'text'});e.value=v[l]||'';e.oninput=()=>v[l]=e.value;return h('div',{class:'bi'},[h('span',{text:l==='hi'?'हिं':'EN'}),e])};return h('div',{class:'sf'},[h('label',{text:label}),mk('hi'),mk('en')])}
  if(typeof v==='string'||typeof v==='number'){
@@ -53,12 +53,12 @@ function arr(a,label,ctx){
 function editor(path,only){
  const tgt=getAt(path);if(tgt==null)return;
  const work=clone(tgt),rt=path.split('.')[0],ctx={root:rt};
- if(!only||only.split(',').includes('c')||true){const m=path.match(/^(staff|method|notices|events)\.(\d+)$/),PS=['#fde2ef','#d7f5ee','#ffe9a8','#e4d9ff','#d6e6ff','#ffe0cc','#d4f5d9','#fff0bd'];if(m&&!work.c)work.c=PS[(+m[2]+(m[1]==='events'?3:0))%8];if(path==='banner'&&!work.c)work.c='#ffe3c8'}
+ if(!only||only.split(',').includes('c')||true){const m=path.match(/^(staff|method|notices|events)\.(\d+)$/),mr=path.match(/^results\.items\.(\d+)$/),ml=path.match(/^(levels|facilities)\.items\.(\d+)$/),PS=['#fde2ef','#d7f5ee','#ffe9a8','#e4d9ff','#d6e6ff','#ffe0cc','#d4f5d9','#fff0bd'];if(m&&!work.c)work.c=PS[(+m[2]+(m[1]==='events'?3:0))%8];if(path==='banner'&&!work.c)work.c='#ffe3c8';if(mr&&!work.c2)work.c2=['#f5b301','#a8b0ba','#c97b3d'][+mr[1]]||'#111111';if(ml&&!work.c)work.c='#111111'}
  const form=h('div',{class:'sfm'});
  if(Array.isArray(work))form.append(arr(work,path.split('.').pop(),ctx));
  else{const keys=only?only.split(','):Object.keys(work);keys.filter(k=>k in work).forEach(k=>form.append(field(work,k,ctx)))}
  const ov=h('div',{class:'smd'}),close=()=>ov.remove();
- const rb=h('button',{class:'pill ghost',type:'button',text:'↺ Reset to default'});rb.onclick=()=>{if(rt==='CFG'||!DEF[rt]){toast('Nothing to reset here',1);return}if(!confirm('Reset the whole "'+rt+'" section to its original default?'))return;SITE[rt]=clone(DEF[rt]);ST.dS.add(rt);ST.rs.add(rt);close();render();upd()};
+ const rb=h('button',{class:'rst',type:'button',text:'↺',title:'Reset section to default'});rb.onclick=()=>{if(rt==='CFG'||!DEF[rt]){toast('Nothing to reset here',1);return}if(!confirm('Reset the whole "'+rt+'" section to its original default?'))return;SITE[rt]=clone(DEF[rt]);ST.dS.add(rt);ST.rs.add(rt);close();render();upd()};
  const sv=h('button',{class:'pill orange',type:'button',text:'Apply'}),cn=h('button',{class:'pill ghost',type:'button',text:'Cancel'});
  cn.onclick=close;
  sv.onclick=()=>{
@@ -66,7 +66,7 @@ function editor(path,only){
   else{(only?only.split(','):Object.keys(work)).forEach(k=>{if(k in work)tgt[k]=work[k]})}
   if(rt==='CFG'){(only?only.split(','):Object.keys(work)).forEach(k=>ST.dC.add(k))}else ST.dS.add(rt);
   close();render();upd()};
- ov.append(h('div',{class:'sbx'},[h('div',{class:'sh2'},[h('b',{text:'✏️ Edit'}),h('small',{text:path})]),form,h('div',{class:'sact'},[rb,cn,sv])]));
+ ov.append(h('div',{class:'sbx'},[h('div',{class:'sh2'},[h('b',{text:'✏️ Edit'}),h('small',{text:path}),rb]),form,h('div',{class:'sact'},[cn,sv])]));
  document.body.append(ov);
 }
 // ---------- overlay on rendered site ----------
