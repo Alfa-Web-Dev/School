@@ -252,3 +252,9 @@ html[data-alt] .mt-gen,html[data-alt] .mfp-gen{--a:#7c4dff}
 html[data-alt] .mfp-rev .mfa{background:transparent}
 html[data-alt] .dk .eyebrow,html[data-alt] .dk .tm small,html[data-alt] .tb .dot,html[data-alt] footer h5,html[data-alt] .tm .q{color:var(--o2)}
 html[data-alt] .bn em{color:var(--o)}
+
+/* language chooser card (slides down from top, auto-hides) */
+.ltc{position:fixed;top:12px;left:50%;transform:translate(-50%,-140%);z-index:1000;display:flex;align-items:center;gap:10px;background:#fff;color:#16161a;border-radius:99px;padding:8px 10px 8px 14px;box-shadow:0 12px 36px rgba(0,0,0,.25);border:1px solid rgba(0,0,0,.08);transition:transform .4s cubic-bezier(.2,.8,.2,1);max-width:calc(100% - 24px);font-size:14px}
+.ltc.show{transform:translate(-50%,0)}.ltc .lti{width:20px;height:20px;display:grid;place-items:center;flex:none}.ltc .lti svg{width:20px;height:20px;stroke:var(--o);fill:none}.ltc b{font-weight:700;white-space:nowrap}
+.ltc button{border:1.5px solid #e1ddd3;background:#fff;border-radius:99px;padding:6px 14px;font:inherit;font-weight:700;cursor:pointer;color:#16161a}.ltc button.on{background:#111;border-color:#111;color:#fff}.ltc button.x{border:0;font-size:20px;line-height:1;padding:2px 8px;color:#777}
+@media(max-width:420px){.ltc b{display:none}}
