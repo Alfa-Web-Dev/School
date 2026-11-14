@@ -152,3 +152,4 @@ body.pub,body.app,body.rbody{place-items:normal;justify-items:normal;align-items
 @media(max-width:700px){.grid:has(>.stat){grid-template-columns:repeat(2,1fr)}.card.stat{padding:16px}.card.stat .big{font-size:26px}nav a.on{min-width:76px}}
 #inst{width:auto;height:38px;margin:0;padding:0 14px;font-size:13px;border-radius:999px;background:var(--c);color:var(--cx);border:0}#inst[hidden]{display:none!important}
 @media(max-width:380px){#inst{padding:0 10px}}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:8px 0}.chk input{width:auto;margin-top:3px}

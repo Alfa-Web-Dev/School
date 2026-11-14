@@ -24,3 +24,8 @@ index, about, academics, facilities, admission, gallery, contact .html — each 
 
 ## Language (Hindi / English, one at a time)
 `assets/js/lang.js` (loaded on every panel page, login, receipt, report card, studio) maps every visible phrase to clean English or Hindi at runtime (text, placeholders, alert/confirm/prompt, server messages). New UI text: add one line `[source, hindi]` (or `[source, english, hindi]` if the source is Hinglish) to the list in lang.js. Website text lives bilingual in `site-data.js` / `site.js` (`b(hi,en)`); school name/address: `CFG.name`/`CFG.nameHi`, `CFG.address`/`CFG.addressHi`. Typed data (student names etc.) is shown as entered.
+
+## Public Library (website `library.html`)
+- Files stay in **Google Drive** only (never in this repo). Teacher/admin upload a note in the panel; ticking *"Website ki Library mein public dikhao"* + *"content apna/allowed hai"* sets `public=yes` in the `Notes` sheet (11th column, auto-added on old sheets).
+- Website calls the public Apps Script action `publicNotes` (no login, 10-min cache, returns only title/chapter/class/subject/date/type/size/fileId). Cards open `drive.google.com/file/d/<id>/view`.
+- Teacher can switch any note Public ON/OFF later (`setNotePublic`). Private notes are never listed.

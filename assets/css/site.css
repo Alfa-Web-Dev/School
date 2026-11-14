@@ -162,3 +162,13 @@ footer{margin-top:60px;padding:36px 0 0}.fg{grid-template-columns:1.5fr 1fr 1.3f
 .fbar{margin-top:26px;padding:16px 0 84px}
 @media(max-width:900px){.fg{grid-template-columns:1fr 1fr}.fg>div:first-child{grid-column:1/-1}}@media(max-width:560px){.fg{grid-template-columns:minmax(0,1fr);gap:20px}}
 .stp .it{padding:22px 20px}
+
+/* Library (public notes from Drive) */
+.lbf{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:22px}.lbf input,.lbf select{width:100%;padding:12px 14px;border:1px solid rgba(0,0,0,.15);border-radius:12px;background:#fff;font:inherit;font-size:15px;min-width:0}
+.lbg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}.lbm{color:#555;font-size:14px;grid-column:1/-1}
+.lbc{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.07);display:flex;flex-direction:column}
+.lbt{height:110px;display:flex;align-items:center;justify-content:center;gap:10px;color:#111}.lbt .ic{width:40px;height:40px;background:#fff}.lbt b{font-size:15px;letter-spacing:.05em}
+.lbb{padding:16px;display:flex;flex-direction:column;gap:4px;flex:1}.lbb h3{font-size:17px;margin:0;overflow-wrap:anywhere}.lbb p{margin:0;font-size:14px;font-weight:600}.lbb small{color:#666;font-size:12.5px}
+.lbx{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:12px}
+@media(max-width:640px){.lbf{grid-template-columns:1fr 1fr}.lbf input{grid-column:1/-1}}
+.lbt .ic{color:#111;border-radius:12px;display:grid;place-items:center}.lbt .ic svg{width:24px;height:24px;stroke:#111;fill:none}

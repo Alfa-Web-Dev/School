@@ -5,6 +5,12 @@
 const D=[
 // ---- common
 ["Install app","ऐप इंस्टॉल करें"],["Error","त्रुटि"],["Cancel","रद्द करें"],["Save","सहेजें"],["Copy","कॉपी करें"],["Copied","कॉपी हो गया"],["OK","ठीक है"],["Close","बंद करें"],["Download","डाउनलोड"],["View","देखें"],["Open","खोलें"],["Edit","संपादित करें"],["Delete","हटाएँ"],["Confirm","पुष्टि करें"],["Loading...","लोड हो रहा है..."],["Dashboard","डैशबोर्ड"],["Report Card","रिपोर्ट कार्ड"],["Not allowed","अनुमति नहीं है"],
+// ---- public library
+["Website ki Library mein public dikhao (sab dekh sakte hain)","Show in the website Library (public)","वेबसाइट की लाइब्रेरी में सार्वजनिक दिखाएँ"],
+["Yeh content mera apna ya use karne ki permission hai (copyright)","This content is my own or I have permission to use it (copyright)","यह सामग्री मेरी अपनी है या इसके उपयोग की अनुमति है (कॉपीराइट)"],
+["Public karne ke liye \"content apna / allowed hai\" tick karo","Tick \"content is my own / allowed\" to make it public","सार्वजनिक करने के लिए \"सामग्री अपनी / अनुमत है\" टिक करें"],
+["Public: ON","Public: ON","सार्वजनिक: चालू"],["Public: OFF","Public: OFF","सार्वजनिक: बंद"],
+["Yeh note website par sabko dikhega. Kya yeh content aapka apna ya allowed hai?","This note will be visible to everyone on the website. Is this content your own or allowed?","यह नोट वेबसाइट पर सबको दिखेगा। क्या यह सामग्री आपकी अपनी या अनुमत है?"],
 [" zaruri hai"," is required"," आवश्यक है"],
 ["Yeh sirf abhi dikh raha hai. Copy karke student/parent ko de do.","This is shown only now. Copy it and give it to the student/parent.","यह सिर्फ़ अभी दिख रहा है। कॉपी करके छात्र/अभिभावक को दे दें।"],
 ["Copy nahi hua","Copy failed","कॉपी नहीं हुआ"],["Kuch nahi mila","Nothing found","कुछ नहीं मिला"],

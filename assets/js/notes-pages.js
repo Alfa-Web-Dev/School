@@ -40,19 +40,19 @@ async function initNotesMgr2(){   // admin + teacher
  const m=page('n_notes'),o=await call('noteOptions');
  if(!o.classes.length){m.append(el('p',{class:'mu'},'Abhi koi class assign nahi hai'));return}
  const cs=el('select',{},o.classes.map(c=>el('option',{value:c.classId},c.name))),ss=el('select'),ch=el('input',{placeholder:'Chapter (jaise: Ch 1 - Numbers)'}),ti=el('input',{placeholder:'Title (jaise: Chapter 1 notes)'}),
-  fi=el('input',{type:'file',accept:'application/pdf,image/jpeg,image/png,image/webp'}),msg=el('div',{class:'err'}),go=el('button',{type:'button'},'Upload');
+  fi=el('input',{type:'file',accept:'application/pdf,image/jpeg,image/png,image/webp'}),msg=el('div',{class:'err'}),go=el('button',{type:'button'},'Upload'),pb=el('input',{type:'checkbox'}),ob=el('input',{type:'checkbox'});
  const fillSub=()=>{const c=o.classes.find(x=>x.classId===cs.value);ss.innerHTML='';(c?c.subjects:[]).forEach(s=>ss.append(el('option',{value:s.subjectId},s.name)))};fillSub();
  cs.onchange=()=>{fillSub();fc.value=cs.value;load()};
  go.onclick=async()=>{msg.style.color='';msg.textContent='';go.disabled=true;
-  try{if(!fi.files[0])throw new Error('File chuno');if(!ss.value)throw new Error('Is class mein aapka koi subject nahi hai');
+  try{if(!fi.files[0])throw new Error('File chuno');if(!ss.value)throw new Error('Is class mein aapka koi subject nahi hai');if(pb.checked&&!ob.checked)throw new Error('Public karne ke liye "content apna / allowed hai" tick karo');
    msg.textContent='Upload ho raha hai... (badi file mein thoda time lagta hai, page band mat karo)';
-   const f=await prepNote(fi.files[0]);await call('uploadNote',{classId:cs.value,subjectId:ss.value,chapter:ch.value,title:ti.value,mime:f.mime,data:f.data});
+   const f=await prepNote(fi.files[0]);await call('uploadNote',{classId:cs.value,subjectId:ss.value,chapter:ch.value,title:ti.value,mime:f.mime,data:f.data,isPublic:pb.checked,original:ob.checked});
    toast('Notes upload ho gaye');ti.value='';fi.value='';msg.textContent='';await load()}
   catch(e){msg.style.color='';msg.textContent=e.message}go.disabled=false};
- m.append(el('div',{class:'card',style:'max-width:520px'},el('h3',{style:'margin-top:0'},'Naye notes upload karo'),el('label',{},'Class'),cs,el('label',{},'Subject'),ss,el('label',{},'Chapter'),ch,el('label',{},'Title'),ti,el('label',{},'File (PDF ya photo, max 20 MB)'),fi,go,msg));
+ m.append(el('div',{class:'card',style:'max-width:520px'},el('h3',{style:'margin-top:0'},'Naye notes upload karo'),el('label',{},'Class'),cs,el('label',{},'Subject'),ss,el('label',{},'Chapter'),ch,el('label',{},'Title'),ti,el('label',{},'File (PDF ya photo, max 20 MB)'),fi,el('label',{class:'chk'},pb,' Website ki Library mein public dikhao (sab dekh sakte hain)'),el('label',{class:'chk'},ob,' Yeh content mera apna ya use karne ki permission hai (copyright)'),go,msg));
  const fc=el('select',{},o.classes.map(c=>el('option',{value:c.classId},c.name))),q=el('input',{placeholder:'Search title / chapter'}),list=el('div');let all=[];
  m.append(el('h3',{},'Upload kiye hue notes'),el('div',{class:'bar'},fc,q),list);
- const act=n=>n.editable?[btn('Edit',()=>formModal('Edit notes',[{k:'title',l:'Title',req:1},{k:'chapter',l:'Chapter',req:1}],n,async v=>{await call('updateNote',{noteId:n.noteId,title:v.title,chapter:v.chapter});await load()})),
+ const act=n=>n.editable?[btn(n.isPublic?'Public: ON':'Public: OFF',async()=>{if(!n.isPublic&&!confirm('Yeh note website par sabko dikhega. Kya yeh content aapka apna ya allowed hai?'))return;await call('setNotePublic',{noteId:n.noteId,on:!n.isPublic,original:true});await load()}),btn('Edit',()=>formModal('Edit notes',[{k:'title',l:'Title',req:1},{k:'chapter',l:'Chapter',req:1}],n,async v=>{await call('updateNote',{noteId:n.noteId,title:v.title,chapter:v.chapter});await load()})),
   btn('Delete',async()=>{if(confirm('"'+n.title+'" delete karein? File Drive ke trash mein jayegi.')){await call('deleteNote',{noteId:n.noteId});await load()}})]:[];
  const draw=()=>{const t=q.value.toLowerCase();noteGroups(list,all.filter(n=>!t||(n.title+' '+n.chapter).toLowerCase().includes(t)),act)};
  async function load(){all=(await call('listNotes',{classId:fc.value})).notes;draw()}
