@@ -167,7 +167,23 @@ function doPost(e){
  }catch(err){return out({ok:false,error:'Server error'})}}
 
 // action -> function ka naam. Naye features yahin jodo.
-const ROUTES={noteOptions:'noteOptions',listNotes:'listNotes',uploadNote:'uploadNote',updateNote:'updateNote',deleteNote:'deleteNote',uploadNote:'uploadNote',listNotes:'listNotes',updateNote:'updateNote',deleteNote:'deleteNote',noteSubjects:'noteSubjects',deleteFee:'deleteFee',studentFees:'studentFees',voidPayment:'voidPayment',getReceipt:'getReceipt',defaulters:'defaulters',getMarks:'getMarks',deleteAssignment:'deleteAssignment',deleteLesson:'deleteLesson',deleteClassNotice:'deleteClassNotice',teacherHome:'teacherHome',resetSecret:'resetSecret',myDashboard:'myDashboard',myProfile:'myProfile',myAttendance:'myAttendance',myFees:'myFees',myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',saveClass:'saveClass',listSubjects:'listSubjects',saveSubject:'saveSubject',listLessons:'listLessons',saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',issueCertificate:'issueCertificate',adminExams:'adminExams',deleteExam:'deleteExam',reportCard:'reportCard',saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',backupNow:'backupNow'};
+const ROUTES={
+ noteOptions:'noteOptions',listNotes:'listNotes',uploadNote:'uploadNote',updateNote:'updateNote',
+ deleteNote:'deleteNote',deleteFee:'deleteFee',studentFees:'studentFees',voidPayment:'voidPayment',
+ getReceipt:'getReceipt',defaulters:'defaulters',getMarks:'getMarks',deleteAssignment:'deleteAssignment',
+ deleteLesson:'deleteLesson',deleteClassNotice:'deleteClassNotice',teacherHome:'teacherHome',resetSecret:'resetSecret',
+ myDashboard:'myDashboard',myProfile:'myProfile',myAttendance:'myAttendance',myFees:'myFees',
+ myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',
+ changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',
+ promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',
+ saveClass:'saveClass',saveSubject:'saveSubject',listLessons:'listLessons',
+ saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',
+ markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',
+ saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',
+ issueCertificate:'issueCertificate',adminExams:'adminExams',deleteExam:'deleteExam',reportCard:'reportCard',
+ saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',
+ listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',
+ backupNow:'backupNow'};
 
 // Student portal (Phase 3): student sirf apni hi data dekh sakta hai. changeSecret sab roles ke liye.
 const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],TZ='Asia/Kolkata';
@@ -359,7 +375,6 @@ function teacherHome(b){
 function listClasses(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return{ok:true,classes:table('Classes').rows.map(c=>strip(c,[])),subjects:table('Subjects').rows.map(c=>strip(c,[]))}}
-function listSubjects(b){return listClasses(b)}
 
 function saveClass(b){
  const s=guard(b,['admin']);if(!s)return DENIED;

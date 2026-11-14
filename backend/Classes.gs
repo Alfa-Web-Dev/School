@@ -2,7 +2,6 @@
 function listClasses(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return{ok:true,classes:table('Classes').rows.map(c=>strip(c,[])),subjects:table('Subjects').rows.map(c=>strip(c,[]))}}
-function listSubjects(b){return listClasses(b)}
 
 function saveClass(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
