@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /teacher/
+Disallow: /student/
+Sitemap: https://alfa-web-dev.github.io/School/sitemap.xml

@@ -1,0 +1,624 @@
+{
+ "SITE": {
+  "staff": [
+   {
+    "name": "Sunita Sharma",
+    "role": {
+     "hi": "प्रधानाध्यापिका",
+     "en": "Head teacher"
+    },
+    "q": "M.A., B.Ed.",
+    "photo": "teacher"
+   },
+   {
+    "name": "Amit Verma",
+    "role": {
+     "hi": "विज्ञान शिक्षक",
+     "en": "Science teacher"
+    },
+    "q": "M.Sc., B.Ed.",
+    "photo": "labteach"
+   },
+   {
+    "name": "Neha Gupta",
+    "role": {
+     "hi": "कला शिक्षिका",
+     "en": "Art teacher"
+    },
+    "q": "B.F.A.",
+    "photo": ""
+   },
+   {
+    "name": "Rahul Singh",
+    "role": {
+     "hi": "खेल प्रशिक्षक",
+     "en": "Sports coach"
+    },
+    "q": "B.P.Ed.",
+    "photo": ""
+   },
+   {
+    "name": "Pooja Yadav",
+    "role": {
+     "hi": "संगीत शिक्षिका",
+     "en": "Music teacher"
+    },
+    "q": "M.A. Music",
+    "photo": ""
+   },
+   {
+    "name": "Rohit Kumar",
+    "role": {
+     "hi": "कंप्यूटर शिक्षक",
+     "en": "Computer teacher"
+    },
+    "q": "MCA",
+    "photo": ""
+   },
+   {
+    "name": "Anil Mishra",
+    "role": {
+     "hi": "गणित शिक्षक",
+     "en": "Maths teacher"
+    },
+    "q": "M.Sc., B.Ed.",
+    "photo": ""
+   },
+   {
+    "name": "Kavita Joshi",
+    "role": {
+     "hi": "हिंदी शिक्षिका",
+     "en": "Hindi teacher"
+    },
+    "q": "M.A., B.Ed.",
+    "photo": ""
+   },
+   {
+    "name": "Kavita Joshi",
+    "role": {
+     "hi": "हिंदी शिक्षिका",
+     "en": "Hindi teacher"
+    },
+    "q": "M.A., B.Ed.",
+    "photo": ""
+   }
+  ],
+  "mvv": [
+   {
+    "i": "star",
+    "t": {
+     "hi": "हमारा मिशन",
+     "en": "Our mission"
+    },
+    "x": {
+     "hi": "हर बच्चे को आत्मविश्वासी, जिज्ञासु और ज़िम्मेदार नागरिक बनाना।",
+     "en": "To make every child a confident, curious and responsible citizen."
+    },
+    "c": "#ffe9a8"
+   },
+   {
+    "i": "globe",
+    "t": {
+     "hi": "हमारी दृष्टि",
+     "en": "Our vision"
+    },
+    "x": {
+     "hi": "ऐसा स्कूल जहाँ परंपरा और आधुनिक तकनीक साथ चलें और हर प्रतिभा को मंच मिले।",
+     "en": "A school where tradition and modern technology go together and every talent finds a stage."
+    },
+    "c": "#d7f5ee"
+   },
+   {
+    "i": "award",
+    "t": {
+     "hi": "हमारे मूल्य",
+     "en": "Our values"
+    },
+    "x": {
+     "hi": "अनुशासन, ईमानदारी, सम्मान, मेहनत और सबके प्रति दया।",
+     "en": "Discipline, honesty, respect, hard work and kindness towards all."
+    },
+    "c": "#fde2ef"
+   },
+   {
+    "i": "award",
+    "t": {
+     "hi": "हमारे मूल्य",
+     "en": "Our values"
+    },
+    "x": {
+     "hi": "अनुशासन, ईमानदारी, सम्मान, मेहनत और सबके प्रति दया।",
+     "en": "Discipline, honesty, respect, hard work and kindness towards all."
+    },
+    "c": "#e3d1d1"
+   }
+  ],
+  "milestones": [
+   {
+    "y": "2001",
+    "t": {
+     "hi": "स्कूल की स्थापना",
+     "en": "School founded"
+    },
+    "x": {
+     "hi": "30 बच्चों और 4 शिक्षकों के साथ शुरुआत।",
+     "en": "Started with 30 children and 4 teachers."
+    }
+   },
+   {
+    "y": "2008",
+    "t": {
+     "hi": "नया भवन",
+     "en": "New building"
+    },
+    "x": {
+     "hi": "बड़ा परिसर, पुस्तकालय और खेल का मैदान।",
+     "en": "Bigger campus, library and playground."
+    }
+   },
+   {
+    "y": "2015",
+    "t": {
+     "hi": "स्मार्ट क्लास",
+     "en": "Smart classes"
+    },
+    "x": {
+     "hi": "डिजिटल शिक्षण और कंप्यूटर लैब की शुरुआत।",
+     "en": "Digital learning and computer lab introduced."
+    }
+   },
+   {
+    "y": "2020",
+    "t": {
+     "hi": "ऑनलाइन पोर्टल",
+     "en": "Online portal"
+    },
+    "x": {
+     "hi": "अभिभावकों के लिए मोबाइल पोर्टल।",
+     "en": "A mobile portal for parents."
+    }
+   },
+   {
+    "y": "2025",
+    "t": {
+     "hi": "1000+ छात्र",
+     "en": "1000+ students"
+    },
+    "x": {
+     "hi": "एक हज़ार से अधिक बच्चों का परिवार।",
+     "en": "A family of over a thousand children."
+    }
+   },
+   {
+    "y": "2025",
+    "t": {
+     "hi": "1000+ छात्र",
+     "en": "1000+ students"
+    },
+    "x": {
+     "hi": "एक हज़ार से अधिक बच्चों का परिवार।",
+     "en": "Hi"
+    }
+   }
+  ],
+  "documents": [
+   {
+    "hi": "जन्म प्रमाण पत्र",
+    "en": "Birth certificate"
+   },
+   {
+    "hi": "पिछली कक्षा की रिपोर्ट कार्ड / TC",
+    "en": "Previous report card / TC"
+   },
+   {
+    "hi": "आधार कार्ड (बच्चा और अभिभावक)",
+    "en": "Aadhaar card (child & parent)"
+   },
+   {
+    "hi": "4 पासपोर्ट साइज़ फ़ोटो",
+    "en": "4 passport-size photos"
+   },
+   {
+    "hi": "निवास प्रमाण",
+    "en": "Address proof"
+   },
+   {
+    "hi": "Mother and father Aadhaar card ",
+    "en": "Mother and father Aadhaar card "
+   }
+  ],
+  "hero": {
+   "pre": {
+    "hi": "सर्वश्रेष्ठ शिक्षा,",
+    "en": "World-class learning,"
+   },
+   "hl": {
+    "hi": "उज्ज्वल भविष्य",
+    "en": "brighter future"
+   },
+   "sub": {
+    "hi": "अनुभवी शिक्षक, आधुनिक कक्षाएँ और हर बच्चे पर व्यक्तिगत ध्यान — जहाँ सीखना आसान और मज़ेदार है।",
+    "en": "Experienced teachers, modern classrooms and personal attention for every child — where learning is easy and fun."
+   },
+   "badge": {
+    "hi": "नया सत्र 2026-27 के लिए प्रवेश जारी",
+    "en": "Admissions open for 2026-27"
+   },
+   "happy": {
+    "hi": "2,000+ खुश अभिभावक",
+    "en": "2,000+ happy parents"
+   },
+   "photos": [
+    "class1",
+    "girls",
+    "boyBook",
+    "u179452630418030"
+   ]
+  },
+  "programs": {
+   "title": {
+    "hi": "हमारे ख़ास कार्यक्रम",
+    "en": "Explore featured programs"
+   },
+   "e": {
+    "hi": "ख़ास",
+    "en": "Featured"
+   },
+   "cats": [
+    {
+     "hi": "सभी",
+     "en": "All"
+    },
+    {
+     "hi": "पढ़ाई",
+     "en": "Academics"
+    },
+    {
+     "hi": "खेल",
+     "en": "Sports"
+    },
+    {
+     "hi": "कला",
+     "en": "Arts"
+    },
+    {
+     "hi": "स्किल",
+     "en": "Skills"
+    }
+   ],
+   "items": [
+    {
+     "cat": 1,
+     "t": {
+      "hi": "स्मार्ट क्लास शिक्षा",
+      "en": "Smart class learning"
+     },
+     "by": "Sunita Sharma",
+     "r": "4.9",
+     "m": {
+      "hi": "कक्षा 1-8",
+      "en": "Class 1-8"
+     },
+     "icon": "book",
+     "photo": "smart"
+    },
+    {
+     "cat": 1,
+     "t": {
+      "hi": "विज्ञान प्रयोगशाला",
+      "en": "Science laboratory"
+     },
+     "by": "Amit Verma",
+     "r": "4.8",
+     "m": {
+      "hi": "कक्षा 6-10",
+      "en": "Class 6-10"
+     },
+     "icon": "flask",
+     "photo": "labgirl"
+    },
+    {
+     "cat": 2,
+     "t": {
+      "hi": "क्रिकेट और फुटबॉल कोचिंग",
+      "en": "Cricket & football coaching"
+     },
+     "by": "Rahul Singh",
+     "r": "4.9",
+     "m": {
+      "hi": "हर शाम",
+      "en": "Every evening"
+     },
+     "icon": "ball",
+     "photo": "football"
+    },
+    {
+     "cat": 3,
+     "t": {
+      "hi": "चित्रकला कार्यशाला",
+      "en": "Art workshop"
+     },
+     "by": "Neha Gupta",
+     "r": "4.7",
+     "m": {
+      "hi": "सप्ताह में 2 दिन",
+      "en": "2 days a week"
+     },
+     "icon": "brush",
+     "photo": "boyBook"
+    },
+    {
+     "cat": 4,
+     "t": {
+      "hi": "कंप्यूटर और कोडिंग",
+      "en": "Computer & coding"
+     },
+     "by": "Rohit Kumar",
+     "r": "4.8",
+     "m": {
+      "hi": "कक्षा 3-10",
+      "en": "Class 3-10"
+     },
+     "icon": "pc",
+     "photo": "pc"
+    },
+    {
+     "cat": 3,
+     "t": {
+      "hi": "संगीत एवं नृत्य",
+      "en": "Music & dance"
+     },
+     "by": "Pooja Yadav",
+     "r": "4.9",
+     "m": {
+      "hi": "सप्ताह में 3 दिन",
+      "en": "3 days a week"
+     },
+     "icon": "music",
+     "photo": "stage"
+    },
+    {
+     "cat": 1,
+     "t": {
+      "hi": "बोर्ड परीक्षा तैयारी",
+      "en": "Board exam preparation"
+     },
+     "by": "Anil Mishra",
+     "r": "4.9",
+     "m": {
+      "hi": "कक्षा 9-10",
+      "en": "Class 9-10"
+     },
+     "icon": "cap",
+     "photo": "class3"
+    },
+    {
+     "cat": 4,
+     "t": {
+      "hi": "शतरंज क्लब",
+      "en": "Chess club"
+     },
+     "by": "Vikas Tiwari",
+     "r": "5.0",
+     "m": {
+      "hi": "सप्ताह में 2 दिन",
+      "en": "2 days a week"
+     },
+     "icon": "star",
+     "photo": "chess"
+    },
+    {
+     "cat": 4,
+     "t": {
+      "hi": "शतरंज क्लब",
+      "en": "Chess club"
+     },
+     "by": "Vikas Tiwari",
+     "r": "5.0",
+     "m": {
+      "hi": "सप्ताह में 2 दिन",
+      "en": "2 days a week"
+     },
+     "icon": "star",
+     "photo": "chess"
+    }
+   ]
+  },
+  "gallery": [
+   {
+    "k": "class1",
+    "c": 1,
+    "t": {
+     "hi": "कक्षा में पढ़ाई",
+     "en": "Classroom learning"
+    }
+   },
+   {
+    "k": "lab",
+    "c": 1,
+    "t": {
+     "hi": "विज्ञान प्रयोग",
+     "en": "Science experiment"
+    }
+   },
+   {
+    "k": "read",
+    "c": 1,
+    "t": {
+     "hi": "पुस्तकालय में पढ़ना",
+     "en": "Reading in the library"
+    }
+   },
+   {
+    "k": "pc",
+    "c": 1,
+    "t": {
+     "hi": "कंप्यूटर लैब",
+     "en": "Computer lab"
+    }
+   },
+   {
+    "k": "play",
+    "c": 2,
+    "t": {
+     "hi": "खेल का समय",
+     "en": "Play time"
+    }
+   },
+   {
+    "k": "field",
+    "c": 2,
+    "t": {
+     "hi": "खेल का मैदान",
+     "en": "Sports ground"
+    }
+   },
+   {
+    "k": "football",
+    "c": 2,
+    "t": {
+     "hi": "फुटबॉल अभ्यास",
+     "en": "Football practice"
+    }
+   },
+   {
+    "k": "swing",
+    "c": 2,
+    "t": {
+     "hi": "झूला",
+     "en": "Playground"
+    }
+   },
+   {
+    "k": "stage",
+    "c": 3,
+    "t": {
+     "hi": "वार्षिक उत्सव",
+     "en": "Annual day"
+    }
+   },
+   {
+    "k": "hug",
+    "c": 3,
+    "t": {
+     "hi": "दोस्ती के पल",
+     "en": "Friends forever"
+    }
+   },
+   {
+    "k": "kids",
+    "c": 3,
+    "t": {
+     "hi": "पिकनिक",
+     "en": "School trip"
+    }
+   },
+   {
+    "k": "group",
+    "c": 3,
+    "t": {
+     "hi": "कक्षा 5 के बच्चे",
+     "en": "Class 5 kids"
+    }
+   },
+   {
+    "k": "girls",
+    "c": 4,
+    "t": {
+     "hi": "साथ में सीखना",
+     "en": "Learning together"
+    }
+   },
+   {
+    "k": "blue",
+    "c": 4,
+    "t": {
+     "hi": "हमारे छात्र",
+     "en": "Our students"
+    }
+   },
+   {
+    "k": "smart",
+    "c": 4,
+    "t": {
+     "hi": "स्मार्ट क्लास",
+     "en": "Smart class"
+    }
+   },
+   {
+    "k": "chess",
+    "c": 4,
+    "t": {
+     "hi": "शतरंज प्रतियोगिता",
+     "en": "Chess competition"
+    }
+   },
+   {
+    "k": "u179452742160779",
+    "c": 3,
+    "t": {
+     "hi": "शतरंज प्रतियोगिता",
+     "en": "Chess competition"
+    }
+   }
+  ],
+  "stats": [
+   {
+    "i": "users",
+    "n": "1200+",
+    "l": {
+     "hi": "छात्र",
+     "en": "Students"
+    },
+    "c": "#ede9fe",
+    "k": "#111"
+   },
+   {
+    "i": "book",
+    "n": "60+",
+    "l": {
+     "hi": "अनुभवी शिक्षक",
+     "en": "Expert teachers"
+    },
+    "c": "#ffedd5",
+    "k": "#f97316"
+   },
+   {
+    "i": "award",
+    "n": "25+",
+    "l": {
+     "hi": "वर्षों का अनुभव",
+     "en": "Years of trust"
+    },
+    "c": "#fce7f3",
+    "k": "#ec4899"
+   },
+   {
+    "i": "star",
+    "n": "98%",
+    "l": {
+     "hi": "बोर्ड रिज़ल्ट",
+     "en": "Board results"
+    },
+    "c": "#d1fae5",
+    "k": "#10b981"
+   }
+  ]
+ },
+ "PH": {
+  "u179452630418030": "uploads/u179452630418030.jpg",
+  "u179452742160779": "uploads/u179452742160779.jpg"
+ },
+ "CFG": {
+  "name": "Demo Public School",
+  "nameHi": "डेमो पब्लिक स्कूल",
+  "shortName": "DPS",
+  "phone": "+910000000000",
+  "whatsapp": "910000000000",
+  "email": "info@example.com",
+  "address": "Demo Road, Demo City",
+  "addressHi": "डेमो रोड, डेमो सिटी",
+  "mapEmbed": "<iframe src=\"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d211.44750098618871!2d84.68435638584413!3d26.863170599999986!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39934307bcbb134f%3A0x86c90078bd017872!2s094%2C%20Nawaz%20Brother's!5e1!3m2!1sen!2sin!4v1794538536080!5m2!1sen!2sin\" width=\"600\" height=\"450\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\"></iframe>",
+  "theme": "sunrise"
+ }
+}
