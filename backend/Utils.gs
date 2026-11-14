@@ -15,7 +15,7 @@ const SCHEMA={
  FeeStructure:['classId','feeType','amount','dueMonth'],
  Payments:['receiptNo','studentId','feeType','amount','mode','date','receivedBy'],
  ClassNotices:['id','classId','title','text','date'],
- Enquiries:['id','name','phone','message','time','status'],
+ Enquiries:['id','name','phone','message','time','status','type','role','email','details'],
  Notes:['noteId','classId','subjectId','chapter','title','fileId','fileName','mime','size','uploadedBy','date'],
  Tokens:['tokenHash','userId','role','expires'],
  Notes:['noteId','classId','subjectId','chapter','title','fileId','mime','size','uploadedBy','date'],
