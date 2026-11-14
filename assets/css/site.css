@@ -268,3 +268,13 @@ html[data-alt] .bn em{color:var(--o)}
  #links{top:70px}
 }
 @media(max-width:380px){.brand{font-size:15px}.nvr .pill.sm{padding:7px 11px}}
+/* menu button: rounded square outline with 3 lines; medium sizes */
+#mb{font-size:0!important;position:relative;background:transparent!important;border:2px solid #fff!important;border-radius:12px!important;color:#fff}
+#mb:before{content:"";position:absolute;left:50%;top:50%;width:18px;height:2px;margin:-1px 0 0 -9px;background:#fff;border-radius:2px;box-shadow:0 -6px 0 #fff,0 6px 0 #fff;transition:.2s}
+#mb[aria-expanded=true]:before{box-shadow:none;transform:rotate(45deg)}#mb[aria-expanded=true]:after{content:"";position:absolute;left:50%;top:50%;width:18px;height:2px;margin:-1px 0 0 -9px;background:#fff;border-radius:2px;transform:rotate(-45deg)}
+@media(max-width:1020px){
+ .nv{height:68px}.brand img,.brand .lm{width:44px;height:44px;font-size:21px}
+ .nvr .pill.sm{padding:10px 18px;font-size:14.5px}#mb{width:42px;height:42px}
+}
+@media(max-width:380px){.brand img,.brand .lm{width:40px;height:40px}.nvr .pill.sm{padding:9px 14px;font-size:13.5px}#mb{width:40px;height:40px}}
+@media(max-width:1020px){.nav{position:sticky}.nav #links{position:absolute;top:calc(100% + 6px);left:12px;right:12px}}

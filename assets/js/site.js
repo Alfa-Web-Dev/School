@@ -66,7 +66,7 @@ function shell(){
  +'<div class="fbar"><span>© '+new Date().getFullYear()+' '+esc(SN())+'. '+s_('rights')+'</span><span><a href="privacy.html">'+s_('privacy')+'</a> · <a href="#" id="lg2">'+(getLang()==='hi'?'English':'हिंदी')+'</a></span></div></div></footer>'
  +'<a class="wa" href="https://wa.me/'+esc(CFG.whatsapp)+'" target="_blank" rel="noopener" aria-label="'+s_('wa')+'"><svg class="i" viewBox="0 0 24 24" style="width:28px;height:28px">'+IC.chat+'</svg></a>';
  $('lg2').onclick=e=>{e.preventDefault();setLang(getLang()==='hi'?'en':'hi');render()};
- $('mb').onclick=()=>$('links').classList.toggle('open');
+ $('mb').onclick=()=>$('mb').setAttribute('aria-expanded',$('links').classList.toggle('open'));
 }
 const LOGO=()=>CFG.logo||SITE.logo||'',okLogo=()=>pu(LOGO(),160)!=='';
 
