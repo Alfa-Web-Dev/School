@@ -279,3 +279,9 @@ html[data-alt] .bn em{color:var(--o)}
 @media(max-width:380px){.brand img,.brand .lm{width:40px;height:40px}.nvr .pill.sm{padding:9px 14px;font-size:13.5px}#mb{width:40px;height:40px}}
 @media(max-width:1020px){.nav{position:sticky}.nav #links{position:absolute;top:calc(100% + 6px);left:12px;right:12px}}
 .ltc button.sw{background:#111;border-color:#111;color:#fff;padding:8px 18px}
+
+/* slim language card */
+.ltc{padding:4px 4px 4px 4px;gap:2px;font-size:14px}
+.ltc button{flex:none;white-space:nowrap}
+.ltc button.sw{display:flex;align-items:center;gap:8px;padding:8px 16px;background:#111;color:#fff;border:0;font-size:14px}.ltc button.sw svg{flex:none}
+.ltc button.x{padding:2px 10px 2px 8px;font-size:20px;color:#888;background:none}
