@@ -258,3 +258,13 @@ html[data-alt] .bn em{color:var(--o)}
 .ltc.show{transform:translate(-50%,0)}.ltc .lti{width:20px;height:20px;display:grid;place-items:center;flex:none}.ltc .lti svg{width:20px;height:20px;stroke:var(--o);fill:none}.ltc b{font-weight:700;white-space:nowrap}
 .ltc button{border:1.5px solid #e1ddd3;background:#fff;border-radius:99px;padding:6px 14px;font:inherit;font-weight:700;cursor:pointer;color:#16161a}.ltc button.on{background:#111;border-color:#111;color:#fff}.ltc button.x{border:0;font-size:20px;line-height:1;padding:2px 8px;color:#777}
 @media(max-width:420px){.ltc b{display:none}}
+/* compact header: circular logo, tighter spacing so the school name fits */
+.brand img,.brand .lm{border-radius:50%}
+@media(max-width:1020px){
+ .nav .wrap{padding-left:12px;padding-right:12px}
+ .nv{gap:8px;height:64px}.brand{gap:8px;font-size:17px;flex:1 1 auto;min-width:0}
+ .brand img,.brand .lm{width:38px;height:38px;font-size:19px}
+ .nvr{gap:6px}.nvr .pill.sm{padding:8px 14px;font-size:13px}#mb{width:38px;height:38px;font-size:18px}
+ #links{top:70px}
+}
+@media(max-width:380px){.brand{font-size:15px}.nvr .pill.sm{padding:7px 11px}}
