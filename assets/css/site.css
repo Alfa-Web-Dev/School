@@ -214,3 +214,17 @@ footer{margin-top:60px;padding:36px 0 0}.fg{grid-template-columns:1.5fr 1fr 1.3f
 .hfr{background:#fff;margin:14px;border-radius:20px;padding:22px;position:relative}.hfr .pill{width:100%;margin-top:4px}
 .hfr input:not([type=radio]),.hfr textarea,.hfr select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:0;border-bottom:2px solid #e6e1d4;border-radius:8px 8px 0 0;background:#faf8f2;min-width:0}.hfr input:focus,.hfr textarea:focus,.hfr select:focus{outline:0;border-bottom-color:var(--o)}
 @media(max-width:820px){.hf{grid-template-columns:1fr}.hfl{padding:26px 22px 8px}.hfr{margin:10px}}
+/* Contact forms: same clean cream-card + white form look as the home form */
+.mfp,.mfp-cmp,.mfp-rev,.mfp-gen{background:#fff2d4;border:1px solid rgba(0,0,0,.06);border-radius:28px;box-shadow:none;grid-template-columns:1fr 1.15fr}
+.mfp-rev{grid-template-columns:1fr}
+.mfp-cmp{border-top:1px solid rgba(0,0,0,.06)}
+.mfa,.mfp-cmp .mfa,.mfp-gen .mfa,.mfp-rev .mfa{background:transparent;color:#16161a;border:0;padding:34px 30px;justify-content:center}
+.mfa h2,.mfp-rev .mfa h2{color:#16161a;font-size:clamp(24px,3vw,32px)}.mfa p,.mfp-rev .mfa p{color:#444}
+.mfp-rev .mfa{text-align:center;align-items:center;padding-bottom:10px}
+.mfc{background:#fff;margin:14px;border-radius:20px;padding:22px}.mfp-rev .mfc{max-width:640px;width:calc(100% - 28px)}
+.mf input:not([type=radio]):not([type=checkbox]),.mf textarea,.mf select{border:0;border-bottom:2px solid #e6e1d4;border-radius:8px 8px 0 0;padding:11px 13px}
+.mf input:focus,.mf textarea:focus,.mf select:focus{border-bottom-color:var(--a)}
+.mfb{background:#111}
+.mt{border-radius:99px;flex-direction:row;align-items:center;gap:10px;padding:10px 16px}.mt .ic{margin:0;flex:none}.mt small{display:none}
+.mt.on{background:#111;color:#fff;border-color:#111;box-shadow:none}.mt.on .ic{background:var(--a);color:#fff}.mt.on .ic svg{stroke:#fff}
+@media(max-width:820px){.mfp{grid-template-columns:1fr!important}.mfp-cmp .mfa{border:0}.mfa{padding:26px 22px 8px}.mfc{margin:10px}}
