@@ -3,6 +3,30 @@ const L=o=>o&&typeof o==='object'?(o[getLang()]||o.en||''):(o||'');
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=id=>document.getElementById(id);
 let PAGE=document.body.dataset.page||'home';
+// Colour themes: o = main accent (buttons/links), o2 = light accent used on dark areas, cream/cream2 = soft tint backgrounds, bn1/bn2 = banner gradient
+const THEMES={
+ sunrise:{n:'Sunrise (orange)',o:'#ff7a1a',o2:'#ff7a1a',cream:'#fff2d4',cream2:'#f6e3b4',bn1:'#ffe7d1',bn2:'#ffd2a8'},
+ ocean:{n:'Ocean blue',o:'#1a73e8',o2:'#8ab4f8',cream:'#e8f0fe',cream2:'#d2e3fc'},
+ navy:{n:'Royal navy',o:'#1e40af',o2:'#93a5f5',cream:'#eaeefc',cream2:'#d3dcf8'},
+ sky:{n:'Sky',o:'#0369a1',o2:'#7dd3fc',cream:'#e6f4fb',cream2:'#c7e6f6'},
+ indigo:{n:'Indigo',o:'#4f46e5',o2:'#a5b4fc',cream:'#eceefe',cream2:'#d8dbfc'},
+ purple:{n:'Royal purple',o:'#6d28d9',o2:'#c4b5fd',cream:'#f1eafe',cream2:'#e0d3fb'},
+ teal:{n:'Teal',o:'#0f766e',o2:'#5eead4',cream:'#e6f7f5',cream2:'#c9efea'},
+ emerald:{n:'Emerald',o:'#0b8043',o2:'#81c995',cream:'#e6f4ea',cream2:'#ceead6'},
+ forest:{n:'Forest green',o:'#2e6b2f',o2:'#a5d6a7',cream:'#eef6ec',cream2:'#d8ead3'},
+ lime:{n:'Fresh green',o:'#4d7c0f',o2:'#bef264',cream:'#f3f9e5',cream2:'#e2efc3'},
+ gold:{n:'Golden',o:'#a16207',o2:'#f6c85f',cream:'#fdf6e3',cream2:'#f5e6b8'},
+ coffee:{n:'Coffee brown',o:'#92400e',o2:'#e0b48a',cream:'#f8efe6',cream2:'#efdcc7'},
+ maroon:{n:'Maroon classic',o:'#9b1c31',o2:'#e8a0ad',cream:'#fbeef0',cream2:'#f3d5da'},
+ crimson:{n:'Crimson',o:'#c62828',o2:'#fca5a5',cream:'#fdecec',cream2:'#fbd0d0'},
+ rose:{n:'Rose',o:'#be185d',o2:'#f9a8d4',cream:'#fdeaf3',cream2:'#fbcfe5'},
+ slate:{n:'Slate grey',o:'#334155',o2:'#94a3b8',cream:'#f1f5f9',cream2:'#e2e8f0'}
+};
+function applyTheme(){
+ const r=document.documentElement,t=THEMES[CFG.theme];['--o','--o2','--cream','--cream2','--soft','--bn1','--bn2'].forEach(k=>r.style.removeProperty(k));
+ if(!t){r.removeAttribute('data-alt');r.style.setProperty('--o',CFG.accent||'#ff7a1a');return}
+ r.style.setProperty('--o',t.o);r.style.setProperty('--o2',t.o2);r.style.setProperty('--cream',t.cream);r.style.setProperty('--cream2',t.cream2);r.style.setProperty('--soft',t.cream);r.style.setProperty('--bn1',t.bn1||t.cream);r.style.setProperty('--bn2',t.bn2||t.cream2);
+ if(CFG.theme==='sunrise')r.removeAttribute('data-alt');else r.setAttribute('data-alt','')}
 const T={en:{home:'Home',about:'About',acad:'Academics',fac:'Facilities',adm:'Admission',gal:'Gallery',con:'Contact',login:'Login',enq:'Enquire now',ph:'Your phone number',call:'Call me back',menu:'Menu',wel:'Welcome to',adm_open:'Admissions open',privacy:'Privacy policy',h_privacy:'Privacy policy',s_privacy:'How we handle your information.',dl:'Downloads',agree:'By sending you agree to our',soon:'',follow2:'Follow us',sent:'Thanks! We will call you back soon.',nm:'Your name',msg:'Message (optional)',send:'Send enquiry',rights:'All rights reserved.',quick:'Quick links',reach:'Reach us',hrs:'School hours',addr:'Address',phone:'Phone',mail:'Email',method:'How we teach',wa:'WhatsApp',chatus:'Chat with us',more:'Learn more',viewall:'View all',notices:'Latest notices',events:'Upcoming events',story:'About us',team:'Our team',journey:'Our journey',vision:'Mission & vision',msgp:'From the principal\'s desk',elig:'Eligibility',docs:'Documents required',dates:'Important dates',faq:'Frequently asked questions',class:'Class',age:'Minimum age',cong:'Admissions open',cong2:'Limited seats',rate:'Parent rating',school:'School',loc:'Find us',tag:'Nurturing curious minds',desc:'Learn about our classes, facilities, admission process and school life.',portal:'Student / Parent login',follow:'Admission helpline',err:'Please enter a valid name and phone',h_about:'About our school',h_acad:'Academics',h_fac:'Campus & facilities',h_adm:'Admissions',h_gal:'Photo gallery',h_con:'Contact us',s_about:'Our story, values and the people behind the school.',s_acad:'From first steps to board exams, a path built for every child.',s_fac:'Spaces designed for learning, play and growth.',s_adm:'Simple steps, clear information, friendly help.',s_gal:'Moments from classrooms, playgrounds and celebrations.',s_con:'We would love to hear from you.'},
 hi:{home:'होम',about:'हमारे बारे में',acad:'शिक्षा',fac:'सुविधाएँ',adm:'प्रवेश',gal:'गैलरी',con:'संपर्क',login:'लॉगिन',enq:'पूछताछ करें',ph:'आपका फ़ोन नंबर',call:'मुझे कॉल करें',menu:'मेनू',wel:'स्वागत है',adm_open:'प्रवेश जारी हैं',privacy:'गोपनीयता नीति',h_privacy:'गोपनीयता नीति',s_privacy:'हम आपकी जानकारी कैसे संभालते हैं।',dl:'डाउनलोड',agree:'भेजकर आप हमारी इस नीति से सहमत होते हैं:',soon:'',follow2:'हमें फ़ॉलो करें',sent:'धन्यवाद! हम जल्द ही आपको कॉल करेंगे।',nm:'आपका नाम',msg:'संदेश (वैकल्पिक)',send:'पूछताछ भेजें',rights:'सर्वाधिकार सुरक्षित।',quick:'त्वरित लिंक',reach:'संपर्क करें',hrs:'स्कूल का समय',addr:'पता',phone:'फ़ोन',mail:'ईमेल',method:'हम कैसे पढ़ाते हैं',wa:'व्हाट्सऐप',chatus:'हमसे चैट करें',more:'और जानें',viewall:'सभी देखें',notices:'ताज़ा सूचनाएँ',events:'आने वाले कार्यक्रम',story:'हमारे बारे में',team:'हमारी टीम',journey:'हमारा सफ़र',vision:'मिशन और विज़न',msgp:'प्रधानाचार्य का संदेश',elig:'पात्रता',docs:'ज़रूरी दस्तावेज़',dates:'महत्वपूर्ण तिथियाँ',faq:'अक्सर पूछे जाने वाले प्रश्न',class:'कक्षा',age:'न्यूनतम आयु',cong:'प्रवेश जारी',cong2:'सीमित सीटें',rate:'अभिभावक रेटिंग',school:'स्कूल',loc:'हमें खोजें',tag:'जिज्ञासु मन का विकास',desc:'हमारी कक्षाएँ, सुविधाएँ, प्रवेश प्रक्रिया और स्कूल जीवन के बारे में जानें।',portal:'छात्र / अभिभावक लॉगिन',follow:'प्रवेश हेल्पलाइन',err:'कृपया सही नाम और फ़ोन नंबर लिखें',h_about:'हमारे स्कूल के बारे में',h_acad:'शिक्षा',h_fac:'परिसर और सुविधाएँ',h_adm:'प्रवेश',h_gal:'फ़ोटो गैलरी',h_con:'संपर्क करें',s_about:'हमारी कहानी, मूल्य और स्कूल के पीछे के लोग।',s_acad:'पहले कदम से बोर्ड परीक्षा तक, हर बच्चे के लिए बना रास्ता।',s_fac:'सीखने, खेलने और आगे बढ़ने के लिए बने स्थान।',s_adm:'आसान चरण, साफ़ जानकारी, मित्रवत सहायता।',s_gal:'कक्षाओं, खेल के मैदानों और उत्सवों के पल।',s_con:'हमें आपसे बात करके खुशी होगी।'}};
 Object.assign(T.en,{hf_e:'Get in touch',hf_h:'How can we help you?',hf_p:'Admission, a question, a review or a complaint — choose what it is about and we will get back to you.',hf_t:'Message type',lib:'Library',h_lib:'Study Library',s_lib:'Free notes, books, previous year papers and sample papers (PDF)',lb_all:'All',lb_cls:'Class',lb_sub:'Subject',lb_q:'Search notes, chapter or subject',lb_view:'View',lb_dl:'Download',lb_none:'No notes found yet.',lb_load:'Loading library…',lb_err:'Library could not be loaded. Please try again later.',lb_read:'Read online',lb_back:'Back to Library',lb_pdfhint:'Your device may not show the PDF here. Use Read online or Download.',lb_note:'',lb_pdf:'PDF',lb_img:'Photo'});
@@ -247,7 +271,7 @@ function wire(){
  if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.08});document.querySelectorAll('.rv').forEach(n=>io.observe(n))}else document.querySelectorAll('.rv').forEach(n=>n.classList.add('in'));
 }
 function render(){
- FB.length=0;document.documentElement.lang=getLang();document.documentElement.style.setProperty('--c',CFG.color||'#111');document.documentElement.dataset.theme=CFG.theme||'';if(CFG.theme)document.documentElement.style.removeProperty('--o');else document.documentElement.style.setProperty('--o',CFG.accent||'#ff7a1a');
+ FB.length=0;document.documentElement.lang=getLang();document.documentElement.style.setProperty('--c',CFG.color||'#111');applyTheme();
  PAGE=document.body.dataset.page||'home';if(PAGE!=='libitem')document.title=(PAGE==='home'?SN()+' — '+s_('tag'):s_('h_'+PAGE)+' | '+SN());
  if(PAGE!=='libitem'){seo();$('main').innerHTML=(PAGES[PAGE]||PAGES.home)()}shell();gallery();mapInit();wire();libInit();mfDraw();tmAuto();
  if(window.afterRender)afterRender();

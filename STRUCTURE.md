@@ -29,3 +29,8 @@ index, about, academics, facilities, admission, gallery, contact .html — each 
 - PDFs live **in this repo** so they load fast (GitHub Pages CDN) and Google can index them: `library/files/<id>.pdf`, one static SEO page `library/<id>.html` per file, index in `content/library.json`, and each page is added to `sitemap.xml`.
 - Manage everything from **Studio → 📚 Library** (add PDF with category / class / subject / description, or delete). Categories: Notes, Books, Previous Year Papers, Sample Papers, Magazines, Syllabus, Other. Limit 30 MB per file; keep total repo under ~1 GB.
 - Students' private class notes still use Google Drive in the panels (not public).
+
+## Colour themes
+- 16 ready themes in `THEMES` (assets/js/site.js): sunrise (default orange+cream), ocean, navy, sky, indigo, purple, teal, emerald, forest, lime, gold, coffee, maroon, crimson, rose, slate. Header/footer stay black.
+- Change in one click: Studio -> 🎨 Theme -> tap a theme (live preview) -> Save & publish. Or set `theme:"ocean"` in config.js.
+- To add a theme: add one line to `THEMES` (o = accent, o2 = light accent for dark areas, cream/cream2 = soft backgrounds).

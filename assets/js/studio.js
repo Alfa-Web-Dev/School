@@ -90,9 +90,9 @@ const PGS=[['home','Home','index.html'],['about','About','about.html'],['acad','
 function go(p){document.body.dataset.page=p;render();scrollTo(0,0);qa('.sbar .tab').forEach(t=>t.classList.toggle('on',t.dataset.p===p))}
 function bar(){
  const sb=h('div',{class:'sbar'},[h('b',{text:'✏️ Website Studio'}),h('div',{class:'tabsb'},PGS.map(p=>{const t=h('button',{class:'tab'+(p[0]===document.body.dataset.page?' on':''),type:'button',text:p[1]});t.dataset.p=p[0];t.onclick=()=>go(p[0]);return t})),
-  h('span',{class:'sp'}),h('button',{class:'pill sm solid',type:'button',text:'📚 Library',id:'slib'}),h('button',{class:'pill sm ghost',type:'button',text:'Exit',id:'sx'})]);
+  h('span',{class:'sp'}),h('button',{class:'pill sm ghost',type:'button',text:'🎨 Theme',id:'sth'}),h('button',{class:'pill sm solid',type:'button',text:'📚 Library',id:'slib'}),h('button',{class:'pill sm ghost',type:'button',text:'Exit',id:'sx'})]);
  document.body.prepend(sb);document.body.append(h('div',{class:'pubbar'},[h('span',{id:'pubn',class:'pubn'}),h('button',{id:'shist',class:'pill sm ghost',type:'button',text:'Clean history'}),h('button',{id:'spub',class:'pill orange',type:'button',text:'Publish',disabled:''})]));
- q('#spub').onclick=publish;q('#slib').onclick=libManager;q('#shist').onclick=cleanHistory;q('#sx').onclick=()=>{if((ST.dS.size+ST.dP.size+ST.dC.size)&&!confirm('You have unsaved changes. Exit?'))return;sessionStorage.removeItem('st_tok');localStorage.removeItem('st_tok');location.href='index.html'};
+ q('#spub').onclick=publish;q('#slib').onclick=libManager;q('#sth').onclick=themePicker;q('#shist').onclick=cleanHistory;q('#sx').onclick=()=>{if((ST.dS.size+ST.dP.size+ST.dC.size)&&!confirm('You have unsaved changes. Exit?'))return;sessionStorage.removeItem('st_tok');localStorage.removeItem('st_tok');location.href='index.html'};
  document.addEventListener('click',e=>{const a=e.target.closest('a');if(!a||e.target.closest('.sbar'))return;e.preventDefault();const f=(a.getAttribute('href')||'').split('/').pop();const m=PGS.find(p=>p[2]===f);if(m)go(m[0])},true);
  window.addEventListener('beforeunload',e=>{if(ST.dS.size+ST.dP.size+ST.dC.size){e.preventDefault();e.returnValue=''}});
 }
@@ -132,6 +132,15 @@ async function cleanHistory(){
   toast('✅ History cleaned. Only one commit remains.');
  }catch(e){toast('Clean failed: '+e.message,1)}
 }
+// ---------- Theme picker: one click preview, "Save & publish" makes it live ----------
+function themePicker(){
+ const ov=h('div',{class:'smd'}),box=h('div',{class:'sbx'}),grid=h('div',{class:'thg'}),cur=()=>CFG.theme&&THEMES[CFG.theme]?CFG.theme:'';
+ const draw=()=>{grid.textContent='';Object.keys(THEMES).forEach(k=>{const t=THEMES[k],b=h('button',{type:'button',class:'thc'+(cur()===k?' on':'')},[h('span',{class:'thsw',style:'background:'+t.cream},[h('i',{style:'background:'+t.o}),h('i',{style:'background:'+t.o2}),h('i',{style:'background:'+t.cream2})]),h('b',{text:t.n})]);
+  b.onclick=()=>{CFG.theme=k;ST.dC.add('theme');applyTheme();upd();draw()};grid.append(b)})};
+ const pub=h('button',{class:'pill solid',type:'button',text:'Save & publish'}),cl=h('button',{class:'sb',type:'button',text:'Close'});
+ cl.onclick=()=>ov.remove();pub.onclick=async()=>{ov.remove();await publish()};
+ box.append(h('h3',{text:'🎨 Website theme'}),h('p',{class:'mu',text:'Tap a theme to preview it on this page. Header and footer stay black. Press "Save & publish" to make it live.'}),grid,h('div',{class:'sact'},[cl,pub]));
+ ov.append(box);document.body.append(ov);draw()}
 // ---------- Library manager (PDF files live in this repo: library/files/*.pdf + library/<slug>.html + content/library.json) ----------
 const LIB_MAX=30*1024*1024,LIB_WARN=800*1024*1024;
 const siteBase=()=>location.href.split('#')[0].split('?')[0].replace(/[^/]*$/,'');
