@@ -278,3 +278,4 @@ html[data-alt] .bn em{color:var(--o)}
 }
 @media(max-width:380px){.brand img,.brand .lm{width:40px;height:40px}.nvr .pill.sm{padding:9px 14px;font-size:13.5px}#mb{width:40px;height:40px}}
 @media(max-width:1020px){.nav{position:sticky}.nav #links{position:absolute;top:calc(100% + 6px);left:12px;right:12px}}
+.ltc button.sw{background:#111;border-color:#111;color:#fff;padding:8px 18px}
