@@ -53,7 +53,7 @@ function hero(){
  +'<form class="quick" id="qf"><input name="phone" type="tel" required maxlength="15" placeholder="'+esc(s_('ph'))+'"><input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true"><button class="pill solid" type="submit">'+s_('call')+'</button></form><div class="qm" id="qm"></div>'
  +'<div class="happy"><div class="stack">'+[3,4,5,6].map(i=>'<i>'+avatar(i)+'</i>').join('')+'</div><span>'+esc(L(h.happy))+'</span></div></div>'
  +'<div class="hr"'+E('hero','photos')+'><div class="p p1">'+im(h.photos[0],avatar(0,{book:true,bg:'#b9a4ff'}),600)+'</div><div class="p p2">'+im(h.photos[1],avatar(1,{bg:'#8fe3d8'}),600)+'</div><div class="p p3">'+im(h.photos[2],avatar(2,{bg:'#ffe08a'}),600)+'</div><div class="p p4">'+im(h.photos[3],avatar(3,{bg:'#ffb8d9'}),600)+'</div>'
- +'<div class="fb a"><span class="ic" style="background:#ffe7d1;color:#f97316">'+ic('award')+'</span><div><b>'+esc(s_('cong'))+'</b><small>'+esc(s_('cong2'))+'</small></div></div>'
+ +'<div class="fb a"><span class="ic" style="background:color-mix(in srgb,var(--o) 15%,#fff);color:var(--o)">'+ic('award')+'</span><div><b>'+esc(s_('cong'))+'</b><small>'+esc(s_('cong2'))+'</small></div></div>'
  +'<div class="fb b"><span class="ic" style="background:#fff3c4;color:#f59e0b">'+ic('star')+'</span><div><b>4.9 ★</b><small>'+esc(s_('rate'))+'</small></div></div></div></div></section>';
 }
 function stats(){return '<section class="wrap"><div class="sg"'+EA('stats')+'>'+SITE.stats.map((x,i)=>'<div class="st"'+E('stats.'+i)+'><span class="ic" style="background:'+x.c+';color:'+x.k+'">'+ic(x.i)+'</span><div><b>'+esc(L(x.n))+'</b><span>'+esc(L(x.l))+'</span></div></div>').join('')+'</div></section>'}
@@ -247,7 +247,7 @@ function wire(){
  if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.08});document.querySelectorAll('.rv').forEach(n=>io.observe(n))}else document.querySelectorAll('.rv').forEach(n=>n.classList.add('in'));
 }
 function render(){
- FB.length=0;document.documentElement.lang=getLang();document.documentElement.style.setProperty('--c',CFG.color||'#111');document.documentElement.style.setProperty('--o',CFG.accent||'#ff7a1a');
+ FB.length=0;document.documentElement.lang=getLang();document.documentElement.style.setProperty('--c',CFG.color||'#111');document.documentElement.dataset.theme=CFG.theme||'';if(CFG.theme)document.documentElement.style.removeProperty('--o');else document.documentElement.style.setProperty('--o',CFG.accent||'#ff7a1a');
  PAGE=document.body.dataset.page||'home';if(PAGE!=='libitem')document.title=(PAGE==='home'?SN()+' — '+s_('tag'):s_('h_'+PAGE)+' | '+SN());
  if(PAGE!=='libitem'){seo();$('main').innerHTML=(PAGES[PAGE]||PAGES.home)()}shell();gallery();mapInit();wire();libInit();mfDraw();tmAuto();
  if(window.afterRender)afterRender();

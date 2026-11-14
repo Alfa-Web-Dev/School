@@ -245,3 +245,17 @@ footer{margin-top:60px;padding:36px 0 0}.fg{grid-template-columns:1.5fr 1fr 1.3f
 .tmr .tm p{font-size:14.5px;line-height:1.55;margin:0;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;min-height:calc(1.55em*3)}
 .stars5{color:#f5b301;letter-spacing:2px;font-size:16px}.stars5 i{font-style:normal;color:#4a4a55}
 .studio .tmr{flex-wrap:wrap}.studio .tmr .tm{flex:1 1 300px}
+
+/* ===== Blue theme (config.js: theme:"blue"). Remove the theme value to go back to orange + cream. =====
+   dark blue #1a73e8 (accent) · light blue #8ab4f8 (on dark) · whitish blue #e8f0fe (tint) */
+html[data-theme=blue]{--o:#1a73e8;--o2:#8ab4f8;--soft:#e8f0fe;--cream:#e8f0fe;--cream2:#d2e3fc}
+html[data-theme=blue] .hero{background:linear-gradient(180deg,#e8f0fe 0%,#f3f7ff 62%,#fff 100%)}
+html[data-theme=blue] .hf,html[data-theme=blue] .mfp,html[data-theme=blue] .mfp-cmp,html[data-theme=blue] .mfp-rev,html[data-theme=blue] .mfp-gen{background:#e8f0fe}
+html[data-theme=blue] .mfp-rev .mfa{background:transparent}
+html[data-theme=blue] .mt,html[data-theme=blue] .mfp{--a:#1a73e8}html[data-theme=blue] .mt-cmp,html[data-theme=blue] .mfp-cmp{--a:#d63a3a}html[data-theme=blue] .mt-rev,html[data-theme=blue] .mfp-rev{--a:#e0a100}html[data-theme=blue] .mt-gen,html[data-theme=blue] .mfp-gen{--a:#7c4dff}
+html[data-theme=blue] .pill.orange,html[data-theme=blue] .pill.orange:hover{box-shadow:0 10px 24px rgba(26,115,232,.3)}
+html[data-theme=blue] .dk .eyebrow,html[data-theme=blue] .dk .tm small,html[data-theme=blue] .tb .dot,html[data-theme=blue] footer h5{color:#8ab4f8}
+html[data-theme=blue] .tm .q,html[data-theme=blue] .stats .n{color:#8ab4f8}
+html[data-theme=blue] .hfk svg{stroke:#1a73e8}
+html[data-theme=blue] .bn{background:linear-gradient(120deg,#e8f0fe,#c6dafc)}
+html[data-theme=blue] .bn em{color:#1a73e8}
