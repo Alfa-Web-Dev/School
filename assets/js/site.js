@@ -86,11 +86,7 @@ function notices(){
  const row=(d,t,x,c,pa)=>{const f=fmtD(d);return '<div class="li"'+E(pa)+'><div class="db" style="background:'+c+'"><b>'+f.d+'</b><small>'+f.m+'</small></div><div><h4>'+esc(L(t))+'</h4>'+(x?'<p>'+esc(L(x))+'</p>':'')+'</div></div>'};
  return sec('rv','<div class="two"><div class="panel"'+EA('notices')+'><h3>'+s_('notices')+'</h3>'+SITE.notices.map((n,i)=>row(n.date,n.t,n.x,n.c||PASTEL[i%8],'notices.'+i)).join('')+'</div><div class="panel"'+EA('events')+'><h3>'+s_('events')+'</h3>'+SITE.events.map((n,i)=>row(n.date,n.t,'',n.c||PASTEL[(i+3)%8],'events.'+i)).join('')+'</div></div>')
 }
-function ctaForm(){
- const a=SITE.admission;
- return sec('rv','<div class="cta-band"><div'+E('admission')+'><span class="eyebrow lt">'+s_('follow')+'</span><h2>'+esc(L(a.t))+'</h2><p>'+esc(L(a.x))+'</p></div>'
- +'<form class="ef" id="ef"><input name="name" placeholder="'+esc(s_('nm'))+'" required maxlength="60"><input name="phone" type="tel" placeholder="'+esc(s_('ph'))+'" required maxlength="15"><input name="message" placeholder="'+esc(s_('msg'))+'" maxlength="600"><input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true"><button class="pill orange" type="submit">'+s_('send')+'</button><div class="em" id="em"></div><small style="color:#6a6a76">'+s_('agree')+' <a href="privacy.html" style="text-decoration:underline">'+s_('privacy')+'</a> · <a href="contact.html?form=complaint" style="text-decoration:underline">'+s_('f_more')+'</a></small></form></div>')
-}
+function ctaForm(){return homeForm()}
 function homeForm(){
  const o=(a,pre)=>a.map(x=>'<option value="'+x[0]+'">'+esc(s_(pre+x[1]))+'</option>').join('');
  return sec('rv','<div class="hf"><div class="hfl"><span class="eyebrow">'+esc(s_('hf_e'))+'</span><h2>'+esc(s_('hf_h'))+'</h2><p>'+esc(s_('hf_p'))+'</p><div class="hfk"><a href="contact.html?form=admission">'+ic('cap')+'<span>'+esc(s_('f_t_adm'))+'</span></a><a href="contact.html?form=review">'+ic('star')+'<span>'+esc(s_('f_t_rev'))+'</span></a><a href="contact.html?form=complaint">'+ic('shield')+'<span>'+esc(s_('f_t_cmp'))+'</span></a></div></div>'
@@ -125,7 +121,7 @@ const PAGES={
   +sec('rv',head(L(SITE.facilities.e),esc(L(SITE.facilities.title)),'',true,E('facilities','e,title'))+'<div class="g3 pfs"'+EA('facilities.items')+'>'+SITE.facilities.items.map((x,i)=>'<article class="pf"'+E('facilities.items.'+i)+'>'+im(x.photo,scene(i,x.i),700)+'<span class="tag"'+(x.c?' style="background:'+x.c+';color:'+ink(x.c)+'"':'')+'>'+ic(x.i)+'</span><div class="pbd"><h3>'+esc(L(x.t))+'</h3><p>'+esc(L(x.x))+'</p></div></article>').join('')+'</div>')
   +popular()+ctaForm(),
  adm:()=>pageHero('adm','girlsclass')
-  +sec('rv',head(L(SITE.steps.e),esc(L(SITE.steps.title)),'',true,E('steps','e,title'))+'<div class="g4 stp"'+EA('steps.items')+'>'+SITE.steps.items.map((x,i)=>'<div class="it"'+E('steps.items.'+i)+'><h4>'+esc(L(x.t))+'</h4><p>'+esc(L(x.x))+'</p></div>').join('')+'</div>')
+  +sec('rv',head(L(SITE.steps.e),esc(L(SITE.steps.title)),'',true,E('steps','e,title'))+'<div class="g4 stps"'+EA('steps.items')+'>'+SITE.steps.items.map((x,i)=>'<div class="it"'+E('steps.items.'+i)+'><h4>'+esc(L(x.t))+'</h4><p>'+esc(L(x.x))+'</p></div>').join('')+'</div>')
   +sec('rv','<div class="two"><div'+E('eligibility')+'><h3 style="font-size:24px;margin-bottom:14px">'+s_('elig')+'</h3><table class="tbl2"><tr><th>'+s_('class')+'</th><th>'+s_('age')+'</th></tr>'+SITE.eligibility.map(r=>'<tr><td>'+esc(L(r.c))+'</td><td>'+esc(L(r.a))+'</td></tr>').join('')+'</table></div>'
    +'<div><h3 style="font-size:24px;margin-bottom:14px">'+s_('docs')+'</h3><ul class="dl2"'+E('documents')+'>'+SITE.documents.map(d=>'<li>'+ic('check')+esc(L(d))+'</li>').join('')+'</ul><h3 style="font-size:24px;margin:26px 0 14px">'+s_('dates')+'</h3><ul class="dl2"'+E('dates')+'>'+SITE.dates.map(d=>{const f=fmtD(d.d);return '<li>'+ic('clock')+esc(L(d.t))+'<time>'+f.d+' '+f.m+'</time></li>'}).join('')+'</ul></div></div>')
   +downloads()
