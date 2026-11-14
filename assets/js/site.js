@@ -79,9 +79,15 @@ function principal(){
  return sec('rv','<div class="pr"'+E('principal')+'><div class="im">'+ph+'</div><div><span class="eyebrow">'+s_('msgp')+'</span><blockquote>“'+esc(L(p.message))+'”</blockquote><b>'+esc(L(p.name))+'</b><small>'+esc(L(p.role))+'</small></div></div>')
 }
 function testimonials(){
- const t=SITE.testimonials;
- return '<section class="sec dk rv"><div class="wrap">'+head(L(t.e),esc(L(t.title)),'',true,E('testimonials','e,title'))+'<div class="g3"'+EA('testimonials.items')+'>'+t.items.map((x,i)=>'<div class="tm"'+E('testimonials.items.'+i)+'><span class="q">“</span><p>'+esc(L(x.x))+'</p><div class="who"><i>'+avatar(i+3)+'</i><div><b>'+esc(L(x.n))+'</b><small>'+esc(L(x.r))+'</small></div></div></div>').join('')+'</div></div></section>'
+ const t=SITE.testimonials,st=n=>{n=Math.max(1,Math.min(5,parseInt(n,10)||5));return '<span class="stars5" aria-label="'+n+'/5">'+'★'.repeat(n)+'<i>'+'★'.repeat(5-n)+'</i></span>'};
+ return '<section class="sec dk rv tms"><div class="wrap">'+head(L(t.e),esc(L(t.title)),'',true,E('testimonials','e,title'))+'<div class="tmr" id="tmr"'+EA('testimonials.items')+'>'+t.items.map((x,i)=>'<div class="tm"'+E('testimonials.items.'+i)+'><div class="who"><i>'+(x.photo?im(x.photo,avatar(i+3),120):avatar(i+3))+'</i><div><b>'+esc(L(x.n))+'</b><small>'+esc(L(x.r))+'</small></div></div><p>'+esc(L(x.x))+'</p>'+st(x.s)+'</div>').join('')+'</div></div></section>'
 }
+let tmT;function tmAuto(){
+ clearInterval(tmT);const r=$('tmr');if(!r||window.STUDIO||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+ let hold=false;['pointerdown','touchstart','mouseenter','focusin'].forEach(e=>r.addEventListener(e,()=>hold=true,{passive:true}));['mouseleave','focusout'].forEach(e=>r.addEventListener(e,()=>hold=false));r.addEventListener('touchend',()=>setTimeout(()=>hold=false,4000),{passive:true});
+ tmT=setInterval(()=>{if(hold||document.hidden)return;const c=r.firstElementChild;if(!c)return;const w=c.offsetWidth+parseFloat(getComputedStyle(r).columnGap||16);
+  if(r.scrollLeft+r.clientWidth>=r.scrollWidth-4)r.scrollTo({left:0,behavior:'smooth'});else r.scrollBy({left:w,behavior:'smooth'})},3800)}
+
 function notices(){
  const row=(d,t,x,c,pa)=>{const f=fmtD(d);return '<div class="li"'+E(pa)+'><div class="db" style="background:'+c+'"><b>'+f.d+'</b><small>'+f.m+'</small></div><div><h4>'+esc(L(t))+'</h4>'+(x?'<p>'+esc(L(x))+'</p>':'')+'</div></div>'};
  return sec('rv','<div class="two"><div class="panel"'+EA('notices')+'><h3>'+s_('notices')+'</h3>'+SITE.notices.map((n,i)=>row(n.date,n.t,n.x,n.c||PASTEL[i%8],'notices.'+i)).join('')+'</div><div class="panel"'+EA('events')+'><h3>'+s_('events')+'</h3>'+SITE.events.map((n,i)=>row(n.date,n.t,'',n.c||PASTEL[(i+3)%8],'events.'+i)).join('')+'</div></div>')
@@ -243,7 +249,7 @@ function wire(){
 function render(){
  FB.length=0;document.documentElement.lang=getLang();document.documentElement.style.setProperty('--c',CFG.color||'#111');document.documentElement.style.setProperty('--o',CFG.accent||'#ff7a1a');
  PAGE=document.body.dataset.page||'home';if(PAGE!=='libitem')document.title=(PAGE==='home'?SN()+' — '+s_('tag'):s_('h_'+PAGE)+' | '+SN());
- if(PAGE!=='libitem'){seo();$('main').innerHTML=(PAGES[PAGE]||PAGES.home)()}shell();gallery();mapInit();wire();libInit();mfDraw();
+ if(PAGE!=='libitem'){seo();$('main').innerHTML=(PAGES[PAGE]||PAGES.home)()}shell();gallery();mapInit();wire();libInit();mfDraw();tmAuto();
  if(window.afterRender)afterRender();
 }
 function seo(){const set=(sel,mk,v)=>{let e=document.querySelector(sel);if(!e){e=document.createElement('meta');mk(e);document.head.appendChild(e)}e.setAttribute('content',v)};
