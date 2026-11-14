@@ -3,6 +3,11 @@ const ENQ_STATUS=['new','contacted','closed'];
 function enqMail(){
  const st=find('Settings',x=>String(x.key)==='notify_email'),v=st&&clean(st.value,100);
  if(v)return v;try{return Session.getEffectiveUser().getEmail()}catch(e){return ''}}
+// Editor mein ek baar chalao: Gmail permission maangega (Allow karo) aur test email bhejega. Phir Deploy -> Manage deployments -> Edit -> New version.
+function testEnquiryEmail(){
+ const to=enqMail();if(!to)throw new Error('Email nahi mila. Settings sheet mein key=notify_email, value=aapka email likho');
+ MailApp.sendEmail({to,subject:'Test: school website enquiry email',body:'Agar yeh mail mili to enquiry emails theek chal rahe hain.'});
+ Logger.log('Test email bheja: '+to+' | Bacha hua daily quota: '+MailApp.getRemainingDailyQuota())}
 function enqLimit(key,max,secs){const c=CacheService.getScriptCache(),n=Number(c.get(key)||0);if(n>=max)return false;c.put(key,String(n+1),secs);return true}
 
 // Purane sheet mein 7-10 columns (type, role, email, details) apne aap jud jate hain.
