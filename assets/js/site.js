@@ -5,8 +5,8 @@ const $=id=>document.getElementById(id);
 let PAGE=document.body.dataset.page||'home';
 const T={en:{home:'Home',about:'About',acad:'Academics',fac:'Facilities',adm:'Admission',gal:'Gallery',con:'Contact',login:'Login',enq:'Enquire now',ph:'Your phone number',call:'Call me back',menu:'Menu',wel:'Welcome to',adm_open:'Admissions open',privacy:'Privacy policy',h_privacy:'Privacy policy',s_privacy:'How we handle your information.',dl:'Downloads',agree:'By sending you agree to our',soon:'',follow2:'Follow us',sent:'Thanks! We will call you back soon.',nm:'Your name',msg:'Message (optional)',send:'Send enquiry',rights:'All rights reserved.',quick:'Quick links',reach:'Reach us',hrs:'School hours',addr:'Address',phone:'Phone',mail:'Email',method:'How we teach',wa:'WhatsApp',chatus:'Chat with us',more:'Learn more',viewall:'View all',notices:'Latest notices',events:'Upcoming events',story:'About us',team:'Our team',journey:'Our journey',vision:'Mission & vision',msgp:'From the principal\'s desk',elig:'Eligibility',docs:'Documents required',dates:'Important dates',faq:'Frequently asked questions',class:'Class',age:'Minimum age',cong:'Admissions open',cong2:'Limited seats',rate:'Parent rating',school:'School',loc:'Find us',tag:'Nurturing curious minds',desc:'Learn about our classes, facilities, admission process and school life.',portal:'Student / Parent login',follow:'Admission helpline',err:'Please enter a valid name and phone',h_about:'About our school',h_acad:'Academics',h_fac:'Campus & facilities',h_adm:'Admissions',h_gal:'Photo gallery',h_con:'Contact us',s_about:'Our story, values and the people behind the school.',s_acad:'From first steps to board exams, a path built for every child.',s_fac:'Spaces designed for learning, play and growth.',s_adm:'Simple steps, clear information, friendly help.',s_gal:'Moments from classrooms, playgrounds and celebrations.',s_con:'We would love to hear from you.'},
 hi:{home:'होम',about:'हमारे बारे में',acad:'शिक्षा',fac:'सुविधाएँ',adm:'प्रवेश',gal:'गैलरी',con:'संपर्क',login:'लॉगिन',enq:'पूछताछ करें',ph:'आपका फ़ोन नंबर',call:'मुझे कॉल करें',menu:'मेनू',wel:'स्वागत है',adm_open:'प्रवेश जारी हैं',privacy:'गोपनीयता नीति',h_privacy:'गोपनीयता नीति',s_privacy:'हम आपकी जानकारी कैसे संभालते हैं।',dl:'डाउनलोड',agree:'भेजकर आप हमारी इस नीति से सहमत होते हैं:',soon:'',follow2:'हमें फ़ॉलो करें',sent:'धन्यवाद! हम जल्द ही आपको कॉल करेंगे।',nm:'आपका नाम',msg:'संदेश (वैकल्पिक)',send:'पूछताछ भेजें',rights:'सर्वाधिकार सुरक्षित।',quick:'त्वरित लिंक',reach:'संपर्क करें',hrs:'स्कूल का समय',addr:'पता',phone:'फ़ोन',mail:'ईमेल',method:'हम कैसे पढ़ाते हैं',wa:'व्हाट्सऐप',chatus:'हमसे चैट करें',more:'और जानें',viewall:'सभी देखें',notices:'ताज़ा सूचनाएँ',events:'आने वाले कार्यक्रम',story:'हमारे बारे में',team:'हमारी टीम',journey:'हमारा सफ़र',vision:'मिशन और विज़न',msgp:'प्रधानाचार्य का संदेश',elig:'पात्रता',docs:'ज़रूरी दस्तावेज़',dates:'महत्वपूर्ण तिथियाँ',faq:'अक्सर पूछे जाने वाले प्रश्न',class:'कक्षा',age:'न्यूनतम आयु',cong:'प्रवेश जारी',cong2:'सीमित सीटें',rate:'अभिभावक रेटिंग',school:'स्कूल',loc:'हमें खोजें',tag:'जिज्ञासु मन का विकास',desc:'हमारी कक्षाएँ, सुविधाएँ, प्रवेश प्रक्रिया और स्कूल जीवन के बारे में जानें।',portal:'छात्र / अभिभावक लॉगिन',follow:'प्रवेश हेल्पलाइन',err:'कृपया सही नाम और फ़ोन नंबर लिखें',h_about:'हमारे स्कूल के बारे में',h_acad:'शिक्षा',h_fac:'परिसर और सुविधाएँ',h_adm:'प्रवेश',h_gal:'फ़ोटो गैलरी',h_con:'संपर्क करें',s_about:'हमारी कहानी, मूल्य और स्कूल के पीछे के लोग।',s_acad:'पहले कदम से बोर्ड परीक्षा तक, हर बच्चे के लिए बना रास्ता।',s_fac:'सीखने, खेलने और आगे बढ़ने के लिए बने स्थान।',s_adm:'आसान चरण, साफ़ जानकारी, मित्रवत सहायता।',s_gal:'कक्षाओं, खेल के मैदानों और उत्सवों के पल।',s_con:'हमें आपसे बात करके खुशी होगी।'}};
-Object.assign(T.en,{lib:'Library',h_lib:'Study Library',s_lib:'Free notes, books and PDFs shared by our teachers',lb_all:'All',lb_cls:'Class',lb_sub:'Subject',lb_q:'Search notes, chapter or subject',lb_view:'View',lb_dl:'Download',lb_none:'No notes found yet.',lb_load:'Loading library…',lb_err:'Library could not be loaded. Please try again later.',lb_note:'Shared by teachers for study. Opens from Google Drive.',lb_pdf:'PDF',lb_img:'Photo'});
-Object.assign(T.hi,{lib:'लाइब्रेरी',h_lib:'अध्ययन लाइब्रेरी',s_lib:'हमारे शिक्षकों द्वारा साझा किए गए मुफ़्त नोट्स, किताबें और PDF',lb_all:'सभी',lb_cls:'कक्षा',lb_sub:'विषय',lb_q:'नोट्स, अध्याय या विषय खोजें',lb_view:'देखें',lb_dl:'डाउनलोड',lb_none:'अभी कोई नोट्स नहीं मिले।',lb_load:'लाइब्रेरी लोड हो रही है…',lb_err:'लाइब्रेरी लोड नहीं हो सकी। कृपया बाद में कोशिश करें।',lb_note:'शिक्षकों द्वारा पढ़ाई के लिए साझा। Google Drive से खुलता है।',lb_pdf:'PDF',lb_img:'फ़ोटो'});
+Object.assign(T.en,{lib:'Library',h_lib:'Study Library',s_lib:'Free notes, books, previous year papers and sample papers (PDF)',lb_all:'All',lb_cls:'Class',lb_sub:'Subject',lb_q:'Search notes, chapter or subject',lb_view:'View',lb_dl:'Download',lb_none:'No notes found yet.',lb_load:'Loading library…',lb_err:'Library could not be loaded. Please try again later.',lb_read:'Read online',lb_back:'Back to Library',lb_pdfhint:'Your device may not show the PDF here. Use Read online or Download.',lb_note:'',lb_pdf:'PDF',lb_img:'Photo'});
+Object.assign(T.hi,{lib:'लाइब्रेरी',h_lib:'अध्ययन लाइब्रेरी',s_lib:'मुफ़्त नोट्स, किताबें, पिछले वर्ष के प्रश्नपत्र और सैंपल पेपर (PDF)',lb_all:'सभी',lb_cls:'कक्षा',lb_sub:'विषय',lb_q:'नोट्स, अध्याय या विषय खोजें',lb_view:'देखें',lb_dl:'डाउनलोड',lb_none:'अभी कोई नोट्स नहीं मिले।',lb_load:'लाइब्रेरी लोड हो रही है…',lb_err:'लाइब्रेरी लोड नहीं हो सकी। कृपया बाद में कोशिश करें।',lb_read:'ऑनलाइन पढ़ें',lb_back:'लाइब्रेरी पर वापस',lb_pdfhint:'आपके डिवाइस पर PDF यहाँ न दिखे तो ऑनलाइन पढ़ें या डाउनलोड करें।',lb_note:'',lb_pdf:'PDF',lb_img:'फ़ोटो'});
 const s_=k=>(T[getLang()]||T.en)[k]||k;
 const UL='<svg viewBox="0 0 200 12" preserveAspectRatio="none"><path d="M2 8Q50 0 100 6T198 4" fill="none" stroke="var(--o)" stroke-width="4" stroke-linecap="round"/></svg>';
 const PASTEL=['#fde2ef','#d7f5ee','#ffe9a8','#e4d9ff','#d6e6ff','#ffe0cc','#d4f5d9','#fff0bd'];
@@ -25,7 +25,7 @@ const pill=(href,txt,cls)=>'<a class="pill '+(cls||'solid')+'" href="'+href+'">'
 const cityPhoto=(it,i,ic)=>im(it.photo,scene(i,ic||it.i||it.icon||'book'));
 
 const NAV=[['index.html','home'],['about.html','about'],['academics.html','acad'],['facilities.html','fac'],['admission.html','adm'],['library.html','lib'],['gallery.html','gal'],['contact.html','con']];
-const PID={lib:'lib',home:'home',about:'about',acad:'acad',fac:'fac',adm:'adm',gal:'gal',con:'con'};
+const PID={lib:'lib',libitem:'lib',home:'home',about:'about',acad:'acad',fac:'fac',adm:'adm',gal:'gal',con:'con'};
 
 function shell(){
  const lg=okLogo()?'<img src="'+esc(SITE.logo)+'" alt="">':'<span class="lm">'+esc((CFG.shortName||SN()||'S').trim().charAt(0))+'</span>';
@@ -122,31 +122,36 @@ const PAGES={
   +sec('rv',head('',esc(s_('faq')))+'<div class="fq"'+EA('faq')+'>'+SITE.faq.map((f,i)=>'<details'+E('faq.'+i)+'><summary>'+esc(L(f.q))+'</summary><p>'+esc(L(f.a))+'</p></details>').join('')+'</div>')
   +ctaForm(),
  gal:()=>pageHero('gal','twoboys')+sec('rv','<div class="tabs" id="gtabs" style="margin-top:0"></div><div class="gg" id="gg"'+EA('gallery')+'></div>'),
- lib:()=>pageHero('lib','books')+sec('rv','<div class="lbf"><input id="lq" type="search" placeholder="'+esc(s_('lb_q'))+'" value="'+esc(LIBF.q)+'"><select id="lc" aria-label="'+esc(s_('lb_cls'))+'"></select><select id="ls" aria-label="'+esc(s_('lb_sub'))+'"></select></div><div id="lbg" class="lbg"><p class="lbm">'+esc(s_('lb_load'))+'</p></div><p class="lbm" style="margin-top:18px">'+esc(s_('lb_note'))+'</p>'),
+ lib:()=>pageHero('lib','books')+sec('rv','<div class="tabs" id="lct" style="margin:0 0 18px"></div><div class="lbf"><input id="lq" type="search" placeholder="'+esc(s_('lb_q'))+'" value="'+esc(LIBF.q)+'"><select id="lc" aria-label="'+esc(s_('lb_cls'))+'"></select><select id="ls" aria-label="'+esc(s_('lb_sub'))+'"></select></div><div id="lbg" class="lbg"><p class="lbm">'+esc(s_('lb_load'))+'</p></div>'),
  privacy:()=>privacyPage(),
  con:()=>pageHero('con','kids')+sec('rv',cards())
   +sec('rv','<div class="cg"><div class="panel"'+E('hours')+'><h3>'+s_('hrs')+'</h3>'+SITE.hours.map(h=>'<div class="li"><div><h4>'+esc(L(h.d))+'</h4><p>'+esc(L(h.t))+'</p></div></div>').join('')+'</div><div class="map" id="map"></div></div>')+ctaForm()
 };
 let gcat=0;
-const LIBF={q:'',c:'',s:''};let LIB=null,LIBERR=false;
+const LCATS=[['notes','Notes','नोट्स'],['books','Books','किताबें'],['pyq','Previous Year Papers','पिछले वर्ष के प्रश्नपत्र'],['sample','Sample Papers','सैंपल पेपर'],['mag','Magazines','पत्रिकाएँ'],['syl','Syllabus','पाठ्यक्रम'],['other','Other','अन्य']];
+const lcat=k=>{const c=LCATS.find(x=>x[0]===k)||LCATS[6];return getLang()==='hi'?c[2]:c[1]};
+const LIBF={q:'',cat:(new URLSearchParams(location.search).get('cat')||''),c:'',s:''};let LIB=null,LIBERR=false;
 const fz=n=>n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB';
 function libDraw(){
  const g=$('lbg');if(!g)return;
  if(LIBERR){g.innerHTML='<p class="lbm">'+esc(s_('lb_err'))+'</p>';return}
  if(!LIB){g.innerHTML='<p class="lbm">'+esc(s_('lb_load'))+'</p>';return}
- const uniq=a=>[...new Set(a)].sort((x,y)=>x.localeCompare(y,undefined,{numeric:true})),cs=uniq(LIB.map(n=>n.c)),ss=uniq(LIB.filter(n=>!LIBF.c||n.c===LIBF.c).map(n=>n.s));
- if(LIBF.s&&!ss.includes(LIBF.s))LIBF.s='';
+ const uniq=a=>[...new Set(a.filter(Boolean))].sort((x,y)=>x.localeCompare(y,undefined,{numeric:true})),byCat=LIB.filter(n=>!LIBF.cat||n.cat===LIBF.cat),cs=uniq(byCat.map(n=>n.c)),ss=uniq(byCat.filter(n=>!LIBF.c||n.c===LIBF.c).map(n=>n.s));
+ if(LIBF.c&&!cs.includes(LIBF.c))LIBF.c='';if(LIBF.s&&!ss.includes(LIBF.s))LIBF.s='';
+ const used=new Set(LIB.map(n=>n.cat));
+ $('lct').innerHTML=['<button type="button" data-k=""'+(!LIBF.cat?' class="on"':'')+'>'+esc(s_('lb_all'))+'</button>'].concat(LCATS.filter(c=>used.has(c[0])).map(c=>'<button type="button" data-k="'+c[0]+'"'+(LIBF.cat===c[0]?' class="on"':'')+'>'+esc(lcat(c[0]))+'</button>')).join('');
  const opt=(a,v,all)=>'<option value="">'+esc(all)+'</option>'+a.map(x=>'<option'+(x===v?' selected':'')+'>'+esc(x)+'</option>').join('');
  $('lc').innerHTML=opt(cs,LIBF.c,s_('lb_cls')+': '+s_('lb_all'));$('ls').innerHTML=opt(ss,LIBF.s,s_('lb_sub')+': '+s_('lb_all'));
- const t=LIBF.q.toLowerCase().trim(),r=LIB.filter(n=>(!LIBF.c||n.c===LIBF.c)&&(!LIBF.s||n.s===LIBF.s)&&(!t||(n.t+' '+n.ch+' '+n.s+' '+n.c).toLowerCase().includes(t)));
- g.innerHTML=r.length?r.map((n,i)=>{const id=encodeURIComponent(n.f);return '<article class="lbc"><div class="lbt" style="background:'+PASTEL[i%8]+'"><span class="ic">'+ic('book')+'</span><b>'+esc(s_(n.m==='pdf'?'lb_pdf':'lb_img'))+'</b></div><div class="lbb"><h3>'+esc(n.t)+'</h3><p>'+esc(n.s+' · '+n.c)+'</p><small>'+esc(n.ch)+'</small><small>'+fz(n.z)+' · '+esc(n.d)+'</small><div class="lbx"><a class="pill solid sm" target="_blank" rel="noopener" href="https://drive.google.com/file/d/'+id+'/view">'+esc(s_('lb_view'))+'</a><a class="pill ghost sm" target="_blank" rel="noopener" href="https://drive.google.com/uc?export=download&id='+id+'">'+esc(s_('lb_dl'))+'</a></div></div></article>'}).join(''):'<p class="lbm">'+esc(s_('lb_none'))+'</p>'}
+ const t=LIBF.q.toLowerCase().trim(),r=byCat.filter(n=>(!LIBF.c||n.c===LIBF.c)&&(!LIBF.s||n.s===LIBF.s)&&(!t||(n.t+' '+n.s+' '+n.c+' '+(n.x||'')).toLowerCase().includes(t)));
+ g.innerHTML=r.length?r.map((n,i)=>'<article class="lbc"><a class="lbt" href="library/'+esc(n.id)+'.html" style="background:'+PASTEL[i%8]+'"><span class="ic">'+ic('book')+'</span><b>'+esc(lcat(n.cat))+'</b></a><div class="lbb"><h3><a href="library/'+esc(n.id)+'.html">'+esc(n.t)+'</a></h3><p>'+esc([n.s,n.c].filter(Boolean).join(' · '))+'</p><small>PDF · '+fz(n.z||0)+' · '+esc(n.d||'')+'</small><div class="lbx"><a class="pill solid sm" href="library/'+esc(n.id)+'.html">'+esc(s_('lb_view'))+'</a><a class="pill ghost sm" download href="'+esc(n.f)+'">'+esc(s_('lb_dl'))+'</a></div></div></article>').join(''):'<p class="lbm">'+esc(s_('lb_none'))+'</p>'}
 async function libInit(){
+ if(PAGE==='libitem'){document.querySelectorAll('[data-k]').forEach(e=>{const k=e.dataset.k;if(k.indexOf('cat:')===0)e.textContent=lcat(k.slice(4));else if(T.en[k])e.textContent=s_(k)});return}
  if(!$('lbg'))return;
  const q=$('lq');q.oninput=()=>{LIBF.q=q.value;libDraw()};$('lc').onchange=e=>{LIBF.c=e.target.value;libDraw()};$('ls').onchange=e=>{LIBF.s=e.target.value;libDraw()};
+ $('lct').onclick=e=>{const b=e.target.closest('button');if(b){LIBF.cat=b.dataset.k;libDraw()}};
  if(LIB||LIBERR){libDraw();return}
  libDraw();
- if(window.STUDIO||!CFG.api){LIB=[];libDraw();return}
- try{const r=await api('publicNotes');if(!r||!r.ok)throw 0;LIB=r.notes||[]}catch(e){LIBERR=true}
+ try{const r=await fetch('content/library.json?v='+Date.now());if(!r.ok)throw 0;LIB=(await r.json()).items||[]}catch(e){LIB=[]}
  libDraw()}
 function gallery(){
  const g=$('gg');if(!g)return;
@@ -179,8 +184,8 @@ function wire(){
 }
 function render(){
  FB.length=0;document.documentElement.lang=getLang();document.documentElement.style.setProperty('--c',CFG.color||'#111');document.documentElement.style.setProperty('--o',CFG.accent||'#ff7a1a');
- PAGE=document.body.dataset.page||'home';document.title=(PAGE==='home'?SN()+' — '+s_('tag'):s_('h_'+PAGE)+' | '+SN());
- seo();shell();$('main').innerHTML=(PAGES[PAGE]||PAGES.home)();gallery();mapInit();wire();libInit();
+ PAGE=document.body.dataset.page||'home';if(PAGE!=='libitem')document.title=(PAGE==='home'?SN()+' — '+s_('tag'):s_('h_'+PAGE)+' | '+SN());
+ if(PAGE!=='libitem'){seo();$('main').innerHTML=(PAGES[PAGE]||PAGES.home)()}shell();gallery();mapInit();wire();libInit();
  if(window.afterRender)afterRender();
 }
 function seo(){const set=(sel,mk,v)=>{let e=document.querySelector(sel);if(!e){e=document.createElement('meta');mk(e);document.head.appendChild(e)}e.setAttribute('content',v)};

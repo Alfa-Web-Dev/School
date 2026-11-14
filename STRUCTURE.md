@@ -26,6 +26,6 @@ index, about, academics, facilities, admission, gallery, contact .html — each 
 `assets/js/lang.js` (loaded on every panel page, login, receipt, report card, studio) maps every visible phrase to clean English or Hindi at runtime (text, placeholders, alert/confirm/prompt, server messages). New UI text: add one line `[source, hindi]` (or `[source, english, hindi]` if the source is Hinglish) to the list in lang.js. Website text lives bilingual in `site-data.js` / `site.js` (`b(hi,en)`); school name/address: `CFG.name`/`CFG.nameHi`, `CFG.address`/`CFG.addressHi`. Typed data (student names etc.) is shown as entered.
 
 ## Public Library (website `library.html`)
-- Files stay in **Google Drive** only (never in this repo). Teacher/admin upload a note in the panel; ticking *"Website ki Library mein public dikhao"* + *"content apna/allowed hai"* sets `public=yes` in the `Notes` sheet (11th column, auto-added on old sheets).
-- Website calls the public Apps Script action `publicNotes` (no login, 10-min cache, returns only title/chapter/class/subject/date/type/size/fileId). Cards open `drive.google.com/file/d/<id>/view`.
-- Teacher can switch any note Public ON/OFF later (`setNotePublic`). Private notes are never listed.
+- PDFs live **in this repo** so they load fast (GitHub Pages CDN) and Google can index them: `library/files/<id>.pdf`, one static SEO page `library/<id>.html` per file, index in `content/library.json`, and each page is added to `sitemap.xml`.
+- Manage everything from **Studio → 📚 Library** (add PDF with category / class / subject / description, or delete). Categories: Notes, Books, Previous Year Papers, Sample Papers, Magazines, Syllabus, Other. Limit 30 MB per file; keep total repo under ~1 GB.
+- Students' private class notes still use Google Drive in the panels (not public).

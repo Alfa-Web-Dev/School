@@ -16,8 +16,9 @@ const SCHEMA={
  Payments:['receiptNo','studentId','feeType','amount','mode','date','receivedBy'],
  ClassNotices:['id','classId','title','text','date'],
  Enquiries:['id','name','phone','message','time','status'],
+ Notes:['noteId','classId','subjectId','chapter','title','fileId','fileName','mime','size','uploadedBy','date'],
  Tokens:['tokenHash','userId','role','expires'],
- Notes:['noteId','classId','subjectId','chapter','title','fileId','mime','size','uploadedBy','date','public'],
+ Notes:['noteId','classId','subjectId','chapter','title','fileId','mime','size','uploadedBy','date'],
  Logs:['time','userId','action','details']
 };
 const out=o=>ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);

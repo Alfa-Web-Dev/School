@@ -90,9 +90,9 @@ const PGS=[['home','Home','index.html'],['about','About','about.html'],['acad','
 function go(p){document.body.dataset.page=p;render();scrollTo(0,0);qa('.sbar .tab').forEach(t=>t.classList.toggle('on',t.dataset.p===p))}
 function bar(){
  const sb=h('div',{class:'sbar'},[h('b',{text:'✏️ Website Studio'}),h('div',{class:'tabsb'},PGS.map(p=>{const t=h('button',{class:'tab'+(p[0]===document.body.dataset.page?' on':''),type:'button',text:p[1]});t.dataset.p=p[0];t.onclick=()=>go(p[0]);return t})),
-  h('span',{class:'sp'}),h('button',{class:'pill sm ghost',type:'button',text:'Exit',id:'sx'})]);
+  h('span',{class:'sp'}),h('button',{class:'pill sm solid',type:'button',text:'📚 Library',id:'slib'}),h('button',{class:'pill sm ghost',type:'button',text:'Exit',id:'sx'})]);
  document.body.prepend(sb);document.body.append(h('div',{class:'pubbar'},[h('span',{id:'pubn',class:'pubn'}),h('button',{id:'shist',class:'pill sm ghost',type:'button',text:'Clean history'}),h('button',{id:'spub',class:'pill orange',type:'button',text:'Publish',disabled:''})]));
- q('#spub').onclick=publish;q('#shist').onclick=cleanHistory;q('#sx').onclick=()=>{if((ST.dS.size+ST.dP.size+ST.dC.size)&&!confirm('You have unsaved changes. Exit?'))return;sessionStorage.removeItem('st_tok');localStorage.removeItem('st_tok');location.href='index.html'};
+ q('#spub').onclick=publish;q('#slib').onclick=libManager;q('#shist').onclick=cleanHistory;q('#sx').onclick=()=>{if((ST.dS.size+ST.dP.size+ST.dC.size)&&!confirm('You have unsaved changes. Exit?'))return;sessionStorage.removeItem('st_tok');localStorage.removeItem('st_tok');location.href='index.html'};
  document.addEventListener('click',e=>{const a=e.target.closest('a');if(!a||e.target.closest('.sbar'))return;e.preventDefault();const f=(a.getAttribute('href')||'').split('/').pop();const m=PGS.find(p=>p[2]===f);if(m)go(m[0])},true);
  window.addEventListener('beforeunload',e=>{if(ST.dS.size+ST.dP.size+ST.dC.size){e.preventDefault();e.returnValue=''}});
 }
@@ -132,6 +132,60 @@ async function cleanHistory(){
   toast('✅ History cleaned. Only one commit remains.');
  }catch(e){toast('Clean failed: '+e.message,1)}
 }
+// ---------- Library manager (PDF files live in this repo: library/files/*.pdf + library/<slug>.html + content/library.json) ----------
+const LIB_MAX=30*1024*1024,LIB_WARN=800*1024*1024;
+const siteBase=()=>location.href.split('#')[0].split('?')[0].replace(/[^/]*$/,'');
+const xe=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const slugOf=t=>{const w=String(t).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,50).replace(/-+$/,'');return (w||'file')+'-'+Date.now().toString(36).slice(-4)};
+const fileB64=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result.split(',')[1]);r.onerror=no;r.readAsDataURL(f)});
+async function shaOf(p){const r=await gh('/repos/'+ST.repo+'/contents/'+p+'?t='+Date.now());if(r.status===404)return null;if(!r.ok)throw new Error('GitHub '+r.status);return (await r.json()).sha}
+async function del(p,msg){const sha=await shaOf(p);if(!sha)return;const r=await gh('/repos/'+ST.repo+'/contents/'+p,{method:'DELETE',body:JSON.stringify({message:msg,sha})});if(!r.ok)throw new Error('Delete failed '+r.status)}
+function itemPage(it,base){
+ const url=base+'library/'+it.id+'.html',pdf=base+it.f,cat=(LCATS.find(c=>c[0]===it.cat)||LCATS[6])[1],name=(CFG.name||'School'),
+  title=it.t+(it.c?' – '+it.c:'')+(it.s?' '+it.s:'')+' '+cat+' (PDF) | '+name,
+  desc=(it.x||(it.t+(it.c?' for '+it.c:'')+(it.s?' '+it.s:'')+'. Free '+cat+' PDF to read online or download.')).slice(0,300),
+  ld={'@context':'https://schema.org','@type':'LearningResource',name:it.t,description:desc,inLanguage:it.l||'en',educationalLevel:it.c||undefined,about:it.s||undefined,learningResourceType:cat,datePublished:it.d,url,encoding:{'@type':'MediaObject',contentUrl:pdf,encodingFormat:'application/pdf',contentSize:it.z+' B'},provider:{'@type':'School',name}};
+ return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><base href="../"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+xe(title)+'</title><meta name="description" content="'+xe(desc)+'"><meta name="theme-color" content="#111111"><link rel="canonical" href="'+xe(url)+'">'
+ +'<meta property="og:title" content="'+xe(it.t)+'"><meta property="og:description" content="'+xe(desc)+'"><meta property="og:type" content="article"><meta property="og:url" content="'+xe(url)+'">'
+ +'<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"><link rel="stylesheet" href="assets/css/site.css">'
+ +'<script type="application/ld+json">'+JSON.stringify(ld).replace(/</g,'\\u003c')+'</script></head>\n<body data-page="libitem"><div id="top"></div>'
+ +'<main id="main"><section class="sec"><div class="wrap lbi"><a class="lbk" href="library.html">← <span data-k="lb_back">Back to Library</span></a><span class="eyebrow" data-k="cat:'+xe(it.cat)+'">'+xe(cat)+'</span><h1>'+xe(it.t)+'</h1>'
+ +'<p class="lbmeta">'+xe([it.s,it.c].filter(Boolean).join(' · '))+(it.s||it.c?' · ':'')+'PDF · '+(it.z>=1048576?(it.z/1048576).toFixed(1)+' MB':Math.max(1,Math.round(it.z/1024))+' KB')+' · '+xe(it.d)+'</p>'
+ +(it.x?'<p class="lbdesc">'+xe(it.x)+'</p>':'')
+ +'<div class="lbx"><a class="pill solid" href="'+xe(it.f)+'" target="_blank" rel="noopener" data-k="lb_read">Read online</a><a class="pill ghost" href="'+xe(it.f)+'" download data-k="lb_dl">Download</a></div>'
+ +'<iframe class="lbpdf" src="'+xe(it.f)+'" title="'+xe(it.t)+'" loading="lazy"></iframe></div></section></main><div id="foot"></div>\n'
+ +'<script src="config.js"></script><script src="assets/js/i18n.js"></script><script src="assets/js/i18n-extra.js"></script><script src="assets/js/api.js"></script><script src="assets/js/art.js"></script><script src="assets/js/site-data.js"></script><script src="assets/js/site.js"></script></body></html>'}
+async function readLib(){const f=await getFile('content/library.json');return f?{sha:f.sha,j:JSON.parse(f.text)}:{sha:null,j:{items:[]}}}
+async function sitemapSet(add,id){const f=await getFile('sitemap.xml');if(!f)return;let x=f.text.replace(new RegExp('<url><loc>[^<]*/library/'+id+'\\.html</loc></url>\\s*','g'),'');
+ if(add)x=x.replace('</urlset>','<url><loc>'+siteBase()+'library/'+id+'.html</loc></url>\n</urlset>');await put('sitemap.xml',b64(x),'Studio: sitemap',f.sha)}
+function libManager(){
+ const ov=h('div',{class:'smd'}),box=h('div',{class:'sbx'}),list=h('div',{class:'lbl'}),msg=h('div',{class:'em'});
+ const cat=h('select',{},LCATS.map(c=>h('option',{value:c[0],text:c[1]}))),ti=h('input',{type:'text',placeholder:'Title (e.g. Class 10 Maths Sample Paper 2026)'}),cl=h('input',{type:'text',placeholder:'Class (e.g. Class 10)',list:'lbcl'}),su=h('input',{type:'text',placeholder:'Subject (e.g. Maths)'}),
+  ds=h('textarea',{rows:'2',placeholder:'Short description (helps Google search). 1–2 lines.'}),fi=h('input',{type:'file',accept:'application/pdf'}),lg=h('select',{},[h('option',{value:'en',text:'English'}),h('option',{value:'hi',text:'Hindi'})]),
+  go_=h('button',{class:'pill solid',type:'button',text:'Upload & publish'}),dl=h('datalist',{id:'lbcl'},['Nursery','LKG','UKG'].concat(Array.from({length:12},(_,i)=>'Class '+(i+1)),['All classes']).map(v=>h('option',{value:v})));
+ const draw=async()=>{list.textContent='Loading…';try{const{j}=await readLib(),tot=j.items.reduce((a,i)=>a+(i.z||0),0);
+  list.textContent='';list.append(h('p',{class:'mu',text:j.items.length+' file(s) · '+(tot/1048576).toFixed(1)+' MB used'+(tot>LIB_WARN?' — repo is getting full (GitHub limit ~1 GB). Delete old files.':'')}));
+  j.items.forEach(it=>{const b=h('button',{class:'sb',type:'button',text:'Delete'});b.onclick=async()=>{if(!confirm('Delete "'+it.t+'"?'))return;b.disabled=true;try{await remove(it);await draw()}catch(e){msg.textContent=e.message;b.disabled=false}};
+   list.append(h('div',{class:'ai'},[h('div',{},[h('b',{text:it.t}),h('div',{class:'mu',text:(LCATS.find(c=>c[0]===it.cat)||LCATS[6])[1]+' · '+[it.c,it.s].filter(Boolean).join(' · ')+' · '+(it.z/1048576).toFixed(1)+' MB'})]),b]))})}catch(e){list.textContent='Error: '+e.message}};
+ async function remove(it){
+  await del(it.f,'Studio: remove '+it.id);await del('library/'+it.id+'.html','Studio: remove page '+it.id);
+  for(let n=0;n<2;n++){try{const{sha,j}=await readLib();j.items=j.items.filter(x=>x.id!==it.id);await put('content/library.json',b64(JSON.stringify(j,null,1)),'Studio: library update',sha);break}catch(e){if(n)throw e}}
+  await sitemapSet(false,it.id)}
+ go_.onclick=async()=>{msg.style.color='';msg.textContent='';go_.disabled=true;
+  try{const f=fi.files[0],t=ti.value.trim();if(!t)throw new Error('Title is required');if(!f)throw new Error('Choose a PDF');if(f.type!=='application/pdf'&&!/\.pdf$/i.test(f.name))throw new Error('Only PDF files');if(f.size>LIB_MAX)throw new Error('File is '+(f.size/1048576).toFixed(1)+' MB. Limit is 30 MB — compress the PDF first.');
+   msg.textContent='Uploading… do not close this page';
+   const id=slugOf(t),it={id,cat:cat.value,t,c:cl.value.trim(),s:su.value.trim(),x:ds.value.trim(),l:lg.value,z:f.size,d:new Date().toISOString().slice(0,10),f:'library/files/'+id+'.pdf'};
+   await put(it.f,await fileB64(f),'Studio: library file '+id);
+   await put('library/'+id+'.html',b64(itemPage(it,siteBase())),'Studio: library page '+id);
+   for(let n=0;n<2;n++){try{const{sha,j}=await readLib();j.items=j.items||[];j.items.unshift(it);await put('content/library.json',b64(JSON.stringify(j,null,1)),'Studio: library update',sha);break}catch(e){if(n)throw e}}
+   try{await sitemapSet(true,id)}catch(e){}
+   ti.value='';ds.value='';fi.value='';msg.textContent='';toast('✅ Added. Live in 1–2 minutes.');await draw()}
+  catch(e){msg.textContent=e.message}go_.disabled=false};
+ const cls=h('button',{class:'sb',type:'button',text:'Close'});cls.onclick=()=>ov.remove();
+ box.append(h('h3',{text:'📚 Library (PDF books, notes, papers)'}),h('p',{class:'mu',text:'Files are saved in your website repository, so they open fast and Google can find them.'}),
+  h('div',{class:'sf'},[h('label',{text:'Category'}),cat]),h('div',{class:'sf'},[h('label',{text:'Title'}),ti]),h('div',{class:'sf'},[h('label',{text:'Class'}),cl,dl]),h('div',{class:'sf'},[h('label',{text:'Subject'}),su]),h('div',{class:'sf'},[h('label',{text:'Language of the PDF'}),lg]),h('div',{class:'sf'},[h('label',{text:'Description'}),ds]),h('div',{class:'sf'},[h('label',{text:'PDF file (max 30 MB)'}),fi]),
+  msg,h('div',{class:'sact'},[cls,go_]),h('h4',{text:'Already in library',style:'margin:18px 0 6px'}),list);
+ ov.append(box);document.body.append(ov);draw()}
 async function login(){
  const ov=h('div',{class:'smd lg'}),guess=(location.hostname.split('.')[0]||'')+'/'+(location.pathname.split('/')[1]||'');
  const rp=h('input',{type:'text',placeholder:'owner/repo',value:localStorage.getItem('st_repo')||guess}),tk=h('input',{type:'password',placeholder:'GitHub token (github_pat_…)',autocomplete:'off'}),rm=h('input',{type:'checkbox'}),er=h('div',{class:'em'}),go_=h('button',{class:'pill solid',type:'button',text:'Open Studio'});

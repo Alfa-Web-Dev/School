@@ -172,3 +172,8 @@ footer{margin-top:60px;padding:36px 0 0}.fg{grid-template-columns:1.5fr 1fr 1.3f
 .lbx{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:12px}
 @media(max-width:640px){.lbf{grid-template-columns:1fr 1fr}.lbf input{grid-column:1/-1}}
 .lbt .ic{color:#111;border-radius:12px;display:grid;place-items:center}.lbt .ic svg{width:24px;height:24px;stroke:#111;fill:none}
+.lbi{max-width:900px}.lbi h1{font-size:clamp(26px,4vw,38px);margin:8px 0}.lbk{display:block;margin-bottom:14px;font-weight:600;font-size:14px}.lbmeta{color:#555;font-weight:600;margin:0 0 10px}.lbdesc{max-width:680px;margin:0 0 16px}
+.lbi .lbx{margin:16px 0 22px}.lbpdf{width:100%;height:80vh;border:1px solid rgba(0,0,0,.12);border-radius:14px;background:#f4f4f4}
+@media(max-width:760px){.lbpdf{display:none}}
+.lbc h3 a{color:inherit;text-decoration:none}a.lbt{text-decoration:none}
+.lbl .ai{align-items:center}

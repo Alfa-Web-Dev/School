@@ -16,8 +16,9 @@ const SCHEMA={
  Payments:['receiptNo','studentId','feeType','amount','mode','date','receivedBy'],
  ClassNotices:['id','classId','title','text','date'],
  Enquiries:['id','name','phone','message','time','status'],
+ Notes:['noteId','classId','subjectId','chapter','title','fileId','fileName','mime','size','uploadedBy','date'],
  Tokens:['tokenHash','userId','role','expires'],
- Notes:['noteId','classId','subjectId','chapter','title','fileId','mime','size','uploadedBy','date','public'],
+ Notes:['noteId','classId','subjectId','chapter','title','fileId','mime','size','uploadedBy','date'],
  Logs:['time','userId','action','details']
 };
 const out=o=>ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
@@ -166,7 +167,7 @@ function doPost(e){
  }catch(err){return out({ok:false,error:'Server error'})}}
 
 // action -> function ka naam. Naye features yahin jodo.
-const ROUTES={publicNotes:'publicNotes',setNotePublic:'setNotePublic',noteOptions:'noteOptions',listNotes:'listNotes',uploadNote:'uploadNote',updateNote:'updateNote',deleteNote:'deleteNote',uploadNote:'uploadNote',listNotes:'listNotes',updateNote:'updateNote',deleteNote:'deleteNote',noteSubjects:'noteSubjects',deleteFee:'deleteFee',studentFees:'studentFees',voidPayment:'voidPayment',getReceipt:'getReceipt',defaulters:'defaulters',getMarks:'getMarks',deleteAssignment:'deleteAssignment',deleteLesson:'deleteLesson',deleteClassNotice:'deleteClassNotice',teacherHome:'teacherHome',resetSecret:'resetSecret',myDashboard:'myDashboard',myProfile:'myProfile',myAttendance:'myAttendance',myFees:'myFees',myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',saveClass:'saveClass',listSubjects:'listSubjects',saveSubject:'saveSubject',listLessons:'listLessons',saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',issueCertificate:'issueCertificate',adminExams:'adminExams',deleteExam:'deleteExam',reportCard:'reportCard',saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',backupNow:'backupNow'};
+const ROUTES={noteOptions:'noteOptions',listNotes:'listNotes',uploadNote:'uploadNote',updateNote:'updateNote',deleteNote:'deleteNote',uploadNote:'uploadNote',listNotes:'listNotes',updateNote:'updateNote',deleteNote:'deleteNote',noteSubjects:'noteSubjects',deleteFee:'deleteFee',studentFees:'studentFees',voidPayment:'voidPayment',getReceipt:'getReceipt',defaulters:'defaulters',getMarks:'getMarks',deleteAssignment:'deleteAssignment',deleteLesson:'deleteLesson',deleteClassNotice:'deleteClassNotice',teacherHome:'teacherHome',resetSecret:'resetSecret',myDashboard:'myDashboard',myProfile:'myProfile',myAttendance:'myAttendance',myFees:'myFees',myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',saveClass:'saveClass',listSubjects:'listSubjects',saveSubject:'saveSubject',listLessons:'listLessons',saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',issueCertificate:'issueCertificate',adminExams:'adminExams',deleteExam:'deleteExam',reportCard:'reportCard',saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',backupNow:'backupNow'};
 
 // Student portal (Phase 3): student sirf apni hi data dekh sakta hai. changeSecret sab roles ke liye.
 const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],TZ='Asia/Kolkata';
@@ -712,31 +713,6 @@ function magicOk(b,mime){const u=i=>b[i]&255;
 function subFolder(parent,name){const it=parent.getFoldersByName(name);return it.hasNext()?it.next():parent.createFolder(name)}
 const safeName=s=>String(s).replace(/[\\/:*?"<>|\r\n]+/g,' ').replace(/\s+/g,' ').trim().slice(0,60)||'note';
 
-// Public library: teacher/admin jis note ko "public" karein wahi website par dikhta hai (Drive se, repo mein kuch nahi).
-// Purane sheet mein 'public' column (11th) apne aap jud jata hai.
-const PUB_KEY='pub_notes';
-function notesCol(){const sh=tab('Notes');if(String(sh.getRange(1,11).getValue())!=='public')sh.getRange(1,11).setValue('public')}
-const isPub=n=>String(n.public).toLowerCase()==='yes';
-const pubBust=()=>{try{CacheService.getScriptCache().remove(PUB_KEY)}catch(e){}};
-function publicNotes(b){   // bina login; sirf public-flag wale notes ka metadata, 10 min cache
- return safe(()=>{
-  const c=CacheService.getScriptCache(),hit=c.get(PUB_KEY);if(hit)return JSON.parse(hit);
-  notesCol();
-  const sn=nameMap('Subjects','subjectId'),cn=nameMap('Classes','classId');
-  let list=table('Notes').rows.filter(isPub).map(n=>({id:String(n.noteId),t:String(n.title),ch:String(n.chapter),c:cn[String(n.classId)]||'',s:sn[String(n.subjectId)]||'',d:dstr(n.date),m:String(n.mime)==='application/pdf'?'pdf':'img',z:Number(n.size)||0,f:String(n.fileId)}));
-  list.sort((a,z)=>a.d<z.d?1:-1);list=list.slice(0,400);
-  let r={ok:true,notes:list},j=JSON.stringify(r);
-  while(j.length>90000&&list.length){list=list.slice(0,Math.floor(list.length*0.8));r={ok:true,notes:list};j=JSON.stringify(r)}
-  c.put(PUB_KEY,j,600);return r})}
-
-function setNotePublic(b){
- const s=guard(b,['admin','teacher']);if(!s)return DENIED;
- return safe(()=>withLock(()=>{
-  const ex=find('Notes',n=>String(n.noteId)===String(b.noteId));if(!ex)throw new Error('Note nahi mila');
-  if(s.role!=='admin'&&String(ex.uploadedBy)!==s.userId)throw new Error('Sirf apna note badal sakte ho');
-  const on=b.on===true;if(on&&b.original!==true)throw new Error('Pehle confirm karo ki yeh content aapka apna / allowed hai');
-  notesCol();setRow('Notes',ex._row,{public:on?'yes':''});pubBust();log(s.userId,on?'note_public':'note_private',ex.noteId);return{ok:true}}))}
-
 // Upload form ke dropdown: kis class mein kaun se subject ke notes daal sakte ho
 function noteOptions(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
@@ -752,7 +728,7 @@ function listNotes(b){
  const notes=table('Notes').rows.filter(n=>(!mine||mine[String(n.classId)])&&(!want||String(n.classId)===want)&&(!b.subjectId||String(n.subjectId)===String(b.subjectId)))
   .map(n=>({noteId:String(n.noteId),classId:String(n.classId),className:cn[String(n.classId)]||String(n.classId),subjectId:String(n.subjectId),subject:sn[String(n.subjectId)]||String(n.subjectId),
    chapter:n.chapter,title:n.title,fileId:String(n.fileId),mime:String(n.mime),size:Number(n.size)||0,by:un[String(n.uploadedBy)]||String(n.uploadedBy),date:dstr(n.date),
-   isPublic:isPub(n),editable:s.role==='admin'||String(n.uploadedBy)===s.userId}));
+   editable:s.role==='admin'||String(n.uploadedBy)===s.userId}));
  notes.sort((a,c)=>a.subject.localeCompare(c.subject)||a.chapter.localeCompare(c.chapter,undefined,{numeric:true})||(a.date<c.date?1:-1));
  return{ok:true,notes:notes.slice(0,1000)}}
 
@@ -774,9 +750,9 @@ function uploadNote(b){
    const file=folder.createFile(Utilities.newBlob(bytes,mime,safeName(title)+NOTE_TYPES[mime]));
    try{file.setSharing(DriveApp.Access.ANYONE_WITH_LINK,DriveApp.Permission.VIEW)}
    catch(e){file.setTrashed(true);throw new Error('Drive sharing allowed nahi hai (Workspace admin ne roka hua hai)')}
-   notesCol();const id=nextId('Notes','noteId','NT',4),pub=b.isPublic===true&&b.original===true;
-   addRow('Notes',{public:pub?'yes':'',noteId:id,classId:cid,subjectId:sub,chapter,title,fileId:file.getId(),fileName:file.getName(),mime,size:bytes.length,uploadedBy:s.userId,date:todayStr()});
-   if(pub)pubBust();log(s.userId,'note_upload',id+' '+cid+' '+sub+(pub?' public':''));return{ok:true,noteId:id}})})}
+   const id=nextId('Notes','noteId','NT',4);
+   addRow('Notes',{noteId:id,classId:cid,subjectId:sub,chapter,title,fileId:file.getId(),fileName:file.getName(),mime,size:bytes.length,uploadedBy:s.userId,date:todayStr()});
+   log(s.userId,'note_upload',id+' '+cid+' '+sub);return{ok:true,noteId:id}})})}
 
 function updateNote(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
@@ -784,7 +760,7 @@ function updateNote(b){
   const ex=find('Notes',n=>String(n.noteId)===String(b.noteId));if(!ex)throw new Error('Note nahi mila');
   if(s.role!=='admin'&&String(ex.uploadedBy)!==s.userId)throw new Error('Sirf apna note edit kar sakte ho');
   const chapter=clean(b.chapter,100),title=clean(b.title,120);if(!chapter||!title)throw new Error('Title aur chapter zaruri hain');
-  notesCol();setRow('Notes',ex._row,{chapter,title});pubBust();return{ok:true}}))}
+  setRow('Notes',ex._row,{chapter,title});return{ok:true}}))}
 
 function deleteNote(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
@@ -792,7 +768,7 @@ function deleteNote(b){
   const ex=find('Notes',n=>String(n.noteId)===String(b.noteId));if(!ex)throw new Error('Note nahi mila');
   if(s.role!=='admin'&&String(ex.uploadedBy)!==s.userId)throw new Error('Sirf apna note delete kar sakte ho');
   try{DriveApp.getFileById(String(ex.fileId)).setTrashed(true)}catch(e){}   // Drive trash mein jati hai (wapas laya ja sakta hai)
-  tab('Notes').deleteRow(ex._row);pubBust();log(s.userId,'note_delete',ex.noteId);return{ok:true}}))}
+  tab('Notes').deleteRow(ex._row);log(s.userId,'note_delete',ex.noteId);return{ok:true}}))}
 
 // Phase 7: website enquiry form (public, bina login) + admin inbox. Email owner ko jaati hai (ya Settings tab: key notify_email).
 const ENQ_STATUS=['new','contacted','closed'];

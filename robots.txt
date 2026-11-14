@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /teacher/
 Disallow: /student/
-Sitemap: /sitemap.xml
+Sitemap: https://alfa-web-dev.github.io/School/sitemap.xml
