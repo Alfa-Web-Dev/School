@@ -237,3 +237,7 @@ body.app{--c:var(--o,#111111);--cx:#fff}
 #aib svg{width:100%;height:100%;display:block;pointer-events:none}#aib.drag{transition:none;transform:scale(1.08);box-shadow:0 14px 34px rgba(0,0,0,.35)}
 .aix{overflow:hidden;background:#d9ccff}.aix svg{width:100%;height:100%;display:block}
 .aix.big{width:72px;height:72px}
+
+/* no blue tap flash on touch */
+*{-webkit-tap-highlight-color:transparent}
+:focus:not(:focus-visible){outline:none}
