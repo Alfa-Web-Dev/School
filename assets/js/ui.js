@@ -47,3 +47,8 @@ function downloadCSV(name,rows){
  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
  const a=el('a',{href:URL.createObjectURL(new Blob(['﻿'+rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'})),download:name});
  document.body.append(a);a.click();a.remove()}
+
+function helloCard(name,id,sub){const h=new Date().getHours(),g=h<12?'Good morning':h<17?'Good afternoon':'Good evening',a=el('span',{class:'av lg pic'});a.innerHTML=AV.svg(AV.get(id,name));
+ return el('div',{class:'hello hl2'},a,el('div',{},el('small',{},g+' 👋'),el('b',{},name),el('span',{class:'mu'},sub||'')),el('span',{class:'dt'},new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})))}
+function ringCard(pct,title,sub){const p=Math.max(0,Math.min(100,+pct||0)),R=34,C=2*Math.PI*R,d=document.createElement('div');d.className='ringc';
+ d.innerHTML='<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="'+R+'" fill="none" stroke="rgba(0,0,0,.08)" stroke-width="9"/><circle cx="40" cy="40" r="'+R+'" fill="none" stroke="var(--c)" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+(C*p/100).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 40 40)"/></svg><b>'+Math.round(p)+'%</b><div><span>'+title+'</span><small>'+(sub||'')+'</small></div>';return d}

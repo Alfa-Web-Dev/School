@@ -1,14 +1,19 @@
 // Student portal pages + sab roles ke liye "PIN/Password badlo" (settings)
 const rupee=n=>(Number(n)<0?'-':'')+'₹'+Math.abs(Number(n||0)).toLocaleString('en-IN');
 const safeUrl=u=>/^https?:\/\//i.test(u)?u:'';
-function page(key,title){const m=$('#main');m.innerHTML='';m.append(el('h1',{'data-i':key},title||''));applyI18n();return m}
+function page(key,title){const m=$('#main');m.innerHTML='';m.append(el('h1',{'data-i':key},title||''));
+ const k=el('div',{id:'skm',class:'sk-m skp'});k.innerHTML='<div class="sk-g"><i class="sk"></i><i class="sk"></i><i class="sk"></i><i class="sk"></i></div><i class="sk sk-w"></i><i class="sk sk-w"></i>';m.append(k);
+ const done=()=>{const x=document.getElementById('skm');if(x)x.remove()};
+ window.__skDone=()=>{if(!window.__pend)done()};new MutationObserver(()=>{const x=document.getElementById('skm');if(x&&m.lastElementChild!==x)m.append(x)}).observe(m,{childList:true});setTimeout(done,12000);
+ applyI18n();return m}
 const stat=(l,v,sub)=>el('div',{class:'card stat'},el('div',{class:'big'},v),el('div',{class:'mu'},l),sub?el('div',{class:'mu'},sub):'');
 const badge=s=>el('span',{class:'bdg '+(s==='P'?'ok':s==='A'?'no':'lt')},s==='P'?'Present':s==='A'?'Absent':s==='L'?'Late':s);
 
+
 async function initSDash(){
  const m=page('n_dashboard'),r=await call('myDashboard'),p=r.profile;
- m.append(el('div',{class:'hello'},(()=>{const a=el('span',{class:'av lg pic'});a.innerHTML=AV.svg(AV.get(p.studentId,p.name));return a})(),el('div',{},el('small',{},'Hello,'),el('b',{},p.name),el('span',{class:'mu'},p.className+(p.roll?' · Roll '+p.roll:'')))),
-  el('div',{class:'grid'},stat('Attendance',r.attendance.percent+'%',r.attendance.present+r.attendance.late+'/'+r.attendance.total+' din'),
+ m.append(helloCard(p.name,p.studentId,p.className+(p.roll?' · Roll '+p.roll:'')),ringCard(r.attendance.percent,'Attendance',r.attendance.present+r.attendance.late+'/'+r.attendance.total+' din present'),
+  el('div',{class:'grid'},
    stat('Fee balance',rupee(r.fees.balance),'Paid '+rupee(r.fees.totalPaid)),stat('Class',p.className,p.classTeacher?'Teacher: '+p.classTeacher:'')),
   el('h3',{},'Aaj ki classes'),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Subject',f:l=>l.subject},{h:'Teacher',f:l=>l.teacher}],r.today,'Aaj koi class nahi'),
   el('h3',{},'Latest notices'),noticeList(r.notices))}

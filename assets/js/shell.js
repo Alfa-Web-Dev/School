@@ -22,7 +22,7 @@ async function initShell(role,page,phase){
  let r;const retry=()=>{document.body.innerHTML='<div style="min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px;font-family:sans-serif"><div><p style="font-size:17px">Connection problem. Your login is safe.</p><button onclick="location.reload()" style="padding:12px 26px;border:0;border-radius:999px;background:#111;color:#fff;font-size:16px">Try again</button></div></div>'};
  try{r=await api('me')}catch(e){retry();return}
  if(!r.ok){if(r.error==='expired'){TOK.clear();location.href='../login.html'}else retry();return}
- const u=r.user,ok=(u.role===role);
+ const u=r.user,ok=(u.role===role);window.__U=u;
  if(!ok){location.href='../'+HOME[u.role]+'/index.html';return}
  const nav=NAV[role].map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('');
  document.getElementById('shell').innerHTML=
@@ -30,7 +30,8 @@ async function initShell(role,page,phase){
   '<div id="umenu" class="umenu" hidden style="display:none"><div class="up">'+AV.html(AV.get(u.userId,u.name),'')+'<div><b>'+u.name+'</b><small data-i="role_'+u.role+'"></small></div></div>'+
   (role==='student'?'<a href="profile.html">'+icon('profile')+'My profile</a>':'')+'<button id="chav">'+icon('profile')+'Change avatar</button><a href="settings.html">'+icon('settings')+'Settings</a>'+
   '<button id="inst" hidden>'+icon('dashboard')+'Install app</button><a href="../index.html">'+icon('content')+'Visit website</a><hr><button id="lo" class="out"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Logout</button></div></header>'+
-  '<div class="wrap"><nav>'+nav+'</nav><main id="main"></main></div>';
+  '<div class="wrap"><nav>'+nav+'</nav><main id="main"><div id="skm1" class="sk-m"><i class="sk sk-t"></i><div class="sk-g"><i class="sk"></i><i class="sk"></i><i class="sk"></i><i class="sk"></i></div><i class="sk sk-w"></i><i class="sk sk-w"></i></div></main></div>';
+ {const mm=document.getElementById('main');new MutationObserver(()=>{const k=document.getElementById('skm1');if(k&&mm.children.length>1)k.remove()}).observe(mm,{childList:true})}
  const um=document.getElementById('um'),mn=document.getElementById('umenu');um.onclick=e=>{e.stopPropagation();const o=mn.hidden;mn.hidden=!o;mn.style.display=o?'block':'none';um.setAttribute('aria-expanded',o)};document.addEventListener('click',e=>{if(!mn.contains(e.target)&&e.target!==um){mn.hidden=true;mn.style.display='none';um.setAttribute('aria-expanded',false)}});
  document.getElementById('chav').onclick=()=>{mn.hidden=true;mn.style.display='none';const cur=AV.get(u.userId,u.name),o=document.createElement('div');o.className='avm';o.innerHTML='<div class="avb"><div class="avh"><b>Choose your avatar</b><button type="button" class="avx" aria-label="Close">×</button></div><div class="avg">'+Array.from({length:AV.count},(_,i)=>'<button type="button" data-i="'+i+'" class="'+(i===cur?'on':'')+'">'+AV.svg(i)+'</button>').join('')+'</div></div>';document.body.append(o);o.onclick=e=>{if(e.target===o||e.target.classList.contains('avx'))o.remove();const b=e.target.closest('button[data-i]');if(b){AV.set(u.userId,+b.dataset.i);location.reload()}}};
  document.getElementById('lo').onclick=async()=>{try{await api('logout')}catch(e){}TOK.clear();location.href='../login.html'};

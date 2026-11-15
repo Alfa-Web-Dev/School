@@ -7,7 +7,7 @@ function classSelect(classes,onchange){const s=el('select',{},classes.map(c=>el(
 
 async function initTHome(){
  const m=page('n_dashboard'),r=await teacherHomeData();
- m.append(el('h3',{},'Aaj ke periods'),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Class',f:l=>l.className},{h:'Subject',f:l=>l.subject}],r.today,'Aaj koi period nahi'),
+ m.append(helloCard(__U.name,__U.userId,'Teacher'),el('h3',{},'Aaj ke periods'),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Class',f:l=>l.className},{h:'Subject',f:l=>l.subject}],r.today,'Aaj koi period nahi'),
   el('h3',{},'Meri classes'),tableEl([{h:'Class',f:c=>c.name+(c.isClassTeacher?' (Class teacher)':'')},{h:'Students',f:c=>c.students},{h:'Subjects',f:c=>c.subjects.join(', ')}],r.classes,'Abhi koi class assign nahi hai. Admin se kaho.'))}
 
 async function initTAtt(){
