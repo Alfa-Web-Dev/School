@@ -50,7 +50,14 @@ async function initSettings(){
   el('button',{type:'button',onclick:async()=>{msg.style.color='';msg.textContent='';
    try{if(n.value!==c.value)throw new Error('Dono naye alag hain');await call('changeSecret',{oldSecret:o.value,newSecret:n.value});o.value=n.value=c.value='';msg.style.color='#16a34a';msg.textContent='Badal gaya'}
    catch(e){msg.textContent=e.message}}},'Save'),msg);
- m.append(f)}
+ m.append(f);
+ if(location.pathname.indexOf('/admin/')>=0)aiCard(m)}
+async function aiCard(m){
+ const c=el('div',{class:'card',style:'max-width:420px;margin-top:16px'}),msg=el('div',{class:'mu'});let r={on:true,name:'Tuto'};try{r=await call('aiGet')}catch(e){}
+ const on=el('input',{type:'checkbox'}),nm=el('input',{type:'text',maxlength:'20',placeholder:'AI name'});on.checked=r.on;nm.value=r.name;
+ c.append(el('h3',{},'AI assistant'),el('p',{class:'mu'},'Floating chat icon in admin, teacher and student panels.'),el('label',{style:'display:flex;gap:10px;align-items:center'},on,'AI assistant ON'),el('label',{},'AI name'),nm,
+  el('button',{type:'button',onclick:async()=>{msg.style.color='';msg.textContent='';try{const x=await call('aiSave',{on:on.checked,name:nm.value});sessionStorage.removeItem('ai_cfg');msg.style.color='#16a34a';msg.textContent=x.on?'Saved: AI is ON':'Saved: AI is OFF (icon hidden everywhere)'}catch(e){msg.textContent=e.message}}},'Save'),msg);
+ m.append(c)}
 
 // UPI QR (optional): config.js mein upi.id bharo. Payment admin haath se confirm karta hai.
 function upiLink(bal,sid){const u=CFG.upi||{};return 'upi://pay?pa='+encodeURIComponent(u.id)+'&pn='+encodeURIComponent(u.name||CFG.name)+'&am='+Number(bal).toFixed(2)+'&cu=INR&tn='+encodeURIComponent('Fee '+sid)}

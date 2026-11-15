@@ -29,4 +29,4 @@ const ROUTES={
  issueCertificate:'issueCertificate',adminExams:'adminExams',deleteExam:'deleteExam',reportCard:'reportCard',
  saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',
  listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',
- backupNow:'backupNow'};
+ backupNow:'backupNow',aiGet:'aiGet',aiSave:'aiSave'};

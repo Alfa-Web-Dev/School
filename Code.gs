@@ -1,4 +1,4 @@
-const VERSION='0.1.0';
+const VERSION='0.2.0';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
  Settings:['key','value'],
@@ -183,7 +183,7 @@ const ROUTES={
  issueCertificate:'issueCertificate',adminExams:'adminExams',deleteExam:'deleteExam',reportCard:'reportCard',
  saveExam:'saveExam',getResults:'getResults',saveMarks:'saveMarks',enquiry:'enquiry',
  listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',
- backupNow:'backupNow'};
+ backupNow:'backupNow',aiGet:'aiGet',aiSave:'aiSave'};
 
 // Student portal (Phase 3): student sirf apni hi data dekh sakta hai. changeSecret sab roles ke liye.
 const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],TZ='Asia/Kolkata';
@@ -877,4 +877,18 @@ function autoBackup(){try{runBackup('system')}catch(e){log('system','backup_fail
 function enableAutoBackup(){
  if(!ScriptApp.getProjectTriggers().some(t=>t.getHandlerFunction()==='autoBackup'))ScriptApp.newTrigger('autoBackup').timeBased().atHour(2).everyDays(1).create();
  runBackup('system')}
+
+// AI assistant on/off + naam (Settings sheet: ai_enabled = on/off, ai_name). Sab roles padh sakte hain, sirf admin badal sakta hai.
+function aiRead(){const g=k=>{const r=find('Settings',x=>String(x.key)===k);return r?String(r.value):''};
+ const en=g('ai_enabled').toLowerCase();return{on:en!=='off',name:clean(g('ai_name'),20)||'Tuto'}}
+function aiGet(b){
+ const s=guard(b,['admin','teacher','student']);if(!s)return DENIED;
+ return safe(()=>Object.assign({ok:true},aiRead()))}
+function aiSave(b){
+ const s=guard(b,['admin']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{
+  const put=(k,v)=>{const r=find('Settings',x=>String(x.key)===k);if(r)setRow('Settings',r._row,{key:k,value:v});else addRow('Settings',{key:k,value:v})};
+  put('ai_enabled',b.on===false||b.on==='off'?'off':'on');
+  const nm=clean(b.name,20);if(nm)put('ai_name',nm);
+  log(s.userId,'ai_settings',b.on===false?'off':'on');return Object.assign({ok:true},aiRead())}))}
 

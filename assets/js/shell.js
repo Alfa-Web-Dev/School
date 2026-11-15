@@ -36,6 +36,7 @@ async function initShell(role,page,phase){
  const ib=document.getElementById('inst');if(ib){ib.hidden=!_ip;ib.onclick=async()=>{if(!_ip)return;_ip.prompt();await _ip.userChoice;_ip=null;ib.hidden=true}}
  applyI18n();
  const m=document.getElementById('main');
+ if(typeof initAI==='function')initAI(role,u);
  if(!phase)return u;
  m.innerHTML='<h1 data-i="n_'+(NAV[role].find(x=>x[0]===page)||[0,page])[1]+'"></h1><p class="mu"><span data-i="soon"></span> Phase '+phase+'</p>';
  applyI18n();
