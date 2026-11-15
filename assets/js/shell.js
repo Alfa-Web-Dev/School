@@ -13,15 +13,19 @@ let _ip=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault(
 window.addEventListener('appinstalled',()=>{_ip=null;const b=document.getElementById('inst');if(b)b.hidden=true});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 const HOME={admin:'admin',teacher:'teacher',student:'student'};
+async function loadBrand(){
+ try{const r=await fetch('../content/site.json?v='+Date.now());if(r.ok){const o=await r.json();for(const k in (o.CFG||{}))if(k!=='api')CFG[k]=o.CFG[k];window.__PH=o.PH||{}}}catch(e){}
+ if(typeof applyTheme==='function')applyTheme()}
+const logoUrl=()=>{let l=CFG.logo||'';l=(window.__PH&&window.__PH[l])||l;return /^uploads\//.test(l)?'../'+l:(/^https:\/\//.test(l)?l:'')};
 async function initShell(role,page,phase){
- applyI18n();
+ applyI18n();await loadBrand();
  let r;try{r=await api('me')}catch(e){location.href='../login.html';return}
  if(!r.ok){location.href='../login.html';return}
  const u=r.user,ok=(u.role===role);
  if(!ok){location.href='../'+HOME[u.role]+'/index.html';return}
  const nav=NAV[role].map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('');
  document.getElementById('shell').innerHTML=
-  '<header><b class="brand">'+CFG.shortName+'</b><span class="sp"></span><span class="uchip"><span class="av">'+(u.name||'?').trim().charAt(0).toUpperCase()+'</span><span class="un">'+u.name+'</span></span>'+
+  '<header><a class="brand" href="index.html">'+(logoUrl()?'<img src="'+logoUrl()+'" alt="">':'<span class="lm">'+((CFG.shortName||'S').trim().charAt(0))+'</span>')+'<span class="bn">'+(typeof SN==='function'?SN():CFG.name)+'</span></a><span class="sp"></span><span class="uchip"><span class="av">'+(u.name||'?').trim().charAt(0).toUpperCase()+'</span><span class="un">'+u.name+'<small data-i="role_'+role+'"></small></span></span>'+
   '<button class="g" id="inst" hidden>Install app</button><button class="g s" id="lg">'+(getLang()==='hi'?'EN':'हिं')+'</button><button class="g s" id="lo" data-i="logout"></button></header>'+
   '<div class="wrap"><nav>'+nav+'</nav><main id="main"></main></div>';
  document.getElementById('lg').onclick=()=>{setLang(getLang()==='hi'?'en':'hi');location.reload()};

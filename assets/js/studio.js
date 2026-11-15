@@ -163,7 +163,7 @@ function itemPage(it,base){
  +(it.x?'<p class="lbdesc">'+xe(it.x)+'</p>':'')
  +'<div class="lbx"><a class="pill solid" href="'+xe(it.f)+'" target="_blank" rel="noopener" data-k="lb_read">Read online</a><a class="pill ghost" href="'+xe(it.f)+'" download data-k="lb_dl">Download</a></div>'
  +'<iframe class="lbpdf" src="'+xe(it.f)+'" title="'+xe(it.t)+'" loading="lazy"></iframe></div></section></main><div id="foot"></div>\n'
- +'<script src="config.js"></script><script src="assets/js/i18n.js"></script><script src="assets/js/i18n-extra.js"></script><script src="assets/js/api.js"></script><script src="assets/js/art.js"></script><script src="assets/js/site-data.js"></script><script src="assets/js/site.js"></script></body></html>'}
+ +'<script src="config.js"></script><script src="assets/js/i18n.js"></script><script src="assets/js/i18n-extra.js"></script><script src="assets/js/api.js"></script><script src="assets/js/art.js"></script><script src="assets/js/site-data.js"></script><script src="assets/js/themes.js"></script><script src="assets/js/site.js"></script></body></html>'}
 async function readLib(){const f=await getFile('content/library.json');return f?{sha:f.sha,j:JSON.parse(f.text)}:{sha:null,j:{items:[]}}}
 async function sitemapSet(add,id){const f=await getFile('sitemap.xml');if(!f)return;let x=f.text.replace(new RegExp('<url><loc>[^<]*/library/'+id+'\\.html</loc></url>\\s*','g'),'');
  if(add)x=x.replace('</urlset>','<url><loc>'+siteBase()+'library/'+id+'.html</loc></url>\n</urlset>');await put('sitemap.xml',b64(x),'Studio: sitemap',f.sha)}

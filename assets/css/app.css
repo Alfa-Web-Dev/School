@@ -152,3 +152,15 @@ body.pub,body.app,body.rbody{place-items:normal;justify-items:normal;align-items
 @media(max-width:700px){.grid:has(>.stat){grid-template-columns:repeat(2,1fr)}.card.stat{padding:16px}.card.stat .big{font-size:26px}nav a.on{min-width:76px}}
 #inst{width:auto;height:38px;margin:0;padding:0 14px;font-size:13px;border-radius:999px;background:var(--c);color:var(--cx);border:0}#inst[hidden]{display:none!important}
 @media(max-width:380px){#inst{padding:0 10px}}
+
+/* ================= UI v3: branded panels (theme accent, black header like the website) ================= */
+body.app{--c:var(--o,#111111);--cx:#fff}
+@media(prefers-color-scheme:dark){body.app{--c:var(--o2,#f4f4f5);--cx:#0a0a0a}}
+.app header{background:#111;color:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 4px 18px rgba(0,0,0,.18);padding:10px 16px;gap:10px}
+.app header .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;min-width:0;font-size:18px}
+.app header .brand img,.app header .brand .lm{width:38px;height:38px;border-radius:50%;object-fit:cover;flex:none}.app header .brand .lm{background:var(--c);color:#fff;display:grid;place-items:center;font-size:18px;font-weight:800}
+.app header .bn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app header .av{background:var(--c);color:#fff}.app header .un{color:#fff;display:flex;flex-direction:column;line-height:1.2;font-size:14px;font-weight:600}.app header .un small{color:#aaa;font-weight:500;font-size:11px;text-transform:capitalize}
+.app header button.g,.app header #lo{background:#ffffff1a;border:0;color:#fff}
+.app header #inst{background:var(--c);color:#fff}
+@media(max-width:700px){.app header .un{display:none}.app header .brand{font-size:16px;flex:1}.app header .sp{display:none}}
