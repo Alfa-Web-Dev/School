@@ -232,3 +232,8 @@ body.app{--c:var(--o,#111111);--cx:#fff}
 #ais{width:44px;height:44px;border-radius:50%;border:0;background:var(--c);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0;flex:none;box-shadow:none}#ais:disabled{opacity:.5}
 .aif{font-size:11px;color:var(--mu);text-align:center;padding:0 0 8px;background:var(--card)}
 .aih button,#ait,#ait:focus{box-shadow:none!important}#ait:focus{border-color:var(--c)}
+
+#aib{background:linear-gradient(135deg,#d9ccff,#b7a4f7);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;border:3px solid #fff;transition:left .22s ease,top .22s ease,transform .15s}
+#aib svg{width:100%;height:100%;display:block;pointer-events:none}#aib.drag{transition:none;transform:scale(1.08);box-shadow:0 14px 34px rgba(0,0,0,.35)}
+.aix{overflow:hidden;background:#d9ccff}.aix svg{width:100%;height:100%;display:block}
+.aix.big{width:72px;height:72px}
