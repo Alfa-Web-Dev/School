@@ -295,3 +295,13 @@ html[data-alt] .bn em{color:var(--o)}
 @media(min-width:1021px){.nv{gap:20px}.brand{flex:none}#links{margin-left:auto}}
 @media(max-width:1020px){#links a.lgn{display:flex;justify-content:center;margin:8px 0 2px;padding:14px 16px;font-size:15.5px}.nav #links{top:calc(100% + 6px)}}
 @media(max-width:380px){.brand{font-size:17px}.brand img,.brand .lm{width:42px;height:42px}}
+
+/* thinner header, no glow on menu button, simple Login row in mobile menu */
+.nv{height:62px}.brand{font-size:18px}.brand img,.brand .lm{width:42px;height:42px;font-size:20px}#mb{width:42px;height:42px;box-shadow:none!important}
+#links a.lgn svg{flex:none}
+@media(max-width:1020px){
+ #links a.lgn{justify-content:flex-start;gap:12px;margin:6px 0 0;padding:14px 16px;border-radius:14px;background:none;box-shadow:none;border-top:1px solid #ffffff22;border-radius:0 0 14px 14px;color:var(--o);font-size:15px;font-weight:700}
+ #links a.lgn:hover{transform:none}
+}
+@media(min-width:1021px){#links a.lgn svg{display:none}}
+@media(max-width:380px){.brand{font-size:16px}.brand img,.brand .lm{width:40px;height:40px}}

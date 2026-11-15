@@ -193,3 +193,8 @@ body.app{--c:var(--o,#111111);--cx:#fff}
 .app header .brand img,.app header .brand .lm{width:46px;height:46px;font-size:22px}
 .app header .um{width:46px;height:46px}
 @media(max-width:380px){.app header .brand{font-size:17px}.app header .brand img,.app header .brand .lm{width:42px;height:42px}}
+
+.app header{min-height:62px}.app header .brand{font-size:18px}
+.app header .brand img,.app header .brand .lm{width:42px;height:42px;font-size:20px}
+.app header .um{width:42px;height:42px;box-shadow:none!important}
+@media(max-width:380px){.app header .brand{font-size:16px}.app header .brand img,.app header .brand .lm{width:40px;height:40px}}
