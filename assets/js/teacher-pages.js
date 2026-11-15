@@ -7,7 +7,7 @@ function classSelect(classes,onchange){const s=el('select',{},classes.map(c=>el(
 
 async function initTHome(){
  const m=page('n_dashboard'),r=await teacherHomeData();
- m.append(helloCard(__U.name,__U.userId,'Teacher'),quickActions([['attendance.html','attendance','Attendance','q0'],['marks.html','marks','Marks','q1'],['homework.html','homework','Homework','q2'],['notices.html','notices','Notices','q3']]),el('h3',{},'Aaj ke periods'),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Class',f:l=>l.className},{h:'Subject',f:l=>l.subject}],r.today,'Aaj koi period nahi'),
+ m.append(helloCard(__U.name,__U.userId,'Teacher'),quickActions([['attendance.html','attendance','Attendance','q0'],['marks.html','marks','Marks','q1'],['homework.html','homework','Homework','q2'],['notices.html','notices','Notices','q3']]),el('div',{class:'grid'},stat('Periods today',String(r.today.length)),stat('My classes',String(r.classes.length)),stat('Students',String(r.classes.reduce((a,c)=>a+(+c.students||0),0)))),el('h3',{},'Aaj ke periods'),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Class',f:l=>l.className},{h:'Subject',f:l=>l.subject}],r.today,'Aaj koi period nahi'),
   el('h3',{},'Meri classes'),tableEl([{h:'Class',f:c=>c.name+(c.isClassTeacher?' (Class teacher)':'')},{h:'Students',f:c=>c.students},{h:'Subjects',f:c=>c.subjects.join(', ')}],r.classes,'Abhi koi class assign nahi hai. Admin se kaho.'))}
 
 async function initTAtt(){
