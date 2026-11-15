@@ -18,6 +18,7 @@ const THEMES={
  slate:{n:'Slate grey',o:'#334155',o2:'#94a3b8',cream:'#f1f5f9',cream2:'#e2e8f0'}
 };
 function applyTheme(){
+ document.documentElement.classList.toggle('fluent',(window.CFG&&CFG.fluent)!==false);
  const r=document.documentElement,t=THEMES[CFG.theme];['--o','--o2','--cream','--cream2','--soft','--bn1','--bn2'].forEach(k=>r.style.removeProperty(k));
  if(!t){r.removeAttribute('data-alt');r.style.setProperty('--o',CFG.accent||'#ff7a1a');return}
  r.style.setProperty('--o',t.o);r.style.setProperty('--o2',t.o2);r.style.setProperty('--cream',t.cream);r.style.setProperty('--cream2',t.cream2);r.style.setProperty('--soft',t.cream);r.style.setProperty('--bn1',t.bn1||t.cream);r.style.setProperty('--bn2',t.bn2||t.cream2);
