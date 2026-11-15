@@ -26,11 +26,11 @@ async function initShell(role,page,phase){
  const nav=NAV[role].map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('');
  document.getElementById('shell').innerHTML=
   '<header><a class="brand" href="index.html">'+(logoUrl()?'<img src="'+logoUrl()+'" alt="">':'<span class="lm">'+((CFG.shortName||'S').trim().charAt(0))+'</span>')+'<span class="bn">'+(typeof SN==='function'?SN():CFG.name)+'</span></a><span class="sp"></span><button id="um" class="um" aria-label="Menu" aria-expanded="false"></button>'+
-  '<div id="umenu" class="umenu" hidden><div class="up"><span class="av">'+(u.name||'?').trim().charAt(0).toUpperCase()+'</span><div><b>'+u.name+'</b><small data-i="role_'+u.role+'"></small></div></div>'+
+  '<div id="umenu" class="umenu" hidden style="display:none"><div class="up"><span class="av">'+(u.name||'?').trim().charAt(0).toUpperCase()+'</span><div><b>'+u.name+'</b><small data-i="role_'+u.role+'"></small></div></div>'+
   (role==='student'?'<a href="profile.html">'+icon('profile')+'My profile</a>':'')+'<a href="settings.html">'+icon('settings')+'Settings</a>'+
   '<button id="inst" hidden>'+icon('dashboard')+'Install app</button><a href="../index.html">'+icon('content')+'Visit website</a><hr><button id="lo" class="out"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Logout</button></div></header>'+
   '<div class="wrap"><nav>'+nav+'</nav><main id="main"></main></div>';
- const um=document.getElementById('um'),mn=document.getElementById('umenu');um.onclick=e=>{e.stopPropagation();const o=mn.hidden;mn.hidden=!o;um.setAttribute('aria-expanded',o)};document.addEventListener('click',e=>{if(!mn.contains(e.target)&&e.target!==um){mn.hidden=true;um.setAttribute('aria-expanded',false)}});
+ const um=document.getElementById('um'),mn=document.getElementById('umenu');um.onclick=e=>{e.stopPropagation();const o=mn.hidden;mn.hidden=!o;mn.style.display=o?'block':'none';um.setAttribute('aria-expanded',o)};document.addEventListener('click',e=>{if(!mn.contains(e.target)&&e.target!==um){mn.hidden=true;mn.style.display='none';um.setAttribute('aria-expanded',false)}});
  document.getElementById('lo').onclick=async()=>{try{await api('logout')}catch(e){}sessionStorage.clear();location.href='../login.html'};
  const ib=document.getElementById('inst');if(ib){ib.hidden=!_ip;ib.onclick=async()=>{if(!_ip)return;_ip.prompt();await _ip.userChoice;_ip=null;ib.hidden=true}}
  applyI18n();
