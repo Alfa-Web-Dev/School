@@ -26,9 +26,8 @@ async function initShell(role,page,phase){
  const nav=NAV[role].map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('');
  document.getElementById('shell').innerHTML=
   '<header><a class="brand" href="index.html">'+(logoUrl()?'<img src="'+logoUrl()+'" alt="">':'<span class="lm">'+((CFG.shortName||'S').trim().charAt(0))+'</span>')+'<span class="bn">'+(typeof SN==='function'?SN():CFG.name)+'</span></a><span class="sp"></span><span class="uchip"><span class="av">'+(u.name||'?').trim().charAt(0).toUpperCase()+'</span><span class="un">'+u.name+'<small data-i="role_'+role+'"></small></span></span>'+
-  '<button class="g" id="inst" hidden>Install app</button><button class="g s" id="lg">'+(getLang()==='hi'?'EN':'हिं')+'</button><button class="g s" id="lo" data-i="logout"></button></header>'+
+  '<button class="g" id="inst" hidden>Install app</button><button class="g s" id="lo" data-i="logout"></button></header>'+
   '<div class="wrap"><nav>'+nav+'</nav><main id="main"></main></div>';
- document.getElementById('lg').onclick=()=>{setLang(getLang()==='hi'?'en':'hi');location.reload()};
  document.getElementById('lo').onclick=async()=>{try{await api('logout')}catch(e){}sessionStorage.clear();location.href='../login.html'};
  const ib=document.getElementById('inst');if(ib){ib.hidden=!_ip;ib.onclick=async()=>{if(!_ip)return;_ip.prompt();await _ip.userChoice;_ip=null;ib.hidden=true}}
  applyI18n();
