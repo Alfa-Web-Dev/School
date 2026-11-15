@@ -329,3 +329,9 @@ main,#app,#page{animation:flIn .45s var(--ease) backwards}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 /* press wins over hover */
 button:active,.pill:active,#links a:active,.lbc:active,.fc:active,.cd:active,.cc:active,.ef:active,.lv:active,.mt:active,.sg:active,.stc:active,.top:active,.tm:active,.chp label:active,.tab:active,.tabs button:active,.mfc:active,#mb:active,.wa:active,.fq:active,.im:active{transform:scale(.95)!important}
+
+/* sending state */
+.spn{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spn .7s linear infinite;vertical-align:-3px;margin-right:9px}
+@keyframes spn{to{transform:rotate(360deg)}}
+button.ld{opacity:1!important;cursor:progress;pointer-events:none}
+.em.inf{color:#555}
