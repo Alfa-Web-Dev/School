@@ -186,3 +186,10 @@ body.app{--c:var(--o,#111111);--cx:#fff}
 .app header .umenu #lo,.app header .umenu #inst{width:100%;height:auto;padding:12px;border-radius:12px;background:none;color:var(--tx);font-size:14.5px;box-shadow:none}
 .app header .umenu #lo{color:#d93025}.app header .umenu #lo:hover,.app header .umenu #inst:hover{background:color-mix(in srgb,var(--c) 10%,transparent)}
 .app header .umenu #inst[hidden]{display:none}
+
+/* ===== unified header size (same as website) ===== */
+.app header{min-height:68px;padding:0 16px;gap:12px}
+.app header .brand{font-size:19px;gap:11px}
+.app header .brand img,.app header .brand .lm{width:46px;height:46px;font-size:22px}
+.app header .um{width:46px;height:46px}
+@media(max-width:380px){.app header .brand{font-size:17px}.app header .brand img,.app header .brand .lm{width:42px;height:42px}}
