@@ -17,7 +17,10 @@ async function initSDash(){
    stat('Fee balance',rupee(r.fees.balance),'Paid '+rupee(r.fees.totalPaid)),stat('Class',p.className,p.classTeacher?'Teacher: '+p.classTeacher:'')),
   el('h3',{},'Aaj ki classes'),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Subject',f:l=>l.subject},{h:'Teacher',f:l=>l.teacher}],r.today,'Aaj koi class nahi'),
   el('h3',{},'Latest notices'),noticeList(r.notices))}
-function noticeList(n){return n.length?el('div',{},n.map(x=>el('div',{class:'card',style:'max-width:none;margin-bottom:8px'},el('b',{},x.title),' ',el('span',{class:'mu'},x.date+(x.forAll?' · All':'')),el('p',{},x.text)))):el('p',{class:'mu'},'Koi notice nahi')}
+const TONES=['#d9f5e8','#e4dcfb','#fde5d6','#fbe0ee','#fff0bd','#d9e7ff'];
+function feedCard(k,i,title,chip,body,extra){const c=el('div',{class:'fcard'}),b=el('span',{class:'fb',style:'background:var(--p'+(i%5+1)+')'});b.innerHTML=PA.mini(k);
+ c.append(b,el('div',{class:'ft'},el('b',{},title),el('span',{class:'fc'},chip),body?el('p',{},body):'',extra||''));return c}
+function noticeList(n){return n.length?el('div',{class:'flist'},n.map((x,i)=>feedCard('bell',i,x.title,x.date+(x.forAll?' · All':''),x.text))):emptyState('No notices','Koi notice nahi')}
 async function initSProfile(){
  const m=page('n_profile'),p=(await call('myProfile')).profile;
  m.append(tableEl([{h:'',f:r=>el('b',{},r[0])},{h:'',f:r=>r[1]||'-'}],[['Name',p.name],['Student ID',p.studentId],['Admission no',p.admNo],['Class',p.className],['Roll no',p.roll],['Class teacher',p.classTeacher],
@@ -45,7 +48,7 @@ async function initSTime(){
 const DAYS_UI=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 async function initSHome(){
  const m=page('n_homework'),r=await call('myHomework');
- m.append(tableEl([{h:'Due',f:x=>x.due},{h:'Subject',f:x=>x.subject},{h:'Homework',f:x=>x.title},{h:'By',f:x=>x.by},{h:'Link',f:x=>safeUrl(x.link)?el('a',{href:x.link,target:'_blank',rel:'noopener'},'Open'):''}],r.homework,'Abhi koi homework nahi'))}
+ m.append(r.homework.length?el('div',{class:'flist'},r.homework.map((x,i)=>feedCard(PA.prop(x.subject,'notebook')==='chart'?'notebook':PA.prop(x.subject,'notebook'),i,x.title,'Due '+x.due,(x.subject||'')+(x.by?' · '+x.by:''),safeUrl(x.link)?el('a',{class:'fl',href:x.link,target:'_blank',rel:'noopener'},'Open link'):''))):emptyState('No homework','Abhi koi homework nahi'))}
 async function initSNotices(){const m=page('n_notices'),r=await call('myNotices');m.append(noticeList(r.notices))}
 async function initSettings(){
  const m=page('n_settings'),isS=location.pathname.indexOf('/student/')>=0;

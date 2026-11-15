@@ -31,7 +31,7 @@ function showSecret(title,rows,note){
 function tableEl(cols,rows,empty){
  if(!rows.length)return emptyState(empty||'Kuch nahi mila','');
  return el('div',{class:'tw'},el('table',{class:'tbl'},el('thead',{},el('tr',{},cols.map(c=>el('th',{},c.h)))),
-  el('tbody',{},rows.map(r=>el('tr',{},cols.map(c=>el('td',{'data-l':c.h||''},c.f(r))))))))}
+  el('tbody',{},rows.map(r=>el('tr',{},cols.map(c=>el('td',{'data-l':c.h||''},(()=>{const v=c.f(r);return c.h==='Name'&&typeof v==='string'&&v&&window.PA?PA.nameCell(v,r):v})())))))))}
 function btn(t,fn,g){return el('button',{class:'s'+(g===false?'':' g'),type:'button',onclick:fn},t)}
 function csvParse(text){
  const rows=[];let row=[],f='',q=false;text=text.replace(/^﻿/,'');
@@ -49,7 +49,8 @@ function downloadCSV(name,rows){
  document.body.append(a);a.click();a.remove()}
 
 function helloCard(name,id,sub){const h=new Date().getHours(),g=h<12?'Good morning':h<17?'Good afternoon':'Good evening',a=el('span',{class:'av lg pic'});a.innerHTML=AV.svg(AV.get(id,name));
- return el('div',{class:'hello hl2'},a,el('div',{},el('small',{},g+' 👋'),el('b',{},name),el('span',{class:'mu'},sub||'')),el('span',{class:'dt'},new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})))}
+ const d=el('div',{class:'hello hl2'},a,el('div',{},el('small',{},g+' 👋'),el('b',{},name),el('span',{class:'mu'},sub||'')));
+ const w=document.createElement('span');w.className='hs';w.innerHTML=PA.mini({student:'cap',teacher:'board'}[(window.__U||{}).role]||'chart');d.append(w);return d}
 function ringCard(pct,title,sub){const p=Math.max(0,Math.min(100,+pct||0)),R=34,C=2*Math.PI*R,d=document.createElement('div');d.className='ringc';
  d.innerHTML='<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="'+R+'" fill="none" stroke="rgba(0,0,0,.08)" stroke-width="9"/><circle cx="40" cy="40" r="'+R+'" fill="none" stroke="var(--c)" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+(C*p/100).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 40 40)"/></svg><b>'+Math.round(p)+'%</b><div><span>'+title+'</span><small>'+(sub||'')+'</small></div>';return d}
 /* ---- reference-style widgets ---- */
@@ -66,7 +67,7 @@ function dayTimetable(m,lessons,mk){const days=['Mon','Tue','Wed','Thu','Fri','S
  const draw=()=>{strip.innerHTML='';days.forEach(d=>strip.append(el('button',{type:'button',class:'dchip'+(d===cur?' on':'')+(d===t?' tod':''),onclick:()=>{cur=d;draw()}},d)));
   list.innerHTML='';const ls=lessons.filter(l=>l.day===cur);if(!ls.length)list.append(emptyState('No classes','Is din koi class nahi hai'));
   ls.forEach((l,i)=>list.append(el('div',{class:'tcard t'+(i%4)},el('div',{class:'tt'},el('b',{},l.start),el('small',{},l.end)),el('div',{class:'tb2'},el('b',{},l.subject),el('span',{class:'mu'},mk(l))))))};draw();m.append(strip,list)}
-function emptyState(t,s){const d=document.createElement('div');d.className='empty';d.innerHTML='<svg viewBox="0 0 120 90"><rect x="18" y="26" width="84" height="52" rx="12" fill="var(--soft,#fde7d6)"/><rect x="30" y="14" width="60" height="16" rx="8" fill="var(--c)" opacity=".35"/><circle cx="46" cy="52" r="6" fill="#fff"/><circle cx="74" cy="52" r="6" fill="#fff"/><path d="M50 66Q60 60 70 66" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></svg><b></b><span></span>';d.querySelector('b').textContent=t;d.querySelector('span').textContent=s||'';return d}
+function emptyState(t,s){return PA.empty(t,s)}
 
 
-function quickActions(list){const w=el('div',{class:'qa'});list.forEach(([href,k,label,cls])=>{const a=el('a',{href,class:'qi '+(cls||'')});a.innerHTML=icon(k)+'<span></span>';a.querySelector('span').textContent=label;w.append(a)});return w}
+function quickActions(list){const w=el('div',{class:'qa'});list.forEach(([href,k,label,cls])=>{const a=el('a',{href,class:'qi '+(cls||'')});a.innerHTML='<span class="ich">'+icon(k)+'</span><span class="ql"></span>'+PA.mini(PA.prop(k+' '+label));a.querySelector('.ql').textContent=label;w.append(a)});return w}
