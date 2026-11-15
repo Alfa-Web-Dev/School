@@ -312,25 +312,20 @@ html[data-alt] .bn em{color:var(--o)}
 *{-webkit-tap-highlight-color:transparent}
 :focus:not(:focus-visible){outline:none}
 
-/* ===== Fluent / fluid look (config.js: fluent:true/false — false = back to normal) ===== */
-html.fluent{--ease:cubic-bezier(.2,.8,.2,1)}
-html.fluent button,html.fluent .pill,html.fluent a,html.fluent .card,html.fluent label{transition:transform .25s var(--ease),box-shadow .25s var(--ease),background-color .25s,opacity .2s}
-html.fluent button:active,html.fluent .pill:active{transform:scale(.96)}
-@keyframes flIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-html.fluent main,html.fluent #main,html.fluent #app{animation:flIn .45s var(--ease) both}
-@media(prefers-reduced-motion:reduce){html.fluent *{animation:none!important;transition:none!important}}
 
-html.fluent .nav{background:rgba(17,17,17,.72);-webkit-backdrop-filter:blur(16px) saturate(1.6);backdrop-filter:blur(16px) saturate(1.6);border-bottom:1px solid rgba(255,255,255,.08)}
-@media(max-width:1020px){html.fluent #links{background:rgba(27,27,32,.8);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid rgba(255,255,255,.1)}}
-html.fluent .ltc{background:rgba(255,255,255,.78);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-html.fluent .tb{background:color-mix(in srgb,var(--cream) 80%,transparent)}
-html.fluent .pill:hover,html.fluent .card:hover,html.fluent .tmc:hover{transform:translateY(-3px)}
-/* fluid blobs behind the hero */
-html.fluent .hero:before{width:620px;height:620px;right:-160px;top:-160px;background:radial-gradient(circle,color-mix(in srgb,var(--o) 38%,#fff) 0%,transparent 68%);filter:blur(30px);opacity:.75;animation:flb1 16s ease-in-out infinite alternate;will-change:transform;z-index:0}
-html.fluent .hero:after{content:"";position:absolute;width:520px;height:520px;border-radius:50%;left:-180px;bottom:-200px;background:radial-gradient(circle,color-mix(in srgb,var(--o2,var(--o)) 30%,#fff) 0%,transparent 68%);filter:blur(34px);opacity:.7;animation:flb2 20s ease-in-out infinite alternate;will-change:transform;z-index:0;pointer-events:none}
-html.fluent .hero>*{position:relative;z-index:1}
-@keyframes flb1{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-90px,70px) scale(1.15)}100%{transform:translate(40px,150px) scale(.92)}}
-@keyframes flb2{0%{transform:translate(0,0) scale(1)}50%{transform:translate(110px,-60px) scale(1.2)}100%{transform:translate(30px,-140px) scale(.95)}}
-html.fluent .nav{background:rgba(17,17,17,.88)}
-html.fluent .hero:after{width:420px;height:420px;left:-200px;bottom:auto;top:32%;opacity:.55}
-@keyframes flb2{0%{transform:translate(0,0) scale(1)}50%{transform:translate(90px,-40px) scale(1.15)}100%{transform:translate(30px,-90px) scale(.95)}}
+/* ===== smooth interactions: tap = shrink, hover = lift ===== */
+:root{--ease:cubic-bezier(.2,.8,.2,1)}
+button,.pill,#links a,.lbc,.fc,.cd,.cc,.ef,.lv,.mt,.sg,.stc,.top,.tm,.quick,.chp label,.tab,.tabs button,.mfc,#mb,.ltc button,.wa,.fq,.im,.tpic{transition:transform .22s var(--ease),box-shadow .25s var(--ease),background-color .2s,color .2s,border-color .2s;-webkit-tap-highlight-color:transparent}
+button:active,.pill:active,#links a:active,.lbc:active,.fc:active,.cd:active,.cc:active,.ef:active,.lv:active,.mt:active,.sg:active,.stc:active,.top:active,.tm:active,.chp label:active,.tab:active,.tabs button:active,.mfc:active,#mb:active,.wa:active,.fq:active,.im:active{transform:scale(.95)}
+@media(hover:hover){
+ .lbc:hover,.fc:hover,.cd:hover,.cc:hover,.ef:hover,.lv:hover,.sg:hover,.stc:hover,.top:hover,.tm:hover,.mfc:hover,.fq:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,.12)}
+ .mt:hover,.pill:hover,.wa:hover{transform:translateY(-3px)}
+ .im:hover{transform:scale(1.03)}
+ #links a:hover{transform:translateY(-1px)}
+}
+@keyframes flIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+main,#app,#page{animation:flIn .45s var(--ease) backwards}
+.rv{transition:opacity .6s,transform .6s var(--ease)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* press wins over hover */
+button:active,.pill:active,#links a:active,.lbc:active,.fc:active,.cd:active,.cc:active,.ef:active,.lv:active,.mt:active,.sg:active,.stc:active,.top:active,.tm:active,.chp label:active,.tab:active,.tabs button:active,.mfc:active,#mb:active,.wa:active,.fq:active,.im:active{transform:scale(.95)!important}

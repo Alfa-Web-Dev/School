@@ -242,20 +242,21 @@ body.app{--c:var(--o,#111111);--cx:#fff}
 *{-webkit-tap-highlight-color:transparent}
 :focus:not(:focus-visible){outline:none}
 
-/* ===== Fluent / fluid look (config.js: fluent:true/false — false = back to normal) ===== */
-html.fluent{--ease:cubic-bezier(.2,.8,.2,1)}
-html.fluent button,html.fluent .pill,html.fluent a,html.fluent .card,html.fluent label{transition:transform .25s var(--ease),box-shadow .25s var(--ease),background-color .25s,opacity .2s}
-html.fluent button:active,html.fluent .pill:active{transform:scale(.96)}
-@keyframes flIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-html.fluent main,html.fluent #main,html.fluent #app{animation:flIn .45s var(--ease) both}
-@media(prefers-reduced-motion:reduce){html.fluent *{animation:none!important;transition:none!important}}
 
-html.fluent .app header{background:rgba(17,17,17,.72);-webkit-backdrop-filter:blur(16px) saturate(1.6);backdrop-filter:blur(16px) saturate(1.6)}
-html.fluent .umenu{background:color-mix(in srgb,var(--card) 82%,transparent);-webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5);border:1px solid rgba(255,255,255,.4)}
-@media(max-width:900px){html.fluent nav{background:color-mix(in srgb,var(--card) 78%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid rgba(255,255,255,.5)}}
-html.fluent .card:hover{transform:translateY(-2px)}
-html.fluent #aiw .aih{background:rgba(17,17,17,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-/* soft drifting colour behind panel pages */
-html.fluent body.app:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(520px 420px at 85% 8%,color-mix(in srgb,var(--c) 14%,transparent),transparent 70%),radial-gradient(480px 420px at 5% 90%,color-mix(in srgb,var(--c) 10%,transparent),transparent 70%);animation:flp 22s ease-in-out infinite alternate}
-@keyframes flp{to{transform:translate(-30px,20px) scale(1.08)}}
-html.fluent .app header{background:rgba(17,17,17,.88)}
+/* ===== smooth interactions: tap = shrink, hover = lift ===== */
+:root{--ease:cubic-bezier(.2,.8,.2,1)}
+button,.card,.stat,.item,.row,nav a,.tab,.chk,.bdg,.btnlink,.umenu a,.umenu button,#aib,.avg button,.aiwel .aic{transition:transform .22s var(--ease),box-shadow .25s var(--ease),background-color .2s,color .2s,border-color .2s;-webkit-tap-highlight-color:transparent}
+button:active,.card:active,.stat:active,.item:active,nav a:active,.tab:active,.btnlink:active,.umenu a:active,.umenu button:active,.avg button:active,.aiwel .aic:active{transform:scale(.95)}
+#aib:active{transform:scale(.9)}
+@media(hover:hover){
+ .card:hover,.stat:hover{transform:translateY(-4px);box-shadow:0 16px 36px rgba(15,23,42,.12)}
+ button:hover,.btnlink:hover{transform:translateY(-2px)}
+ nav a:hover{transform:translateX(3px)}
+ .avg button:hover{transform:scale(1.1)}
+}
+@keyframes flIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#main{animation:flIn .45s var(--ease) backwards}
+.stat,.card{animation:flIn .5s var(--ease) backwards}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* press wins over hover */
+button:active,.card:active,.stat:active,.item:active,nav a:active,.tab:active,.btnlink:active,.umenu a:active,.umenu button:active,.avg button:active,.aiwel .aic:active{transform:scale(.95)!important}
