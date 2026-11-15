@@ -19,8 +19,9 @@ async function loadBrand(){
 const logoUrl=()=>{let l=CFG.logo||'';l=(window.__PH&&window.__PH[l])||l;return /^uploads\//.test(l)?'../'+l:(/^https:\/\//.test(l)?l:'')};
 async function initShell(role,page,phase){
  applyI18n();await loadBrand();
- let r;try{r=await api('me')}catch(e){location.href='../login.html';return}
- if(!r.ok){location.href='../login.html';return}
+ let r;const retry=()=>{document.body.innerHTML='<div style="min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px;font-family:sans-serif"><div><p style="font-size:17px">Connection problem. Your login is safe.</p><button onclick="location.reload()" style="padding:12px 26px;border:0;border-radius:999px;background:#111;color:#fff;font-size:16px">Try again</button></div></div>'};
+ try{r=await api('me')}catch(e){retry();return}
+ if(!r.ok){if(r.error==='expired'){TOK.clear();location.href='../login.html'}else retry();return}
  const u=r.user,ok=(u.role===role);
  if(!ok){location.href='../'+HOME[u.role]+'/index.html';return}
  const nav=NAV[role].map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('');
@@ -32,7 +33,7 @@ async function initShell(role,page,phase){
   '<div class="wrap"><nav>'+nav+'</nav><main id="main"></main></div>';
  const um=document.getElementById('um'),mn=document.getElementById('umenu');um.onclick=e=>{e.stopPropagation();const o=mn.hidden;mn.hidden=!o;mn.style.display=o?'block':'none';um.setAttribute('aria-expanded',o)};document.addEventListener('click',e=>{if(!mn.contains(e.target)&&e.target!==um){mn.hidden=true;mn.style.display='none';um.setAttribute('aria-expanded',false)}});
  document.getElementById('chav').onclick=()=>{mn.hidden=true;mn.style.display='none';const cur=AV.get(u.userId,u.name),o=document.createElement('div');o.className='avm';o.innerHTML='<div class="avb"><div class="avh"><b>Choose your avatar</b><button type="button" class="avx" aria-label="Close">×</button></div><div class="avg">'+Array.from({length:AV.count},(_,i)=>'<button type="button" data-i="'+i+'" class="'+(i===cur?'on':'')+'">'+AV.svg(i)+'</button>').join('')+'</div></div>';document.body.append(o);o.onclick=e=>{if(e.target===o||e.target.classList.contains('avx'))o.remove();const b=e.target.closest('button[data-i]');if(b){AV.set(u.userId,+b.dataset.i);location.reload()}}};
- document.getElementById('lo').onclick=async()=>{try{await api('logout')}catch(e){}sessionStorage.clear();location.href='../login.html'};
+ document.getElementById('lo').onclick=async()=>{try{await api('logout')}catch(e){}TOK.clear();location.href='../login.html'};
  const ib=document.getElementById('inst');if(ib){ib.hidden=!_ip;ib.onclick=async()=>{if(!_ip)return;_ip.prompt();await _ip.userChoice;_ip=null;ib.hidden=true}}
  applyI18n();
  const m=document.getElementById('main');

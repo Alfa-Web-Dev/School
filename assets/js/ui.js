@@ -5,7 +5,7 @@ function el(tag,at,...kids){const e=document.createElement(tag);
  kids.flat().forEach(c=>e.append(c&&c.nodeType?c:document.createTextNode(c==null?'':c)));return e}
 async function call(action,data){
  const r=await api(action,data||{});
- if(!r.ok){if(r.error==='expired'){sessionStorage.clear();location.href='../login.html'}throw new Error(r.error||'Error')}
+ if(!r.ok){if(r.error==='expired'){TOK.clear();location.href='../login.html'}throw new Error(r.error||'Error')}
  return r}
 function toast(msg,bad){const t=el('div',{class:'toast'+(bad?' bad':'')},msg);document.body.append(t);setTimeout(()=>t.remove(),4000)}
 function modal(title,body,btns){

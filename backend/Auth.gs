@@ -1,4 +1,4 @@
-const SESSION_HOURS=6,MAX_FAILS=5,LOCK_SEC=900;
+const SESSION_HOURS=24*30,MAX_FAILS=5,LOCK_SEC=900;
 const sha=s=>Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,s,Utilities.Charset.UTF_8).map(b=>('0'+(b&255).toString(16)).slice(-2)).join('');
 const newSalt=()=>Utilities.getUuid().replace(/-/g,'');
 const hashSecret=(secret,salt)=>sha(salt+'|'+P.getProperty('PEPPER')+'|'+secret);
