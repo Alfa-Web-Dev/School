@@ -7,7 +7,7 @@ function classSelect(classes,onchange){const s=el('select',{},classes.map(c=>el(
 
 async function initTHome(){
  const m=page('n_dashboard'),r=await teacherHomeData();
- m.append(helloCard(__U.name,__U.userId,'Teacher'),el('h3',{},'Aaj ke periods'),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Class',f:l=>l.className},{h:'Subject',f:l=>l.subject}],r.today,'Aaj koi period nahi'),
+ m.append(helloCard(__U.name,__U.userId,'Teacher'),quickActions([['attendance.html','attendance','Attendance','q0'],['marks.html','marks','Marks','q1'],['homework.html','homework','Homework','q2'],['notices.html','notices','Notices','q3']]),el('h3',{},'Aaj ke periods'),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Class',f:l=>l.className},{h:'Subject',f:l=>l.subject}],r.today,'Aaj koi period nahi'),
   el('h3',{},'Meri classes'),tableEl([{h:'Class',f:c=>c.name+(c.isClassTeacher?' (Class teacher)':'')},{h:'Students',f:c=>c.students},{h:'Subjects',f:c=>c.subjects.join(', ')}],r.classes,'Abhi koi class assign nahi hai. Admin se kaho.'))}
 
 async function initTAtt(){
@@ -56,8 +56,8 @@ async function initTClasses(){
   tableEl([{h:'Roll',f:s=>s.roll},{h:'Name',f:s=>s.name},{h:'ID',f:s=>s.studentId},{h:'Parent',f:s=>s.parentName+(s.parentPhone?' ('+s.parentPhone+')':'')}],r.students.filter(s=>s.classId===c.classId&&s.status==='active'),'Koi student nahi')))}
 
 function timetableView(m,lessons,showClass,showTeacher){
- if(!lessons.length)m.append(el('p',{class:'mu'},'Timetable abhi set nahi hai'));
- DAYS_UI.forEach(d=>{const ls=lessons.filter(l=>l.day===d);if(ls.length)m.append(el('h3',{},d),tableEl([{h:'Time',f:l=>l.start+' - '+l.end}].concat(showClass?[{h:'Class',f:l=>l.className}]:[],[{h:'Subject',f:l=>l.subject}],showTeacher?[{h:'Teacher',f:l=>l.teacher}]:[]),ls))})}
+ if(!lessons.length)return m.append(emptyState('Timetable not set','Timetable abhi set nahi hai'));
+ dayTimetable(m,lessons,l=>[showClass?l.className:'',showTeacher?l.teacher:''].filter(Boolean).join(' · '))}
 async function initTTime(){const m=page('n_timetable');timetableView(m,(await call('listLessons')).lessons,true,false)}
 
 async function initATime(){

@@ -12,7 +12,7 @@ const badge=s=>el('span',{class:'bdg '+(s==='P'?'ok':s==='A'?'no':'lt')},s==='P'
 
 async function initSDash(){
  const m=page('n_dashboard'),r=await call('myDashboard'),p=r.profile;
- m.append(helloCard(p.name,p.studentId,p.className+(p.roll?' · Roll '+p.roll:'')),ringCard(r.attendance.percent,'Attendance',r.attendance.present+r.attendance.late+'/'+r.attendance.total+' din present'),
+ m.append(helloCard(p.name,p.studentId,p.className+(p.roll?' · Roll '+p.roll:'')),ringCard(r.attendance.percent,'Attendance',r.attendance.present+r.attendance.late+'/'+r.attendance.total+' din present'),quickActions([['attendance.html','attendance','Attendance','q0'],['fees.html','fees','Fees','q1'],['results.html','results','Results','q2'],['homework.html','homework','Homework','q3']]),
   el('div',{class:'grid'},
    stat('Fee balance',rupee(r.fees.balance),'Paid '+rupee(r.fees.totalPaid)),stat('Class',p.className,p.classTeacher?'Teacher: '+p.classTeacher:'')),
   el('h3',{},'Aaj ki classes'),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Subject',f:l=>l.subject},{h:'Teacher',f:l=>l.teacher}],r.today,'Aaj koi class nahi'),
@@ -24,24 +24,24 @@ async function initSProfile(){
   ['Gender',p.gender],['Date of birth',p.dob],['Parent',p.parentName],['Parent phone',p.parentPhone],['Address',p.address]]))}
 async function initSAtt(){
  const m=page('n_attendance'),r=await call('myAttendance');
- m.append(el('div',{class:'grid'},stat('Attendance',r.percent+'%','Late = present'),stat('Present',r.present),stat('Absent',r.absent),stat('Late',r.late)),
-  el('h3',{},'Din-wise'),tableEl([{h:'Date',f:x=>x.date},{h:'Status',f:x=>badge(x.status)}],r.rows,'Abhi attendance nahi lagi'))}
+ m.append(ringCard(r.percent,'Attendance',(r.present+r.late)+' / '+r.total+' din (late = present)'),
+  el('div',{class:'chips3'},el('div',{class:'pc ok'},el('b',{},String(r.present)),el('small',{},'Present')),el('div',{class:'pc lt'},el('b',{},String(r.late)),el('small',{},'Late')),el('div',{class:'pc no'},el('b',{},String(r.absent)),el('small',{},'Absent'))),
+  calMonth(r.rows),el('h3',{},'Recent'),r.rows.length?el('div',{class:'recent'},r.rows.slice(0,10).map(x=>el('div',{class:'rr'},el('span',{},x.date),badge(x.status)))):emptyState('No attendance yet','Abhi attendance nahi lagi'))}
 async function initSFees(){
  const m=page('n_fees'),r=await call('myFees');
- m.append(el('p',{class:'mu'},'Session '+r.year),el('div',{class:'grid'},stat('Total due',rupee(r.totalDue)),stat('Paid',rupee(r.totalPaid)),stat('Balance',rupee(r.balance))),
+ m.append(el('p',{class:'mu'},'Session '+r.year),ringCard(r.totalDue?r.totalPaid*100/r.totalDue:100,'Fees paid',rupee(r.totalPaid)+' of '+rupee(r.totalDue)),el('div',{class:'grid'},stat('Total due',rupee(r.totalDue)),stat('Paid',rupee(r.totalPaid)),stat('Balance',rupee(r.balance))),
   el('h3',{},'Fee details'),tableEl([{h:'Fee',f:x=>x.feeType},{h:'Amount',f:x=>rupee(x.amount)+(x.dueMonth==='monthly'?' /month':'')},{h:'Due so far',f:x=>rupee(x.due)},{h:'Paid',f:x=>rupee(x.paid)},{h:'Balance',f:x=>rupee(x.balance)}],r.lines,'Fee structure set nahi hai'),
   el('h3',{},'Payments / Receipts'),tableEl([{h:'Receipt',f:x=>el('a',{href:'../receipt.html?no='+encodeURIComponent(x.receiptNo),target:'_blank',rel:'noopener'},x.receiptNo)},{h:'Date',f:x=>x.date},{h:'Fee',f:x=>x.feeType},{h:'Amount',f:x=>rupee(x.amount)},{h:'Mode',f:x=>x.mode}],r.payments,'Abhi koi payment nahi'));
  upiBlock(m,r)}
 async function initSResults(){
  const m=page('n_results'),r=await call('myResults');
- if(!r.exams.length)m.append(el('p',{class:'mu'},'Abhi result nahi aaya'));
- r.exams.forEach(e=>m.append(el('h3',{},e.title+' · '+e.date),tableEl([{h:'Subject',f:x=>x.subject},{h:'Marks',f:x=>x.marks+' / '+x.max},{h:'Grade',f:x=>x.grade}],e.rows),
+ if(!r.exams.length)m.append(emptyState('No results yet','Abhi result nahi aaya'));
+ r.exams.forEach(e=>m.append(el('h3',{},e.title+' · '+e.date),el('div',{class:'chips3'},el('div',{class:'pc ok'},el('b',{},e.percent+'%'),el('small',{},'Percent')),el('div',{class:'pc lt'},el('b',{},String(e.grade)),el('small',{},'Grade')),el('div',{class:'pc no'},el('b',{},'#'+e.rank),el('small',{},'Rank'))),barChart(e.rows.map(x=>({l:x.subject,v:x.marks,pct:x.max?x.marks*100/x.max:0})),'Subject-wise marks'),tableEl([{h:'Subject',f:x=>x.subject},{h:'Marks',f:x=>x.marks+' / '+x.max},{h:'Grade',f:x=>x.grade}],e.rows),
   el('p',{},el('b',{},'Total: '+e.total+' / '+e.max+' ('+e.percent+'%) · Grade '+e.grade+' · Rank '+e.rank+' · '+(e.pass?'Pass':'Fail'))),
   el('p',{},el('a',{href:'../reportcard.html?exam='+encodeURIComponent(e.examId),target:'_blank',rel:'noopener'},'Report card (PDF / Print)'))))}
 async function initSTime(){
  const m=page('n_timetable'),r=await call('myTimetable');
- if(!r.lessons.length)m.append(el('p',{class:'mu'},'Timetable abhi set nahi hai'));
- DAYS_UI.forEach(d=>{const ls=r.lessons.filter(l=>l.day===d);if(ls.length)m.append(el('h3',{},d),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Subject',f:l=>l.subject},{h:'Teacher',f:l=>l.teacher}],ls))})}
+ if(!r.lessons.length)m.append(emptyState('Timetable not set','Timetable abhi set nahi hai'));else dayTimetable(m,r.lessons,l=>l.teacher||'')}
 const DAYS_UI=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 async function initSHome(){
  const m=page('n_homework'),r=await call('myHomework');

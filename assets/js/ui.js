@@ -29,9 +29,9 @@ function showSecret(title,rows,note){
  modal(title,el('div',{},el('pre',{class:'sec'},txt),el('p',{class:'mu'},note||'Yeh sirf abhi dikh raha hai. Copy karke student/parent ko de do.')),
   [{t:'Copy',g:1,fn:async()=>{try{await navigator.clipboard.writeText(txt);toast('Copied')}catch(e){toast('Copy nahi hua',1)}return false}},{t:'OK',fn:()=>true}])}
 function tableEl(cols,rows,empty){
- if(!rows.length)return el('p',{class:'mu'},empty||'Kuch nahi mila');
+ if(!rows.length)return emptyState(empty||'Kuch nahi mila','');
  return el('div',{class:'tw'},el('table',{class:'tbl'},el('thead',{},el('tr',{},cols.map(c=>el('th',{},c.h)))),
-  el('tbody',{},rows.map(r=>el('tr',{},cols.map(c=>el('td',{},c.f(r))))))))}
+  el('tbody',{},rows.map(r=>el('tr',{},cols.map(c=>el('td',{'data-l':c.h||''},c.f(r))))))))}
 function btn(t,fn,g){return el('button',{class:'s'+(g===false?'':' g'),type:'button',onclick:fn},t)}
 function csvParse(text){
  const rows=[];let row=[],f='',q=false;text=text.replace(/^﻿/,'');
@@ -52,3 +52,21 @@ function helloCard(name,id,sub){const h=new Date().getHours(),g=h<12?'Good morni
  return el('div',{class:'hello hl2'},a,el('div',{},el('small',{},g+' 👋'),el('b',{},name),el('span',{class:'mu'},sub||'')),el('span',{class:'dt'},new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})))}
 function ringCard(pct,title,sub){const p=Math.max(0,Math.min(100,+pct||0)),R=34,C=2*Math.PI*R,d=document.createElement('div');d.className='ringc';
  d.innerHTML='<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="'+R+'" fill="none" stroke="rgba(0,0,0,.08)" stroke-width="9"/><circle cx="40" cy="40" r="'+R+'" fill="none" stroke="var(--c)" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+(C*p/100).toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 40 40)"/></svg><b>'+Math.round(p)+'%</b><div><span>'+title+'</span><small>'+(sub||'')+'</small></div>';return d}
+/* ---- reference-style widgets ---- */
+function calMonth(rows){const map={};rows.forEach(r=>map[r.date]=r.status);let d=new Date();d.setDate(1);const box=el('div',{class:'calc'});
+ const draw=()=>{box.innerHTML='';const y=d.getFullYear(),mo=d.getMonth(),first=(new Date(y,mo,1).getDay()+6)%7,days=new Date(y,mo+1,0).getDate(),td=new Date().toISOString().slice(0,10);
+  box.append(el('div',{class:'calh'},el('button',{type:'button',class:'cn',onclick:()=>{d.setMonth(d.getMonth()-1);draw()}},'‹'),el('b',{},d.toLocaleDateString('en-IN',{month:'long',year:'numeric'})),el('button',{type:'button',class:'cn',onclick:()=>{d.setMonth(d.getMonth()+1);draw()}},'›')));
+  const g=el('div',{class:'calg'});['M','T','W','T','F','S','S'].forEach(x=>g.append(el('span',{class:'dw'},x)));
+  for(let i=0;i<first;i++)g.append(el('span'));
+  for(let i=1;i<=days;i++){const k=y+'-'+String(mo+1).padStart(2,'0')+'-'+String(i).padStart(2,'0'),s=map[k];g.append(el('span',{class:'dd'+(s?' s'+s:'')+(k===td?' td':'')},String(i)))}
+  box.append(g,el('div',{class:'calk'},el('span',{class:'sP'},'Present'),el('span',{class:'sA'},'Absent'),el('span',{class:'sL'},'Late')))};draw();return box}
+function barChart(items,title){const w=el('div',{class:'bars'});if(title)w.append(el('b',{class:'bt'},title));const row=el('div',{class:'brow'});
+ items.forEach(x=>{const p=Math.max(0,Math.min(100,+x.pct||0));row.append(el('div',{class:'bc'},el('span',{class:'bv'},String(x.v)),el('div',{class:'bar2'},el('i',{style:'height:'+Math.max(p,4)+'%'})),el('small',{},String(x.l).slice(0,7))))});w.append(row);return w}
+function dayTimetable(m,lessons,mk){const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],t=days[(new Date().getDay()+6)%7];let cur=lessons.some(l=>l.day===t)?t:(days.find(d=>lessons.some(l=>l.day===d))||t);const strip=el('div',{class:'dstrip'}),list=el('div',{class:'tlist'});
+ const draw=()=>{strip.innerHTML='';days.forEach(d=>strip.append(el('button',{type:'button',class:'dchip'+(d===cur?' on':'')+(d===t?' tod':''),onclick:()=>{cur=d;draw()}},d)));
+  list.innerHTML='';const ls=lessons.filter(l=>l.day===cur);if(!ls.length)list.append(emptyState('No classes','Is din koi class nahi hai'));
+  ls.forEach((l,i)=>list.append(el('div',{class:'tcard t'+(i%4)},el('div',{class:'tt'},el('b',{},l.start),el('small',{},l.end)),el('div',{class:'tb2'},el('b',{},l.subject),el('span',{class:'mu'},mk(l))))))};draw();m.append(strip,list)}
+function emptyState(t,s){const d=document.createElement('div');d.className='empty';d.innerHTML='<svg viewBox="0 0 120 90"><rect x="18" y="26" width="84" height="52" rx="12" fill="var(--soft,#fde7d6)"/><rect x="30" y="14" width="60" height="16" rx="8" fill="var(--c)" opacity=".35"/><circle cx="46" cy="52" r="6" fill="#fff"/><circle cx="74" cy="52" r="6" fill="#fff"/><path d="M50 66Q60 60 70 66" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></svg><b></b><span></span>';d.querySelector('b').textContent=t;d.querySelector('span').textContent=s||'';return d}
+
+
+function quickActions(list){const w=el('div',{class:'qa'});list.forEach(([href,k,label,cls])=>{const a=el('a',{href,class:'qi '+(cls||'')});a.innerHTML=icon(k)+'<span></span>';a.querySelector('span').textContent=label;w.append(a)});return w}
