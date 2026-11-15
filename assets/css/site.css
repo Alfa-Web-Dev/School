@@ -305,3 +305,5 @@ html[data-alt] .bn em{color:var(--o)}
 }
 @media(min-width:1021px){#links a.lgn svg{display:none}}
 @media(max-width:380px){.brand{font-size:16px}.brand img,.brand .lm{width:40px;height:40px}}
+/* thinner announcement strip */
+.tb{font-size:12.5px}.tb .mq{height:26px}.mqt{gap:18px}.mqt .dot{font-size:9px}
