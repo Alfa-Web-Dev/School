@@ -9,7 +9,7 @@ assets/js/      site.js (website) site-data.js (text/photos) studio.js lang.js (
 backend/*.gs    Apps Script source (Main.gs ROUTES: action -> function)
 Code.gs         backend/*.gs ka combined version - Apps Script mein yahi paste hota hai. Rebuild: tools/build-code.sh
 content/        site.json (Studio publish) library.json (Library index)     library/  PDFs + SEO pages (Studio banata hai)
-docs/           TEST-*.md (feature test guides)          robots.txt sitemap.xml
+docs/           UI-REFERENCE.md (design notes)           robots.txt sitemap.xml
 ```
 
 Roles: sirf admin, teacher, student. Parent ke liye alag login nahi (student login se dekhte hain).
