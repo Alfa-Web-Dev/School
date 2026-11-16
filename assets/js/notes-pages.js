@@ -58,19 +58,19 @@ async function prepNote(file){
 
 async function initNotesMgr2(){   // admin + teacher
  const m=page('n_notes'),o=await call('noteOptions');
- if(!o.classes.length){m.append(el('p',{class:'mu'},'No class is assigned yet'));return}
- const cs=el('select',{},o.classes.map(c=>el('option',{value:c.classId},c.name))),ss=el('select'),ch=el('input',{placeholder:'e.g. Ch 1 - Numbers'}),ct=el('select',{},NCATS.map(c=>el('option',{value:c[0]},c[1]))),ti=el('input',{placeholder:'Title (e.g. Chapter 1 notes)'}),
+ if(!o.classes.length&&!o.canAll){m.append(el('p',{class:'mu'},'No class is assigned yet'));return}
+ const cOpts=o.classes.map(c=>el('option',{value:c.classId},c.name)).concat(o.canAll?[el('option',{value:'ALL'},'All classes (whole school)')]:[]),cs=el('select',{},cOpts),ss=el('select'),ch=el('input',{placeholder:'e.g. Ch 1 - Numbers'}),ct=el('select',{},NCATS.map(c=>el('option',{value:c[0]},c[1]))),ti=el('input',{placeholder:'Title (e.g. Chapter 1 notes)'}),
   fi=el('input',{type:'file',accept:'application/pdf,image/jpeg,image/png,image/webp'}),msg=el('div',{class:'err'}),go=el('button',{type:'button'},'Upload');
- const fillSub=()=>{const c=o.classes.find(x=>x.classId===cs.value);ss.innerHTML='';(c?c.subjects:[]).forEach(s=>ss.append(el('option',{value:s.subjectId},s.name)))};fillSub();
- cs.onchange=()=>{fillSub();fc.value=cs.value;load()};
+ const fillSub=()=>{const c=o.classes.find(x=>x.classId===cs.value);ss.innerHTML='';ss.parentNode&&(ss.previousSibling.style.display=ss.style.display=cs.value==='ALL'?'none':'');(c?c.subjects:[]).forEach(s=>ss.append(el('option',{value:s.subjectId},s.name)))};fillSub();
+ cs.onchange=()=>{fillSub();if([...fc.options].some(x=>x.value===cs.value))fc.value=cs.value;load()};
  go.onclick=async()=>{msg.style.color='';msg.textContent='';go.disabled=true;
-  try{if(!fi.files[0])throw new Error('Choose a file');if(!ss.value)throw new Error('You have no subject in this class');
+  try{if(!fi.files[0])throw new Error('Choose a file');if(cs.value!=='ALL'&&!ss.value)throw new Error('You have no subject in this class');
    msg.textContent='Uploading... (a big file takes a while, do not close the page)';
    const f=await prepNote(fi.files[0]);await call('uploadNote',{classId:cs.value,subjectId:ss.value,category:ct.value,chapter:ch.value,title:ti.value,mime:f.mime,data:f.data});
    toast('Added to library');ti.value='';fi.value='';msg.textContent='';await load()}
   catch(e){msg.style.color='';msg.textContent=e.message}go.disabled=false};
  m.append(el('div',{class:'card',style:'max-width:520px'},el('h3',{style:'margin-top:0'},'Add to library'),el('label',{},'Class'),cs,el('label',{},'Section'),ct,el('label',{},'Subject'),ss,el('label',{},'Chapter (optional)'),ch,el('label',{},'Title'),ti,el('label',{},'File (PDF or photo, max 20 MB)'),fi,go,msg));
- const fc=el('select',{},o.classes.map(c=>el('option',{value:c.classId},c.name))),list=el('div');let all=[];
+ const fc=el('select',{},o.classes.map(c=>el('option',{value:c.classId},c.name)).concat(o.canAll?[el('option',{value:'ALL'},'All classes (shared)')]:[])),list=el('div');let all=[];
  const lb=libBar((l,c)=>noteGroups(list,l,act,c),()=>all);
  m.append(el('h3',{},'Library shelves'),el('div',{class:'bar'},fc),lb.el,list);
  const act=n=>n.editable?[el('button',{type:'button',class:'lnk',onclick:()=>formModal('Edit item',[{k:'title',l:'Title',req:1},{k:'chapter',l:'Chapter (optional)'},{k:'category',l:'Section',type:'select',opts:NCATS.map(c=>[c[0],c[1]])}],n,async v=>{await call('updateNote',{noteId:n.noteId,title:v.title,chapter:v.chapter,category:v.category});await load()})},'Edit'),

@@ -1,4 +1,4 @@
-const VERSION='0.3.1';
+const VERSION='0.3.2';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
  Settings:['key','value'],
@@ -734,17 +734,18 @@ const safeName=s=>String(s).replace(/[\\/:*?"<>|\r\n]+/g,' ').replace(/\s+/g,' '
 function noteOptions(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  const mine=s.role==='teacher'?teacherClassIds(s.userId):null;
- return{ok:true,classes:table('Classes').rows.filter(c=>!mine||mine[String(c.classId)]).map(c=>({classId:String(c.classId),name:c.name,subjects:subjectsFor(s,String(c.classId))}))}}
+ return{ok:true,canAll:s.role==='admin',classes:table('Classes').rows.filter(c=>!mine||mine[String(c.classId)]).map(c=>({classId:String(c.classId),name:c.name,subjects:subjectsFor(s,String(c.classId))}))}}
 
 function listNotes(b){
  const s=guard(b,['admin','teacher','student']);if(!s)return DENIED;
  ensureNoteCat();
  let cid='';
  if(s.role==='student'){const r=find('Students',x=>String(x.studentId)===s.userId&&String(x.status).toLowerCase()==='active');if(!r)return DENIED;cid=String(r.classId)}
- const mine=s.role==='teacher'?teacherClassIds(s.userId):null,want=s.role==='student'?cid:(b.classId?resolveClass(b.classId):'');
+ const mine=s.role==='teacher'?teacherClassIds(s.userId):null,onlyAll=b.classId==='ALL',want=s.role==='student'?cid:(b.classId&&!onlyAll?resolveClass(b.classId):'');
  const sn=nameMap('Subjects','subjectId'),cn=nameMap('Classes','classId'),un=nameMap('Users','userId');
- const notes=table('Notes').rows.filter(n=>(!mine||mine[String(n.classId)])&&(!want||String(n.classId)===want)&&(!b.subjectId||String(n.subjectId)===String(b.subjectId)))
-  .map(n=>({noteId:String(n.noteId),classId:String(n.classId),className:cn[String(n.classId)]||String(n.classId),subjectId:String(n.subjectId),subject:sn[String(n.subjectId)]||String(n.subjectId),
+ const isAll=n=>String(n.classId)==='ALL';
+ const notes=table('Notes').rows.filter(n=>(onlyAll?isAll(n):(isAll(n)||((!mine||mine[String(n.classId)])&&(!want||String(n.classId)===want))))&&(!b.subjectId||String(n.subjectId)===String(b.subjectId)))
+  .map(n=>({noteId:String(n.noteId),classId:String(n.classId),className:isAll(n)?'All classes':(cn[String(n.classId)]||String(n.classId)),subjectId:String(n.subjectId),subject:isAll(n)?'General':(sn[String(n.subjectId)]||String(n.subjectId)),
    chapter:n.chapter,category:NOTE_CATS.indexOf(String(n.category))>=0?String(n.category):'chapter',title:n.title,fileId:String(n.fileId),mime:String(n.mime),size:Number(n.size)||0,by:un[String(n.uploadedBy)]||String(n.uploadedBy),date:dstr(n.date),
    editable:s.role==='admin'||String(n.uploadedBy)===s.userId}));
  notes.sort((a,c)=>a.subject.localeCompare(c.subject)||a.chapter.localeCompare(c.chapter,undefined,{numeric:true})||(a.date<c.date?1:-1));
@@ -753,10 +754,11 @@ function listNotes(b){
 function uploadNote(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>{
-  const cid=resolveClass(b.classId),sub=clean(b.subjectId,20),chapter=clean(b.chapter,100)||'General',category=clean(b.category,12),title=clean(b.title,120),mime=clean(b.mime,40).toLowerCase(),data=String(b.data||'');
-  if(!cid||!canClass(s,cid))throw new Error('You do not have permission for this class');
-  const subj=find('Subjects',x=>String(x.subjectId)===sub);if(!subj)throw new Error('Select a subject');
-  if(!teachesSub(s,cid,sub))throw new Error('You do not teach this subject in this class');
+  const toAll=b.classId==='ALL',cid=toAll?'ALL':resolveClass(b.classId),sub=toAll?'ALL':clean(b.subjectId,20),chapter=clean(b.chapter,100)||'General',category=clean(b.category,12),title=clean(b.title,120),mime=clean(b.mime,40).toLowerCase(),data=String(b.data||'');
+  if(toAll){if(s.role!=='admin')throw new Error('Only admin can add to all classes')}
+  else if(!cid||!canClass(s,cid))throw new Error('You do not have permission for this class');
+  const subj=toAll?{name:'General'}:find('Subjects',x=>String(x.subjectId)===sub);if(!subj)throw new Error('Select a subject');
+  if(!toAll&&!teachesSub(s,cid,sub))throw new Error('You do not teach this subject in this class');
   if(!title)throw new Error('Title is required');if(NOTE_CATS.indexOf(category)<0)throw new Error('Choose a section (category)');ensureNoteCat();
   if(!NOTE_TYPES[mime])throw new Error('Only PDF or photo (JPG/PNG/WEBP) is allowed');
   if(!data||data.length>NOTE_MAX_BYTES*1.4)throw new Error('File is larger than 20 MB');
@@ -764,7 +766,7 @@ function uploadNote(b){
   const bytes=Utilities.base64Decode(data);
   if(bytes.length>NOTE_MAX_BYTES)throw new Error('File is larger than 20 MB');if(!magicOk(bytes,mime))throw new Error('Invalid file type (the extension seems changed)');
   return withLock(()=>{
-   const cls=find('Classes',c=>String(c.classId)===cid),folder=subFolder(subFolder(DriveApp.getFolderById(root),safeName(cls.name)),safeName(subj.name));
+   const cls=toAll?{name:'All Classes'}:find('Classes',c=>String(c.classId)===cid),folder=subFolder(subFolder(DriveApp.getFolderById(root),safeName(cls.name)),safeName(subj.name));
    const file=folder.createFile(Utilities.newBlob(bytes,mime,safeName(title)+NOTE_TYPES[mime]));
    try{file.setSharing(DriveApp.Access.ANYONE_WITH_LINK,DriveApp.Permission.VIEW)}
    catch(e){file.setTrashed(true);throw new Error('Drive sharing is not allowed (blocked by the Workspace admin)')}
