@@ -7,6 +7,9 @@ function magicOk(b,mime){const u=i=>b[i]&255;
  if(mime==='image/png')return u(0)===0x89&&u(1)===0x50&&u(2)===0x4E&&u(3)===0x47;
  if(mime==='image/webp')return u(0)===0x52&&u(1)===0x49&&u(2)===0x46&&u(3)===0x46;return false}
 function subFolder(parent,name){const it=parent.getFoldersByName(name);return it.hasNext()?it.next():parent.createFolder(name)}
+const NOTE_CATS=['short','chapter','pyq','sample','ref','mag','syll','work','other'];
+// Purani Notes sheet mein 'category' column na ho to ek baar header daal do
+function ensureNoteCat(){const t=tab('Notes');if(String(t.getRange(1,11).getValue())!=='category')t.getRange(1,11).setValue('category').setFontWeight('bold')}
 const safeName=s=>String(s).replace(/[\\/:*?"<>|\r\n]+/g,' ').replace(/\s+/g,' ').trim().slice(0,60)||'note';
 
 // Upload form ke dropdown: kis class mein kaun se subject ke notes daal sakte ho
@@ -17,13 +20,14 @@ function noteOptions(b){
 
 function listNotes(b){
  const s=guard(b,['admin','teacher','student']);if(!s)return DENIED;
+ ensureNoteCat();
  let cid='';
  if(s.role==='student'){const r=find('Students',x=>String(x.studentId)===s.userId&&String(x.status).toLowerCase()==='active');if(!r)return DENIED;cid=String(r.classId)}
  const mine=s.role==='teacher'?teacherClassIds(s.userId):null,want=s.role==='student'?cid:(b.classId?resolveClass(b.classId):'');
  const sn=nameMap('Subjects','subjectId'),cn=nameMap('Classes','classId'),un=nameMap('Users','userId');
  const notes=table('Notes').rows.filter(n=>(!mine||mine[String(n.classId)])&&(!want||String(n.classId)===want)&&(!b.subjectId||String(n.subjectId)===String(b.subjectId)))
   .map(n=>({noteId:String(n.noteId),classId:String(n.classId),className:cn[String(n.classId)]||String(n.classId),subjectId:String(n.subjectId),subject:sn[String(n.subjectId)]||String(n.subjectId),
-   chapter:n.chapter,title:n.title,fileId:String(n.fileId),mime:String(n.mime),size:Number(n.size)||0,by:un[String(n.uploadedBy)]||String(n.uploadedBy),date:dstr(n.date),
+   chapter:n.chapter,category:NOTE_CATS.indexOf(String(n.category))>=0?String(n.category):'chapter',title:n.title,fileId:String(n.fileId),mime:String(n.mime),size:Number(n.size)||0,by:un[String(n.uploadedBy)]||String(n.uploadedBy),date:dstr(n.date),
    editable:s.role==='admin'||String(n.uploadedBy)===s.userId}));
  notes.sort((a,c)=>a.subject.localeCompare(c.subject)||a.chapter.localeCompare(c.chapter,undefined,{numeric:true})||(a.date<c.date?1:-1));
  return{ok:true,notes:notes.slice(0,1000)}}
@@ -31,11 +35,11 @@ function listNotes(b){
 function uploadNote(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>{
-  const cid=resolveClass(b.classId),sub=clean(b.subjectId,20),chapter=clean(b.chapter,100),title=clean(b.title,120),mime=clean(b.mime,40).toLowerCase(),data=String(b.data||'');
+  const cid=resolveClass(b.classId),sub=clean(b.subjectId,20),chapter=clean(b.chapter,100)||'General',category=clean(b.category,12),title=clean(b.title,120),mime=clean(b.mime,40).toLowerCase(),data=String(b.data||'');
   if(!cid||!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
   const subj=find('Subjects',x=>String(x.subjectId)===sub);if(!subj)throw new Error('Subject chuno');
   if(!teachesSub(s,cid,sub))throw new Error('Aap is class mein yeh subject nahi padhate');
-  if(!title)throw new Error('Title zaruri hai');if(!chapter)throw new Error('Chapter zaruri hai');
+  if(!title)throw new Error('Title zaruri hai');if(NOTE_CATS.indexOf(category)<0)throw new Error('Section (category) chuno');ensureNoteCat();
   if(!NOTE_TYPES[mime])throw new Error('Sirf PDF ya photo (JPG/PNG/WEBP) chalegi');
   if(!data||data.length>NOTE_MAX_BYTES*1.4)throw new Error('File 20 MB se badi hai');
   const root=P.getProperty('NOTES_FOLDER_ID');if(!root)throw new Error('Drive folder set nahi hai. Apps Script mein setupDrive chalao.');
@@ -47,7 +51,7 @@ function uploadNote(b){
    try{file.setSharing(DriveApp.Access.ANYONE_WITH_LINK,DriveApp.Permission.VIEW)}
    catch(e){file.setTrashed(true);throw new Error('Drive sharing allowed nahi hai (Workspace admin ne roka hua hai)')}
    const id=nextId('Notes','noteId','NT',4);
-   addRow('Notes',{noteId:id,classId:cid,subjectId:sub,chapter,title,fileId:file.getId(),fileName:file.getName(),mime,size:bytes.length,uploadedBy:s.userId,date:todayStr()});
+   addRow('Notes',{noteId:id,classId:cid,subjectId:sub,chapter,title,fileId:file.getId(),fileName:file.getName(),mime,size:bytes.length,uploadedBy:s.userId,date:todayStr(),category});
    log(s.userId,'note_upload',id+' '+cid+' '+sub);return{ok:true,noteId:id}})})}
 
 function updateNote(b){
@@ -55,8 +59,8 @@ function updateNote(b){
  return safe(()=>withLock(()=>{
   const ex=find('Notes',n=>String(n.noteId)===String(b.noteId));if(!ex)throw new Error('Note nahi mila');
   if(s.role!=='admin'&&String(ex.uploadedBy)!==s.userId)throw new Error('Sirf apna note edit kar sakte ho');
-  const chapter=clean(b.chapter,100),title=clean(b.title,120);if(!chapter||!title)throw new Error('Title aur chapter zaruri hain');
-  setRow('Notes',ex._row,{chapter,title});return{ok:true}}))}
+  const chapter=clean(b.chapter,100)||'General',title=clean(b.title,120),category=clean(b.category,12);if(!title)throw new Error('Title zaruri hai');if(NOTE_CATS.indexOf(category)<0)throw new Error('Section chuno');ensureNoteCat();
+  setRow('Notes',ex._row,{chapter,title,category});return{ok:true}}))}
 
 function deleteNote(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;

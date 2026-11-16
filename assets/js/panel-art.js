@@ -32,11 +32,11 @@ function propFor(t,d){t=String(t||'');for(const [r,k] of KEY)if(r.test(t))return
 const PG={
  students:['cap',0,'Admissions, records and logins',[3,28]],teachers:['board',1,'Staff accounts and class assignments',[9,33]],classes:['building',2,'Classes, sections and subjects',[14,38]],
  timetable:['calendar',3,'Weekly periods, all in one place',[6,31]],fees:['wallet',4,'Collect, track and print receipts',[11,26]],exams:['exam',5,'Create exams and publish results',[2,36]],
- notices:['bell',4,'Announcements and school updates',[16,41]],notes:['books',1,'Study material shared with classes',[5,30]],enquiries:['mail',5,'Admission enquiries from the website',[8,35]],
+ notices:['bell',4,'Announcements and school updates',[16,41]],notes:['books',1,'Shelves of notes, PYQs and reference books',[5,30]],enquiries:['mail',5,'Admission enquiries from the website',[8,35]],
  certificates:['medal',3,'Certificates in one tap',[12,27]],logs:['clipboard',0,'Backups and activity history',[1,25]],settings:['gear',0,'School details, AI and security',[10,29]],
  attendance:['clipboard',1,'Presence record, day by day',[4,32]],homework:['notebook',3,'What is due and what is done',[7,34]],marks:['exam',2,'Enter marks quickly and safely',[13,37]],
  results:['trophy',4,'Marks, ranks and report cards',[15,40]],profile:['idcard',0,'Your details at a glance',[0,24]]};
-const SUB={teacher:{classes:'Your classes and students',notes:'Share notes with your class',timetable:'Your weekly schedule',settings:'Your account and security',attendance:"Mark today's attendance",homework:'Assign and review homework'},student:{timetable:'Your weekly schedule',fees:'Fees and payment history',notes:'Study material from teachers',notices:'Latest from your school',settings:'Your account and security'}};
+const SUB={teacher:{classes:'Your classes and students',notes:'Upload and manage your shelves',timetable:'Your weekly schedule',settings:'Your account and security',attendance:"Mark today's attendance",homework:'Assign and review homework'},student:{timetable:'Your weekly schedule',fees:'Fees and payment history',notes:'Notes, PYQs and books by shelf',notices:'Latest from your school',settings:'Your account and security'}};
 const here=()=>{const m=location.pathname.match(/\/(admin|teacher|student)\/([\w-]+)\.html/);return m?{role:m[1],page:m[2]}:null};
 function avc(i,pos){return '<span class="pav '+pos+'">'+AV.svg(i)+'</span>'}
 function banner(h){const w=here();if(!w||w.page==='index')return;const c=PG[w.page];if(!c)return;

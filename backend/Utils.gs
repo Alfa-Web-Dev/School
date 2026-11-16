@@ -1,4 +1,4 @@
-const VERSION='0.2.0';
+const VERSION='0.3.0';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
  Settings:['key','value'],
@@ -16,9 +16,8 @@ const SCHEMA={
  Payments:['receiptNo','studentId','feeType','amount','mode','date','receivedBy'],
  ClassNotices:['id','classId','title','text','date'],
  Enquiries:['id','name','phone','message','time','status','type','role','email','details'],
- Notes:['noteId','classId','subjectId','chapter','title','fileId','fileName','mime','size','uploadedBy','date'],
  Tokens:['tokenHash','userId','role','expires'],
- Notes:['noteId','classId','subjectId','chapter','title','fileId','mime','size','uploadedBy','date'],
+ Notes:['noteId','classId','subjectId','chapter','title','fileId','mime','size','uploadedBy','date','category'],
  Logs:['time','userId','action','details']
 };
 const out=o=>ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);

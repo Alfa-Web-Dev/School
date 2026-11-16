@@ -10,19 +10,39 @@ function viewNote(n){
   [{t:'Download',g:1,fn:()=>{window.open(gDown(n.fileId),'_blank','noopener');return false}},{t:'Close',fn:()=>true}]);
  d.classList.add('wide')}
 
-function noteCard(n,actions){
- const img=el('img',{src:gThumb(n.fileId),loading:'lazy',alt:'',referrerpolicy:'no-referrer'});
- img.onerror=()=>img.replaceWith(el('div',{class:'nph'},n.mime==='application/pdf'?'PDF':'IMG'));
- return el('div',{class:'ncard'},el('div',{class:'nth',onclick:()=>viewNote(n)},img),
-  el('div',{class:'nb'},el('b',{},n.title),el('div',{class:'mu'},n.subject+' · '+n.chapter),el('div',{class:'mu'},fmtSize(n.size)+' · '+n.by+' · '+n.date),
-   el('div',{class:'row',style:'flex-wrap:wrap;margin-top:8px'},[btn('View',()=>viewNote(n),false)].concat(actions||[]))))}
+const NCATS=[['short','Short Notes','notebook'],['chapter','Chapter-wise Notes','books'],['pyq','Previous Year Papers (PYQ)','exam'],['sample','Sample Papers','clipboard'],['ref','Reference Books','cap'],['mag','Magazines','medal'],['syll','Syllabus','calendar'],['work','Worksheets','board'],['other','Other','box']];
+const catName=k=>(NCATS.find(c=>c[0]===k)||NCATS[8])[1];
+const subHue=s=>{let h=0;for(const ch of String(s))h=(h*31+ch.charCodeAt(0))%360;return h};
 
-function noteGroups(box,notes,actionsFor){
- box.innerHTML='';if(!notes.length){box.append(el('p',{class:'mu'},'Abhi koi notes nahi'));return}
- const bySub={};notes.forEach(n=>{(bySub[n.className+'|'+n.subject]=bySub[n.className+'|'+n.subject]||[]).push(n)});
- Object.keys(bySub).forEach(k=>{const [c,s]=k.split('|'),byCh={};bySub[k].forEach(n=>(byCh[n.chapter]=byCh[n.chapter]||[]).push(n));
-  box.append(el('h3',{},s+' · '+c));
-  Object.keys(byCh).forEach(ch=>box.append(el('h4',{class:'mu',style:'margin:10px 0 6px'},ch),el('div',{class:'ngrid'},byCh[ch].map(n=>noteCard(n,actionsFor?actionsFor(n):[])))))})}
+function bookEl(n,actions){
+ const h=subHue(n.subject),cv=el('div',{class:'bkc',style:'--g:linear-gradient(150deg,hsl('+h+',70%,62%),hsl('+(h+40)+',65%,46%))',onclick:()=>viewNote(n)});
+ const t=el('div',{class:'bkt'},el('span',{},n.title),el('small',{},n.subject));cv.append(t);
+ const img=el('img',{src:gThumb(n.fileId),loading:'lazy',alt:'',referrerpolicy:'no-referrer'});img.onload=()=>{t.style.display='none'};img.onerror=()=>img.remove();cv.append(img);
+ if(n.mime==='application/pdf')cv.append(el('i',{class:'bkb'},'PDF'));
+ const w=el('div',{class:'bk'},cv,el('b',{class:'bkn',title:n.title},n.title),el('span',{class:'bkm'},n.subject+(n.chapter&&n.chapter!=='General'?' · '+n.chapter:'')+' · '+n.className));
+ if(actions&&actions.length)w.append(el('div',{class:'bka'},actions));return w}
+
+function shelfEl(title,count,prop,books){
+ const h=el('div',{class:'sh'},el('span',{class:'shi'}),el('b',{},title),el('em',{},String(count)));h.querySelector('.shi').innerHTML=PA.mini(prop);
+ return el('section',{class:'shelf'},h,el('div',{class:'srow'},el('div',{class:'sin'},books)))}
+
+// cat = '' (sab) ya category key. Sab mein har category ki alag shelf, ek category mein har subject ki.
+function noteGroups(box,notes,actionsFor,cat){
+ box.innerHTML='';if(!notes.length){box.append(emptyState('No books here yet','Is section mein abhi kuch nahi'));return}
+ if(!cat){NCATS.forEach(([k,nm,pr])=>{const l=notes.filter(n=>n.category===k);if(l.length)box.append(shelfEl(nm,l.length,pr,l.map(n=>bookEl(n,actionsFor?actionsFor(n):[]))))})}
+ else{const pr=(NCATS.find(c=>c[0]===cat)||[])[2]||'books',by={};notes.forEach(n=>(by[n.className+'|'+n.subject]=by[n.className+'|'+n.subject]||[]).push(n));
+  Object.keys(by).forEach(k=>{const [c,s]=k.split('|');box.append(shelfEl(s+' · '+c,by[k].length,pr,by[k].map(n=>bookEl(n,actionsFor?actionsFor(n):[]))))})}}
+
+// Category chips + search; draw(cat,text) har baar chalta hai
+function libBar(onChange,getNotes){
+ let cat='';const q=el('input',{placeholder:'Search title, subject, chapter'}),chips=el('div',{class:'cchips'}),sub=el('select',{class:'sel'});
+ const drawChips=()=>{const all=getNotes(),cnt={};all.forEach(n=>cnt[n.category]=(cnt[n.category]||0)+1);
+  chips.innerHTML='';[['', 'All']].concat(NCATS.map(c=>[c[0],c[1]])).forEach(([k,nm])=>{const c=k?cnt[k]||0:all.length;if(k&&!c)return;
+   chips.append(el('button',{type:'button',class:'ctab'+(cat===k?' on':''),onclick:()=>{cat=k;drawChips();go()}},nm+' ',el('em',{},String(c))))});
+  const subs=[...new Set(all.map(n=>n.subject))].sort(),cur=sub.value;sub.innerHTML='';sub.append(el('option',{value:''},'All subjects'));subs.forEach(s=>sub.append(el('option',{value:s},s)));sub.value=subs.includes(cur)?cur:'';sub.style.display=subs.length>1?'':'none'};
+ const go=()=>{const t=q.value.toLowerCase();onChange(getNotes().filter(n=>(!cat||n.category===cat)&&(!sub.value||n.subject===sub.value)&&(!t||(n.title+' '+n.chapter+' '+n.subject).toLowerCase().includes(t))),cat)};
+ q.oninput=go;sub.onchange=go;
+ return{chips,q,sub,refresh:()=>{drawChips();go()},el:el('div',{},el('div',{class:'bar'},q,sub),chips)}}
 
 // Image ho to browser mein chhoti karo, PDF jaisi hai. Base64 bhejte hain.
 async function prepNote(file){
@@ -39,26 +59,25 @@ async function prepNote(file){
 async function initNotesMgr2(){   // admin + teacher
  const m=page('n_notes'),o=await call('noteOptions');
  if(!o.classes.length){m.append(el('p',{class:'mu'},'Abhi koi class assign nahi hai'));return}
- const cs=el('select',{},o.classes.map(c=>el('option',{value:c.classId},c.name))),ss=el('select'),ch=el('input',{placeholder:'Chapter (jaise: Ch 1 - Numbers)'}),ti=el('input',{placeholder:'Title (jaise: Chapter 1 notes)'}),
+ const cs=el('select',{},o.classes.map(c=>el('option',{value:c.classId},c.name))),ss=el('select'),ch=el('input',{placeholder:'e.g. Ch 1 - Numbers'}),ct=el('select',{},NCATS.map(c=>el('option',{value:c[0]},c[1]))),ti=el('input',{placeholder:'Title (jaise: Chapter 1 notes)'}),
   fi=el('input',{type:'file',accept:'application/pdf,image/jpeg,image/png,image/webp'}),msg=el('div',{class:'err'}),go=el('button',{type:'button'},'Upload');
  const fillSub=()=>{const c=o.classes.find(x=>x.classId===cs.value);ss.innerHTML='';(c?c.subjects:[]).forEach(s=>ss.append(el('option',{value:s.subjectId},s.name)))};fillSub();
  cs.onchange=()=>{fillSub();fc.value=cs.value;load()};
  go.onclick=async()=>{msg.style.color='';msg.textContent='';go.disabled=true;
   try{if(!fi.files[0])throw new Error('File chuno');if(!ss.value)throw new Error('Is class mein aapka koi subject nahi hai');
    msg.textContent='Upload ho raha hai... (badi file mein thoda time lagta hai, page band mat karo)';
-   const f=await prepNote(fi.files[0]);await call('uploadNote',{classId:cs.value,subjectId:ss.value,chapter:ch.value,title:ti.value,mime:f.mime,data:f.data});
-   toast('Notes upload ho gaye');ti.value='';fi.value='';msg.textContent='';await load()}
+   const f=await prepNote(fi.files[0]);await call('uploadNote',{classId:cs.value,subjectId:ss.value,category:ct.value,chapter:ch.value,title:ti.value,mime:f.mime,data:f.data});
+   toast('Library mein add ho gaya');ti.value='';fi.value='';msg.textContent='';await load()}
   catch(e){msg.style.color='';msg.textContent=e.message}go.disabled=false};
- m.append(el('div',{class:'card',style:'max-width:520px'},el('h3',{style:'margin-top:0'},'Naye notes upload karo'),el('label',{},'Class'),cs,el('label',{},'Subject'),ss,el('label',{},'Chapter'),ch,el('label',{},'Title'),ti,el('label',{},'File (PDF ya photo, max 20 MB)'),fi,go,msg));
- const fc=el('select',{},o.classes.map(c=>el('option',{value:c.classId},c.name))),q=el('input',{placeholder:'Search title / chapter'}),list=el('div');let all=[];
- m.append(el('h3',{},'Upload kiye hue notes'),el('div',{class:'bar'},fc,q),list);
- const act=n=>n.editable?[btn('Edit',()=>formModal('Edit notes',[{k:'title',l:'Title',req:1},{k:'chapter',l:'Chapter',req:1}],n,async v=>{await call('updateNote',{noteId:n.noteId,title:v.title,chapter:v.chapter});await load()})),
-  btn('Delete',async()=>{if(confirm('"'+n.title+'" delete karein? File Drive ke trash mein jayegi.')){await call('deleteNote',{noteId:n.noteId});await load()}})]:[];
- const draw=()=>{const t=q.value.toLowerCase();noteGroups(list,all.filter(n=>!t||(n.title+' '+n.chapter).toLowerCase().includes(t)),act)};
- async function load(){all=(await call('listNotes',{classId:fc.value})).notes;draw()}
- fc.onchange=load;q.oninput=draw;await load()}
+ m.append(el('div',{class:'card',style:'max-width:520px'},el('h3',{style:'margin-top:0'},'Add to library'),el('label',{},'Class'),cs,el('label',{},'Section'),ct,el('label',{},'Subject'),ss,el('label',{},'Chapter (optional)'),ch,el('label',{},'Title'),ti,el('label',{},'File (PDF ya photo, max 20 MB)'),fi,go,msg));
+ const fc=el('select',{},o.classes.map(c=>el('option',{value:c.classId},c.name))),list=el('div');let all=[];
+ const lb=libBar((l,c)=>noteGroups(list,l,act,c),()=>all);
+ m.append(el('h3',{},'Library shelves'),el('div',{class:'bar'},fc),lb.el,list);
+ const act=n=>n.editable?[el('button',{type:'button',class:'lnk',onclick:()=>formModal('Edit item',[{k:'title',l:'Title',req:1},{k:'chapter',l:'Chapter (optional)'},{k:'category',l:'Section',type:'select',opts:NCATS.map(c=>[c[0],c[1]])}],n,async v=>{await call('updateNote',{noteId:n.noteId,title:v.title,chapter:v.chapter,category:v.category});await load()})},'Edit'),
+  el('button',{type:'button',class:'lnk bad',onclick:async()=>{if(confirm('"'+n.title+'" delete karein? File Drive ke trash mein jayegi.')){await call('deleteNote',{noteId:n.noteId});await load()}}},'Delete')]:[];
+ async function load(){all=(await call('listNotes',{classId:fc.value})).notes;lb.refresh()}
+ fc.onchange=load;await load()}
 
 async function initSNotes(){
- const m=page('n_notes'),q=el('input',{placeholder:'Search title / chapter'}),list=el('div'),r=await call('listNotes');
- const draw=()=>{const t=q.value.toLowerCase();noteGroups(list,r.notes.filter(n=>!t||(n.title+' '+n.chapter+' '+n.subject).toLowerCase().includes(t)))};
- q.oninput=draw;m.append(el('div',{class:'bar'},q),list);draw()}
+ const m=page('n_notes'),r=await call('listNotes'),list=el('div'),lb=libBar((l,c)=>noteGroups(list,l,null,c),()=>r.notes);
+ m.append(lb.el,list);lb.refresh()}
