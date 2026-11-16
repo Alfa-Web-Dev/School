@@ -22,7 +22,7 @@ const ROUTES={
  myResults:'myResults',myTimetable:'myTimetable',myHomework:'myHomework',myNotices:'myNotices',
  changeSecret:'changeSecret',listStudents:'listStudents',saveStudent:'saveStudent',importStudents:'importStudents',
  promoteStudents:'promoteStudents',listTeachers:'listTeachers',saveTeacher:'saveTeacher',listClasses:'listClasses',
- saveClass:'saveClass',saveSubject:'saveSubject',listLessons:'listLessons',
+ saveClass:'saveClass',saveSections:'saveSections',deleteClass:'deleteClass',saveSubject:'saveSubject',listLessons:'listLessons',
  saveLesson:'saveLesson',listClassNotices:'listClassNotices',saveClassNotice:'saveClassNotice',getAttendance:'getAttendance',
  markAttendance:'markAttendance',listAssignments:'listAssignments',saveAssignment:'saveAssignment',getFeeStructure:'getFeeStructure',
  saveFeeStructure:'saveFeeStructure',listPayments:'listPayments',addPayment:'addPayment',listExams:'listExams',
