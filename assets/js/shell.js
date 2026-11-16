@@ -17,13 +17,24 @@ async function loadBrand(){
  try{const r=await fetch('../content/site.json?v='+Date.now());if(r.ok){const o=await r.json();for(const k in (o.CFG||{}))if(k!=='api')CFG[k]=o.CFG[k];window.__PH=o.PH||{}}}catch(e){}
  if(typeof applyTheme==='function')applyTheme()}
 const logoUrl=()=>{let l=CFG.logo||'';l=(window.__PH&&window.__PH[l])||l;return /^uploads\//.test(l)?'../'+l:(/^https:\/\//.test(l)?l:'')};
+const saveShell=u=>{try{const c={};for(const k in CFG)if(k!=='api'&&typeof CFG[k]!=='function')c[k]=CFG[k];localStorage.setItem('sp_shell',JSON.stringify({u:{userId:u.userId,name:u.name,role:u.role},cfg:c,ph:window.__PH||{}}))}catch(e){}};
 async function initShell(role,page,phase){
- applyI18n();await loadBrand();
+ applyI18n();
+ // Cache hai to header/menu/nav turant dikhao (network ka intezaar nahi); login check background mein
+ let cu=null;try{const c=JSON.parse(localStorage.getItem('sp_shell')||'null');if(c&&c.u&&c.u.role===role&&TOK.get()){cu=c.u;for(const k in c.cfg)CFG[k]=c.cfg[k];window.__PH=c.ph||{};if(typeof applyTheme==='function')applyTheme()}}catch(e){}
+ if(cu){window.__U=cu;paint(role,page,cu,phase);
+  (async()=>{try{await loadBrand();const r=await api('me');
+   if(r.ok){if(r.user.role!==role)location.href='../'+HOME[r.user.role]+'/index.html';else{saveShell(r.user);if(r.user.userId!==cu.userId)location.reload()}}
+   else if(r.error==='Session expired. Please login again.'){TOK.clear();location.href='../login.html'}}catch(e){}})();
+  return cu}
+ await loadBrand();
  let r;const retry=()=>{document.body.innerHTML='<div style="min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px;font-family:sans-serif"><div><p style="font-size:17px">Connection problem. Your login is safe.</p><button onclick="location.reload()" style="padding:12px 26px;border:0;border-radius:999px;background:#111;color:#fff;font-size:16px">Try again</button></div></div>'};
  try{r=await api('me')}catch(e){retry();return}
- if(!r.ok){if(r.error==='expired'){TOK.clear();location.href='../login.html'}else retry();return}
- const u=r.user,ok=(u.role===role);window.__U=u;
- if(!ok){location.href='../'+HOME[u.role]+'/index.html';return}
+ if(!r.ok){if(r.error==='Session expired. Please login again.'){TOK.clear();location.href='../login.html'}else retry();return}
+ const u=r.user;window.__U=u;
+ if(u.role!==role){location.href='../'+HOME[u.role]+'/index.html';return}
+ saveShell(u);paint(role,page,u,phase);return u}
+function paint(role,page,u,phase){
  const nav=NAV[role].map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('');
  document.getElementById('shell').innerHTML=
   '<header><a class="brand" href="index.html">'+(logoUrl()?'<img src="'+logoUrl()+'" alt="">':'<span class="lm">'+((CFG.shortName||'S').trim().charAt(0))+'</span>')+'<span class="bn">'+(typeof SN==='function'?SN():CFG.name)+'</span></a><span class="sp"></span><button id="um" class="um" aria-label="Menu" aria-expanded="false"></button>'+
@@ -39,7 +50,7 @@ async function initShell(role,page,phase){
  applyI18n();
  const m=document.getElementById('main');
  if(typeof initAI==='function')initAI(role,u);
- if(!phase)return u;
+ if(!phase)return;
  m.innerHTML='<h1 data-i="n_'+(NAV[role].find(x=>x[0]===page)||[0,page])[1]+'"></h1><p class="mu"><span data-i="soon"></span> Phase '+phase+'</p>';
  applyI18n();
- return u}
+ }

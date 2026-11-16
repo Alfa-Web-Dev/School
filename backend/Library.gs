@@ -36,20 +36,20 @@ function uploadNote(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>{
   const cid=resolveClass(b.classId),sub=clean(b.subjectId,20),chapter=clean(b.chapter,100)||'General',category=clean(b.category,12),title=clean(b.title,120),mime=clean(b.mime,40).toLowerCase(),data=String(b.data||'');
-  if(!cid||!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
-  const subj=find('Subjects',x=>String(x.subjectId)===sub);if(!subj)throw new Error('Subject chuno');
-  if(!teachesSub(s,cid,sub))throw new Error('Aap is class mein yeh subject nahi padhate');
-  if(!title)throw new Error('Title zaruri hai');if(NOTE_CATS.indexOf(category)<0)throw new Error('Section (category) chuno');ensureNoteCat();
-  if(!NOTE_TYPES[mime])throw new Error('Sirf PDF ya photo (JPG/PNG/WEBP) chalegi');
-  if(!data||data.length>NOTE_MAX_BYTES*1.4)throw new Error('File 20 MB se badi hai');
-  const root=P.getProperty('NOTES_FOLDER_ID');if(!root)throw new Error('Drive folder set nahi hai. Apps Script mein setupDrive chalao.');
+  if(!cid||!canClass(s,cid))throw new Error('You do not have permission for this class');
+  const subj=find('Subjects',x=>String(x.subjectId)===sub);if(!subj)throw new Error('Select a subject');
+  if(!teachesSub(s,cid,sub))throw new Error('You do not teach this subject in this class');
+  if(!title)throw new Error('Title is required');if(NOTE_CATS.indexOf(category)<0)throw new Error('Choose a section (category)');ensureNoteCat();
+  if(!NOTE_TYPES[mime])throw new Error('Only PDF or photo (JPG/PNG/WEBP) is allowed');
+  if(!data||data.length>NOTE_MAX_BYTES*1.4)throw new Error('File is larger than 20 MB');
+  const root=P.getProperty('NOTES_FOLDER_ID');if(!root)throw new Error('Drive folder is not set. Run setupDrive in Apps Script.');
   const bytes=Utilities.base64Decode(data);
-  if(bytes.length>NOTE_MAX_BYTES)throw new Error('File 20 MB se badi hai');if(!magicOk(bytes,mime))throw new Error('File ka type galat hai (extension badla hua lagta hai)');
+  if(bytes.length>NOTE_MAX_BYTES)throw new Error('File is larger than 20 MB');if(!magicOk(bytes,mime))throw new Error('Invalid file type (the extension seems changed)');
   return withLock(()=>{
    const cls=find('Classes',c=>String(c.classId)===cid),folder=subFolder(subFolder(DriveApp.getFolderById(root),safeName(cls.name)),safeName(subj.name));
    const file=folder.createFile(Utilities.newBlob(bytes,mime,safeName(title)+NOTE_TYPES[mime]));
    try{file.setSharing(DriveApp.Access.ANYONE_WITH_LINK,DriveApp.Permission.VIEW)}
-   catch(e){file.setTrashed(true);throw new Error('Drive sharing allowed nahi hai (Workspace admin ne roka hua hai)')}
+   catch(e){file.setTrashed(true);throw new Error('Drive sharing is not allowed (blocked by the Workspace admin)')}
    const id=nextId('Notes','noteId','NT',4);
    addRow('Notes',{noteId:id,classId:cid,subjectId:sub,chapter,title,fileId:file.getId(),fileName:file.getName(),mime,size:bytes.length,uploadedBy:s.userId,date:todayStr(),category});
    log(s.userId,'note_upload',id+' '+cid+' '+sub);return{ok:true,noteId:id}})})}
@@ -57,15 +57,15 @@ function uploadNote(b){
 function updateNote(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
-  const ex=find('Notes',n=>String(n.noteId)===String(b.noteId));if(!ex)throw new Error('Note nahi mila');
-  if(s.role!=='admin'&&String(ex.uploadedBy)!==s.userId)throw new Error('Sirf apna note edit kar sakte ho');
-  const chapter=clean(b.chapter,100)||'General',title=clean(b.title,120),category=clean(b.category,12);if(!title)throw new Error('Title zaruri hai');if(NOTE_CATS.indexOf(category)<0)throw new Error('Section chuno');ensureNoteCat();
+  const ex=find('Notes',n=>String(n.noteId)===String(b.noteId));if(!ex)throw new Error('Note not found');
+  if(s.role!=='admin'&&String(ex.uploadedBy)!==s.userId)throw new Error('You can edit only your own note');
+  const chapter=clean(b.chapter,100)||'General',title=clean(b.title,120),category=clean(b.category,12);if(!title)throw new Error('Title is required');if(NOTE_CATS.indexOf(category)<0)throw new Error('Choose a section');ensureNoteCat();
   setRow('Notes',ex._row,{chapter,title,category});return{ok:true}}))}
 
 function deleteNote(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
-  const ex=find('Notes',n=>String(n.noteId)===String(b.noteId));if(!ex)throw new Error('Note nahi mila');
-  if(s.role!=='admin'&&String(ex.uploadedBy)!==s.userId)throw new Error('Sirf apna note delete kar sakte ho');
+  const ex=find('Notes',n=>String(n.noteId)===String(b.noteId));if(!ex)throw new Error('Note not found');
+  if(s.role!=='admin'&&String(ex.uploadedBy)!==s.userId)throw new Error('You can delete only your own note');
   try{DriveApp.getFileById(String(ex.fileId)).setTrashed(true)}catch(e){}   // Drive trash mein jati hai (wapas laya ja sakta hai)
   tab('Notes').deleteRow(ex._row);log(s.userId,'note_delete',ex.noteId);return{ok:true}}))}

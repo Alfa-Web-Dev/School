@@ -10,7 +10,7 @@ const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>
 (async()=>{
  const box=document.getElementById('rc'),no=new URLSearchParams(location.search).get('no')||'';
  try{const r=await api('getReceipt',{receiptNo:no});
-  if(!r.ok){if(r.error==='expired'||r.error==='Not allowed'){location.href='login.html';return}throw new Error(r.error)}
+  if(!r.ok){if(r.error==='Session expired. Please login again.'||r.error==='Not allowed'){location.href='login.html';return}throw new Error(r.error)}
   const p=r.receipt,s=r.student,neg=p.amount<0,row=(a,b)=>'<tr><td class="mu">'+a+'</td><td><b>'+E(b)+'</b></td></tr>';
   box.innerHTML='<div class="rcpt'+(p.voided?' void':'')+'"><div class="rh"><h2>'+E(SN())+'</h2><div class="mu">'+E(SA())+' · '+E(CFG.phone)+'</div><h3>'+(neg?'REVERSAL ENTRY':'FEE RECEIPT')+'</h3></div>'
    +(p.voided?'<div class="stamp">CANCELLED</div>':'')

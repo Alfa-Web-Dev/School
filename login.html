@@ -28,7 +28,7 @@
 <label id="l1">Student ID</label><input name="uid" required autocomplete="username" autocapitalize="characters" placeholder="e.g. S001">
 <label id="l2">PIN</label><div class="pw"><input name="secret" id="secret" type="password" required autocomplete="current-password" placeholder="Enter your PIN"><button type="button" id="eye">Show</button></div>
 <button id="go" type="submit">Login</button><div id="m"></div><a class="web" href="index.html">← Back to website</a></form>
-<script src="config.js"></script><script src="assets/js/avatars.js?v=33"></script><script src="assets/js/panel-art.js?v=33"></script><script src="assets/js/i18n.js?v=33"></script><script src="assets/js/i18n-extra.js?v=33"></script><script src="assets/js/lang.js?v=33"></script><script src="assets/js/api.js?v=33"></script><script src="assets/js/themes.js?v=33"></script>
+<script src="config.js"></script><script src="assets/js/avatars.js?v=34"></script><script src="assets/js/panel-art.js?v=34"></script><script src="assets/js/i18n.js?v=34"></script><script src="assets/js/i18n-extra.js?v=34"></script><script src="assets/js/lang.js?v=34"></script><script src="assets/js/api.js?v=34"></script><script src="assets/js/themes.js?v=34"></script>
 <script>
 try{document.getElementById('lart').innerHTML=PA.mini('cap').replace('class="mp"','class="mp m1"')+PA.mini('trophy').replace('class="mp"','class="mp m2"')+'<span class="pav a1">'+AV.svg(30)+'</span><span class="pav a2">'+AV.svg(5)+'</span>'}catch(e){}
 const f=document.getElementById('f'),m=document.getElementById('m'),go=document.getElementById('go');
@@ -40,7 +40,7 @@ document.getElementById('eye').onclick=e=>{const s=f.secret;s.type=s.type==='pas
  document.getElementById('sn').textContent=SN();document.title='Login · '+SN();
  let l=CFG.logo||'';l=(window.__PH&&window.__PH[l])||l;const lg=document.getElementById('lg');
  if(/^uploads\//.test(l)||/^https:\/\//.test(l)){const i=new Image();i.alt='';i.onload=()=>{lg.textContent='';lg.append(i)};i.src=l}else lg.textContent=(CFG.shortName||SN()||'S').trim().charAt(0)})();
-if(TOK.get())api('me').then(r=>{if(r.ok)location.replace('dashboard.html');else if(r.error==='expired')TOK.clear()}).catch(()=>{});
+if(TOK.get())api('me').then(r=>{if(r.ok)location.replace('dashboard.html');else if(r.error==='Session expired. Please login again.')TOK.clear()}).catch(()=>{});
 f.onsubmit=async e=>{e.preventDefault();m.textContent='';go.disabled=true;go.innerHTML='<span class="spn"></span>Signing in…';
  try{const r=await api('login',{role:f.role.value,id:f.uid.value.trim(),secret:f.secret.value});
   if(!r.ok){m.textContent=r.error||'Error';go.disabled=false;go.textContent='Login';return}

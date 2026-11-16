@@ -73,9 +73,9 @@ function changeSecret(b){
  const s=guard(b);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const nw=String(b.newSecret||''),old=String(b.oldSecret||'');
-  if(s.role==='student'){if(!/^\d{4,8}$/.test(nw))throw new Error('PIN 4 se 8 digits ka hona chahiye')}
-  else if(nw.length<8||nw.length>64)throw new Error('Password kam se kam 8 akshar ka hona chahiye');
-  const u=lookup(s.role,s.userId);if(!u||hashSecret(old,u.salt)!==u.hash)throw new Error('Purana password/PIN galat hai');
+  if(s.role==='student'){if(!/^\d{4,8}$/.test(nw))throw new Error('PIN must be 4 to 8 digits')}
+  else if(nw.length<8||nw.length>64)throw new Error('Password must be at least 8 characters');
+  const u=lookup(s.role,s.userId);if(!u||hashSecret(old,u.salt)!==u.hash)throw new Error('The old password/PIN is wrong');
   const m=s.role==='student'?['Students','studentId','pinHash']:['Users','userId','passHash'],r=find(m[0],x=>String(x[m[1]])===s.userId);
   const f=setSecretFields(nw),o={salt:f.salt};o[m[2]]=f.hash;setRow(m[0],r._row,o);log(s.userId,'change_secret',s.role);
   return{ok:true}}))}

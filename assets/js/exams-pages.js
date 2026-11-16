@@ -9,29 +9,29 @@ async function resultSheet(box,examId){
   el('div',{class:'bar'},btn('Download CSV',()=>downloadCSV('results-'+examId+'.csv',[['Roll','Name'].concat(r.subjects.map(u=>u.name),['Total','Max','Percent','Grade','Rank','Result'])]
     .concat(r.students.map(s=>[s.roll,s.name].concat(r.subjects.map(u=>s.marks[u.subjectId]===undefined?'':s.marks[u.subjectId]),[s.total,s.max,s.percent,s.grade,s.rank,s.max?(s.pass?'Pass':'Fail'):'']))))),
    btn('Print all report cards',()=>window.open(RC(examId)+'&all=1','_blank'),false)),
-  tableEl(cols,r.students,'Is class mein student nahi'),
-  el('p',{class:'mu'},'Grade: A+ 90+, A 80+, B+ 70+, B 60+, C 50+, D 40+, E 33+, F neeche. Pass = har subject mein 33% ya zyada. Marks teacher "Marks Entry" se bharte hain.'))}
+  tableEl(cols,r.students,'No students in this class'),
+  el('p',{class:'mu'},'Grade: A+ 90+, A 80+, B+ 70+, B 60+, C 50+, D 40+, E 33+, F below. Pass = 33% or more in every subject. Teachers enter marks from "Marks Entry".'))}
 
-const EXFIELDS=(cls,edit)=>[{k:'title',l:'Exam name (e.g. Unit Test 1)',req:1}].concat(edit?[]:[{k:'classId',l:'Class',type:'select',opts:[['*','Saari classes']].concat(cls.map(c=>[c.classId,c.name]))}],
+const EXFIELDS=(cls,edit)=>[{k:'title',l:'Exam name (e.g. Unit Test 1)',req:1}].concat(edit?[]:[{k:'classId',l:'Class',type:'select',opts:[['*','All classes']].concat(cls.map(c=>[c.classId,c.name]))}],
  [{k:'date',l:'Date',type:'date',req:1},{k:'maxMarks',l:'Max marks per subject',type:'number',req:1}]);
 
 async function initAExams(){
  const m=$('#main');m.innerHTML='';const cls=(await call('listClasses')).classes,box=el('div'),res=el('div');
  m.append(el('h1',{'data-i':'n_exams'}),el('div',{class:'bar'},btn('+ Create exam',()=>formModal('Create exam',EXFIELDS(cls),{maxMarks:100,date:today()},async v=>{
    const d={title:v.title,date:v.date,maxMarks:Number(v.maxMarks)};if(v.classId==='*')d.classIds=cls.map(c=>c.classId);else d.classId=v.classId;
-   await call('saveExam',{exam:d});toast('Exam ban gaya');await load()}),false)),box,res);
+   await call('saveExam',{exam:d});toast('Exam created');await load()}),false)),box,res);
  async function load(){const r=await call('adminExams');box.innerHTML='';
-  box.append(tableEl([{h:'Exam',f:e=>e.title},{h:'Class',f:e=>e.className},{h:'Date',f:e=>e.date},{h:'Max',f:e=>e.maxMarks},{h:'Marks bhare',f:e=>e.entries},
+  box.append(tableEl([{h:'Exam',f:e=>e.title},{h:'Class',f:e=>e.className},{h:'Date',f:e=>e.date},{h:'Max',f:e=>e.maxMarks},{h:'Marks entered',f:e=>e.entries},
    {h:'',f:e=>el('span',{class:'bar'},btn('Results',()=>resultSheet(res,e.examId).catch(x=>toast(x.message,1)).then(()=>res.scrollIntoView()),false),
-     btn('Edit',()=>formModal('Edit exam',EXFIELDS(cls,1),e,async v=>{await call('saveExam',{exam:{examId:e.examId,title:v.title,date:v.date,maxMarks:Number(v.maxMarks)}});toast('Save hua');await load()}),false),
-     btn('Delete',async()=>{if(!confirm('Exam "'+e.title+'" delete karein?'))return;try{await call('deleteExam',{examId:e.examId});toast('Delete hua');await load()}catch(x){toast(x.message,1)}},false))}],r.exams,'Abhi koi exam nahi. "+ Create exam" dabao.'))}
+     btn('Edit',()=>formModal('Edit exam',EXFIELDS(cls,1),e,async v=>{await call('saveExam',{exam:{examId:e.examId,title:v.title,date:v.date,maxMarks:Number(v.maxMarks)}});toast('Saved');await load()}),false),
+     btn('Delete',async()=>{if(!confirm('Exam "'+e.title+'" - delete it?'))return;try{await call('deleteExam',{examId:e.examId});toast('Deleted');await load()}catch(x){toast(x.message,1)}},false))}],r.exams,'No exams yet. Press "+ Create exam".'))}
  await load();applyI18n()}
 
 async function initTResults(){
  const m=page('n_results'),h=await teacherHomeData(),mine=h.classes.filter(c=>c.isClassTeacher);
- if(!mine.length){m.append(el('p',{class:'mu'},'Poora result sirf class teacher dekh sakta hai. Aap kisi class ke class teacher nahi hain.'));return}
+ if(!mine.length){m.append(el('p',{class:'mu'},'Only the class teacher can see the full result. You are not a class teacher of any class.'));return}
  const box=el('div'),res=el('div'),es=el('select');let cs;
  async function loadEx(){es.innerHTML='';const r=await call('listExams',{classId:cs.value});r.exams.forEach(e=>es.append(el('option',{value:e.examId},e.title+' ('+e.date+')')));
-  res.innerHTML='';if(!r.exams.length)res.append(el('p',{class:'mu'},'Is class ka koi exam nahi'));else await show()}
+  res.innerHTML='';if(!r.exams.length)res.append(el('p',{class:'mu'},'No exam for this class'));else await show()}
  async function show(){try{await resultSheet(res,es.value)}catch(e){toast(e.message,1)}}
  cs=classSelect(mine,loadEx);es.onchange=show;m.append(el('div',{class:'bar'},cs,es),res);await loadEx()}

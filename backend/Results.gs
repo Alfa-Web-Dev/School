@@ -6,7 +6,7 @@ function subjectsFor(s,cid){const all=table('Subjects').rows;
 
 function listExams(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
- return safe(()=>{const cid=resolveClass(b.classId);if(!cid||!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
+ return safe(()=>{const cid=resolveClass(b.classId);if(!cid||!canClass(s,cid))throw new Error('You do not have permission for this class');
   return{ok:true,exams:table('Exams').rows.filter(e=>String(e.classId)===cid).map(e=>({examId:String(e.examId),title:e.title,date:dstr(e.date),maxMarks:Number(e.maxMarks)||0})),subjects:subjectsFor(s,cid)}})}
 
 function marksMap(examId,subjectId){const m={};
@@ -15,8 +15,8 @@ function marksMap(examId,subjectId){const m={};
 function getMarks(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId)),sub=String(b.subjectId||'');
-  if(!ex)throw new Error('Exam nahi mila');const cid=String(ex.classId);
-  if(!canClass(s,cid)||!teachesSub(s,cid,sub))throw new Error('Is subject ki permission nahi hai');
+  if(!ex)throw new Error('Exam not found');const cid=String(ex.classId);
+  if(!canClass(s,cid)||!teachesSub(s,cid,sub))throw new Error('You do not have permission for this subject');
   const m=marksMap(String(ex.examId),sub);
   return{ok:true,maxMarks:Number(ex.maxMarks)||0,students:activeStudents(cid).map(r=>({studentId:String(r.studentId),name:r.name,roll:String(r.roll),marks:m[String(r.studentId)]===undefined?'':m[String(r.studentId)]}))}})}
 
@@ -24,14 +24,14 @@ function saveMarks(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const ex=find('Exams',e=>String(e.examId)===String(b.examId)),sub=String(b.subjectId||'');
-  if(!ex)throw new Error('Exam nahi mila');const cid=String(ex.classId),max=Number(ex.maxMarks)||0;
-  if(!find('Subjects',x=>String(x.subjectId)===sub))throw new Error('Subject galat hai');
-  if(!canClass(s,cid)||!teachesSub(s,cid,sub))throw new Error('Is subject ki permission nahi hai');
+  if(!ex)throw new Error('Exam not found');const cid=String(ex.classId),max=Number(ex.maxMarks)||0;
+  if(!find('Subjects',x=>String(x.subjectId)===sub))throw new Error('Invalid subject');
+  if(!canClass(s,cid)||!teachesSub(s,cid,sub))throw new Error('You do not have permission for this subject');
   const okIds={};activeStudents(cid).forEach(r=>okIds[String(r.studentId)]=1);
   const m=marksMap(String(ex.examId),sub),rows=[];
   (Array.isArray(b.marks)?b.marks:[]).forEach(x=>{const sid=String(x.studentId);if(x.marks===''||x.marks==null)return;
-   if(!okIds[sid])throw new Error('Student is class ka nahi hai: '+sid);
-   const v=Number(x.marks);if(!isFinite(v)||v<0||v>max)throw new Error(sid+': marks 0 se '+max+' ke beech hone chahiye');
+   if(!okIds[sid])throw new Error('Student is not in this class: '+sid);
+   const v=Number(x.marks);if(!isFinite(v)||v<0||v>max)throw new Error(sid+': marks must be between 0 and '+max);
    if(m[sid]===undefined||Number(m[sid])!==v)rows.push({examId:String(ex.examId),studentId:sid,subjectId:sub,marks:v})});
   addRows('Results',rows);log(s.userId,'marks',ex.examId+' '+sub+' ('+rows.length+')');
   return{ok:true,saved:rows.length}}))}
@@ -52,15 +52,15 @@ function saveExam(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const d=b.exam||{},title=clean(d.title,60),max=Number(d.maxMarks),date=clean(d.date,10);
-  if(!title)throw new Error('Exam ka naam zaruri hai');
-  if(!isFinite(max)||max<=0||max>1000)throw new Error('Max marks 1 se 1000 ke beech hone chahiye');
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error('Date galat hai');
-  if(d.examId){const ex=find('Exams',e=>String(e.examId)===String(d.examId));if(!ex)throw new Error('Exam nahi mila');
+  if(!title)throw new Error('Exam name is required');
+  if(!isFinite(max)||max<=0||max>1000)throw new Error('Max marks must be between 1 and 1000');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error('Invalid date');
+  if(d.examId){const ex=find('Exams',e=>String(e.examId)===String(d.examId));if(!ex)throw new Error('Exam not found');
    const over=table('Results').rows.some(r=>String(r.examId)===String(ex.examId)&&Number(r.marks)>max);
-   if(over)throw new Error('Kuch students ke marks is max se zyada hain, max kam nahi kar sakte');
+   if(over)throw new Error('Some students have marks above this max, so max cannot be lowered');
    setRow('Exams',ex._row,{title,date,maxMarks:max});log(s.userId,'exam_edit',ex.examId);return{ok:true,examId:String(ex.examId)}}
   const ids=(Array.isArray(d.classIds)&&d.classIds.length?d.classIds:[d.classId]).map(resolveClass);
-  if(!ids.length||ids.some(x=>!x))throw new Error('Class chuniye');
+  if(!ids.length||ids.some(x=>!x))throw new Error('Select a class');
   const made=[];[...new Set(ids)].forEach(cid=>{
    if(table('Exams').rows.some(e=>String(e.classId)===cid&&String(e.title).toLowerCase()===title.toLowerCase()))throw new Error('Is class mein "'+title+'" pehle se hai');
    const id=nextId('Exams','examId','E',3);addRow('Exams',{examId:id,title,classId:cid,date,maxMarks:max});made.push(id)});
@@ -68,8 +68,8 @@ function saveExam(b){
 
 function deleteExam(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
- return safe(()=>withLock(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam nahi mila');
-  if(table('Results').rows.some(r=>String(r.examId)===String(ex.examId)))throw new Error('Is exam mein marks bhare hain, delete nahi ho sakta');
+ return safe(()=>withLock(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam not found');
+  if(table('Results').rows.some(r=>String(r.examId)===String(ex.examId)))throw new Error('Marks are entered in this exam, it cannot be deleted');
   tab('Exams').deleteRow(ex._row);log(s.userId,'exam_delete',ex.examId);return{ok:true}}))}
 
 // Ek exam ka poori class ka hisaab: {studentId:{rows,total,max,percent,grade,rank}}
@@ -90,8 +90,8 @@ function examBoard(ex){
 // Admin ya class teacher: poori class ka result sheet
 function getResults(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
- return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam nahi mila');
-  const cid=String(ex.classId);if(s.role!=='admin'&&!isClassTeacher(s,cid))throw new Error('Poora result sirf class teacher ya admin dekh sakta hai');
+ return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam not found');
+  const cid=String(ex.classId);if(s.role!=='admin'&&!isClassTeacher(s,cid))throw new Error('Only the class teacher or admin can see the full result');
   const r=examBoard(ex);
   const students=Object.keys(r.board).map(k=>{const x=r.board[k],m={};x.rows.forEach(y=>m[y.subjectId]=y.marks);
    return{studentId:k,name:x.student.name,roll:String(x.student.roll),marks:m,total:x.total,max:x.max,percent:x.percent,grade:x.grade,pass:x.pass,rank:x.rank||''}});
@@ -99,7 +99,7 @@ function getResults(b){
   return{ok:true,exam:{examId:String(ex.examId),title:ex.title,date:dstr(ex.date),maxMarks:Number(ex.maxMarks)||0},subjects:r.subjects,students}})}
 
 function cardOf(st,ex){
- const r=examBoard(ex),x=r.board[String(st.studentId)];if(!x||!x.rows.length)throw new Error('Is exam ka result abhi nahi aaya');
+ const r=examBoard(ex),x=r.board[String(st.studentId)];if(!x||!x.rows.length)throw new Error('The result of this exam is not out yet');
  const cl=find('Classes',c=>String(c.classId)===String(st.classId))||{},a=attOf(String(st.studentId));
  return{ok:true,exam:{examId:String(ex.examId),title:ex.title,date:dstr(ex.date),maxMarks:Number(ex.maxMarks)||0},
   student:{studentId:String(st.studentId),name:st.name,roll:String(st.roll),admNo:String(st.admNo||''),className:cl.name||String(st.classId),parentName:String(st.parentName||''),dob:dstr(st.dob)},
@@ -108,8 +108,8 @@ function cardOf(st,ex){
 
 function reportCard(b){
  const s=guard(b);if(!s)return DENIED;
- return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam nahi mila');
+ return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam not found');
   let sid=s.role==='student'?s.userId:String(b.studentId||'');
-  const st=find('Students',x=>String(x.studentId)===sid);if(!st||String(st.classId)!==String(ex.classId))throw new Error('Student is exam ka nahi hai');
+  const st=find('Students',x=>String(x.studentId)===sid);if(!st||String(st.classId)!==String(ex.classId))throw new Error('Student is not part of this exam');
   if(s.role==='teacher'&&!isClassTeacher(s,String(ex.classId)))return DENIED;
   return cardOf(st,ex)})}

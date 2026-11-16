@@ -1,4 +1,4 @@
-const VERSION='0.3.0';
+const VERSION='0.3.1';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
  Settings:['key','value'],
@@ -46,12 +46,12 @@ function lookup(role,id){
 function login(b){
  const role=String(b.role||''),id=String(b.id||'').trim(),secret=String(b.secret||'');
  const key='fail:'+role+':'+id.toLowerCase(),cache=CacheService.getScriptCache();
- if(Number(cache.get(key)||0)>=MAX_FAILS)return{ok:false,error:'Bahut galat koshish. 15 minute baad try karo.'};
+ if(Number(cache.get(key)||0)>=MAX_FAILS)return{ok:false,error:'Too many wrong attempts. Try again after 15 minutes.'};
  const u=lookup(role,id);
  if(!(u&&u.active&&hashSecret(secret,u.salt)===u.hash)){
   cache.put(key,String(Number(cache.get(key)||0)+1),LOCK_SEC);
   log(id,'login_fail',role);Utilities.sleep(800);
-  return{ok:false,error:'ID ya password galat hai.'}}
+  return{ok:false,error:'Wrong ID or password.'}}
  cache.remove(key);
  const token=Utilities.getUuid()+newSalt();
  tab('Tokens').appendRow([sha(token),u.userId,u.role,Date.now()+SESSION_HOURS*3600000]);
@@ -67,7 +67,7 @@ function session(token,roles){
  return{userId:String(r.userId),role:r.role}}
 
 function me(b){
- const s=session(b.token);if(!s)return{ok:false,error:'expired'};
+ const s=session(b.token);if(!s)return{ok:false,error:'Session expired. Please login again.'};
  const u=lookup(s.role,s.userId);
  return{ok:true,user:{userId:s.userId,role:s.role,name:u?u.name:''}}}
 
@@ -137,19 +137,19 @@ function setupSheet(){
 // Script Properties me FIRST_ADMIN_ID, FIRST_ADMIN_PASSWORD, FIRST_ADMIN_NAME daal kar chalao
 function createFirstAdmin(){
  const id=P.getProperty('FIRST_ADMIN_ID'),pw=P.getProperty('FIRST_ADMIN_PASSWORD'),name=P.getProperty('FIRST_ADMIN_NAME')||'Admin';
- if(!id||!pw)throw 'FIRST_ADMIN_ID aur FIRST_ADMIN_PASSWORD Script Properties me daalo';
- if(find('Users',r=>String(r.userId)===id))throw 'Yeh admin pehle se hai';
+ if(!id||!pw)throw 'Set FIRST_ADMIN_ID and FIRST_ADMIN_PASSWORD in Script Properties';
+ if(find('Users',r=>String(r.userId)===id))throw 'This admin already exists';
  const f=setSecretFields(pw);
  tab('Users').appendRow([id,name,'admin','','',f.hash,f.salt,true]);
  P.deleteProperty('FIRST_ADMIN_PASSWORD');
- Logger.log('Admin ban gaya. Password property hata di gayi.')}
+ Logger.log('Admin created. The password property was removed.')}
 
 // Notes ke liye Drive folder (ek baar editor se chalao; pehli baar Drive permission maangega)
 function setupDrive(){
  const old=P.getProperty('NOTES_FOLDER_ID');
- if(old){try{DriveApp.getFolderById(old);Logger.log('Notes folder pehle se hai: '+old);return}catch(e){}}
+ if(old){try{DriveApp.getFolderById(old);Logger.log('Notes folder already exists: '+old);return}catch(e){}}
  const f=DriveApp.createFolder('School Notes');P.setProperty('NOTES_FOLDER_ID',f.getId());
- Logger.log('Notes folder ban gaya: '+f.getUrl())}
+ Logger.log('Notes folder created: '+f.getUrl())}
 
 function doGet(){return out({ok:true,version:VERSION})}
 function doPost(e){
@@ -259,25 +259,25 @@ function changeSecret(b){
  const s=guard(b);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const nw=String(b.newSecret||''),old=String(b.oldSecret||'');
-  if(s.role==='student'){if(!/^\d{4,8}$/.test(nw))throw new Error('PIN 4 se 8 digits ka hona chahiye')}
-  else if(nw.length<8||nw.length>64)throw new Error('Password kam se kam 8 akshar ka hona chahiye');
-  const u=lookup(s.role,s.userId);if(!u||hashSecret(old,u.salt)!==u.hash)throw new Error('Purana password/PIN galat hai');
+  if(s.role==='student'){if(!/^\d{4,8}$/.test(nw))throw new Error('PIN must be 4 to 8 digits')}
+  else if(nw.length<8||nw.length>64)throw new Error('Password must be at least 8 characters');
+  const u=lookup(s.role,s.userId);if(!u||hashSecret(old,u.salt)!==u.hash)throw new Error('The old password/PIN is wrong');
   const m=s.role==='student'?['Students','studentId','pinHash']:['Users','userId','passHash'],r=find(m[0],x=>String(x[m[1]])===s.userId);
   const f=setSecretFields(nw),o={salt:f.salt};o[m[2]]=f.hash;setRow(m[0],r._row,o);log(s.userId,'change_secret',s.role);
   return{ok:true}}))}
 
 // Students (Phase 2): list, add/edit, CSV import, promote
 function saveStudentCore(d,actor){
- const name=clean(d.name,80);if(!name)throw new Error('Name zaruri hai');
- const classId=resolveClass(d.classId);if(!classId)throw new Error('Class nahi mili: '+clean(d.classId,30));
+ const name=clean(d.name,80);if(!name)throw new Error('Name is required');
+ const classId=resolveClass(d.classId);if(!classId)throw new Error('Class not found: '+clean(d.classId,30));
  const gender=clean(d.gender,1).toUpperCase();
- if(gender&&'MFO'.indexOf(gender)<0)throw new Error('Gender M/F/O hona chahiye');
- const dob=clean(d.dob,10);if(dob&&!/^\d{4}-\d{2}-\d{2}$/.test(dob))throw new Error('DOB format YYYY-MM-DD hona chahiye');
+ if(gender&&'MFO'.indexOf(gender)<0)throw new Error('Gender must be M/F/O');
+ const dob=clean(d.dob,10);if(dob&&!/^\d{4}-\d{2}-\d{2}$/.test(dob))throw new Error('DOB format must be YYYY-MM-DD');
  const status=clean(d.status,15)||'active';
  const ex=d.studentId?find('Students',r=>String(r.studentId)===String(d.studentId)):null;
- if(d.studentId&&!ex)throw new Error('Student nahi mila');
+ if(d.studentId&&!ex)throw new Error('Student not found');
  const admNo=clean(d.admNo,20);
- if(admNo&&find('Students',r=>String(r.admNo)===admNo&&(!ex||r._row!==ex._row)))throw new Error('Admission no pehle se hai: '+admNo);
+ if(admNo&&find('Students',r=>String(r.admNo)===admNo&&(!ex||r._row!==ex._row)))throw new Error('Admission no already exists: '+admNo);
  const o={name,classId,roll:clean(d.roll,10),gender,dob,parentName:clean(d.parentName,80),parentPhone:clean(d.parentPhone,15).replace(/[^\d+]/g,''),address:clean(d.address,200),status};
  if(ex){if(admNo)o.admNo=admNo;setRow('Students',ex._row,o);log(actor,'student_edit',ex.studentId);
   return{studentId:String(ex.studentId),pin:''}}
@@ -308,7 +308,7 @@ function promoteStudents(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const from=resolveClass(b.fromClassId),to=String(b.toClassId)==='PASSOUT'?'PASSOUT':resolveClass(b.toClassId);
-  if(!from||!to)throw new Error('Class galat hai');if(from===to)throw new Error('Dono class same hain');
+  if(!from||!to)throw new Error('Invalid class');if(from===to)throw new Error('Both classes are the same');
   let n=0;table('Students').rows.forEach(r=>{
    if(String(r.classId)===from&&String(r.status).toLowerCase()==='active'){
     setRow('Students',r._row,to==='PASSOUT'?{status:'passed-out'}:{classId:to,roll:''});n++}});
@@ -320,8 +320,8 @@ const CERT_TYPES={bonafide:'BON',tc:'TC',character:'CHR'};
 function issueCertificate(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
-  const type=String(b.type||''),pre=CERT_TYPES[type];if(!pre)throw new Error('Certificate type galat hai');
-  const st=find('Students',x=>String(x.studentId)===String(b.studentId));if(!st)throw new Error('Student nahi mila');
+  const type=String(b.type||''),pre=CERT_TYPES[type];if(!pre)throw new Error('Invalid certificate type');
+  const st=find('Students',x=>String(x.studentId)===String(b.studentId));if(!st)throw new Error('Student not found');
   const yr=todayStr().slice(0,4),key=pre+'/'+yr+'/';
   const n=table('Logs').rows.filter(l=>String(l.action)==='certificate'&&String(l.details).indexOf(key)===0).length+1;
   const ref=key+String(n).padStart(4,'0');
@@ -337,10 +337,10 @@ function listTeachers(b){
 function saveTeacher(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
-  const d=b.teacher||{},name=clean(d.name,80);if(!name)throw new Error('Name zaruri hai');
+  const d=b.teacher||{},name=clean(d.name,80);if(!name)throw new Error('Name is required');
   const o={name,phone:clean(d.phone,15).replace(/[^\d+]/g,''),email:clean(d.email,80),active:d.active===false||String(d.active)==='false'?false:true};
   if(d.userId){const ex=find('Users',r=>String(r.userId)===String(d.userId)&&r.role==='teacher');
-   if(!ex)throw new Error('Teacher nahi mila');
+   if(!ex)throw new Error('Teacher not found');
    setRow('Users',ex._row,o);if(!o.active)revokeTokens(ex.userId);
    log(s.userId,'teacher_edit',ex.userId);return{ok:true,userId:String(ex.userId)}}
   const id=nextId('Users','userId','T',3),pw=genPassword(),f=setSecretFields(pw);
@@ -353,9 +353,9 @@ function resetSecret(b){
  return safe(()=>withLock(()=>{
   const id=String(b.id||''),kind=String(b.kind||'');
   const m={student:['Students','studentId','pinHash',genPin],teacher:['Users','userId','passHash',genPassword]}[kind];
-  if(!m)throw new Error('kind galat hai');
+  if(!m)throw new Error('Invalid kind');
   const r=find(m[0],x=>String(x[m[1]])===id&&(kind!=='teacher'||x.role==='teacher'));
-  if(!r)throw new Error('Record nahi mila');
+  if(!r)throw new Error('Record not found');
   const secret=m[3](),f=setSecretFields(secret),o={salt:f.salt};o[m[2]]=f.hash;
   setRow(m[0],r._row,o);revokeTokens(id);log(s.userId,'reset_'+kind,id);
   return{ok:true,id,secret}}))}
@@ -379,23 +379,23 @@ function saveClass(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const d=b.cls||{},grade=clean(d.grade,3),section=clean(d.section,3).toUpperCase();
-  if(!grade)throw new Error('Grade zaruri hai');
+  if(!grade)throw new Error('Grade is required');
   const name=clean(d.name,40)||('Class '+grade+(section?' - '+section:''));
   const tid=clean(d.classTeacherId,20);
-  if(tid&&!find('Users',r=>String(r.userId)===tid&&r.role==='teacher'))throw new Error('Class teacher nahi mila');
+  if(tid&&!find('Users',r=>String(r.userId)===tid&&r.role==='teacher'))throw new Error('Class teacher not found');
   const o={name,grade,section,classTeacherId:tid};
   if(d.classId){const ex=find('Classes',r=>String(r.classId)===String(d.classId));
-   if(!ex)throw new Error('Class nahi mili');setRow('Classes',ex._row,o);log(s.userId,'class_edit',ex.classId);return{ok:true,classId:String(ex.classId)}}
+   if(!ex)throw new Error('Class not found');setRow('Classes',ex._row,o);log(s.userId,'class_edit',ex.classId);return{ok:true,classId:String(ex.classId)}}
   const id=('C'+grade+section).replace(/\s/g,'').toUpperCase();
-  if(find('Classes',r=>String(r.classId)===id))throw new Error('Yeh class pehle se hai: '+id);
+  if(find('Classes',r=>String(r.classId)===id))throw new Error('This class already exists: '+id);
   addRow('Classes',Object.assign(o,{classId:id}));log(s.userId,'class_add',id);return{ok:true,classId:id}}))}
 
 function saveSubject(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
-  const d=b.subject||{},name=clean(d.name,40);if(!name)throw new Error('Subject ka naam zaruri hai');
+  const d=b.subject||{},name=clean(d.name,40);if(!name)throw new Error('Subject name is required');
   if(d.subjectId){const ex=find('Subjects',r=>String(r.subjectId)===String(d.subjectId));
-   if(!ex)throw new Error('Subject nahi mila');setRow('Subjects',ex._row,{name});return{ok:true,subjectId:String(ex.subjectId)}}
+   if(!ex)throw new Error('Subject not found');setRow('Subjects',ex._row,{name});return{ok:true,subjectId:String(ex.subjectId)}}
   const id=nextId('Subjects','subjectId','SUB',2);addRow('Subjects',{subjectId:id,name});
   log(s.userId,'subject_add',id);return{ok:true,subjectId:id}}))}
 
@@ -412,20 +412,20 @@ function saveLesson(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const d=b.lesson||{},cid=resolveClass(d.classId),sub=clean(d.subjectId,20),tid=clean(d.teacherId,20),day=clean(d.day,3),st=clean(d.start,5),en=clean(d.end,5);
-  if(!cid)throw new Error('Class chuno');if(!find('Subjects',x=>String(x.subjectId)===sub))throw new Error('Subject chuno');
-  if(!find('Users',u=>String(u.userId)===tid&&u.role==='teacher'))throw new Error('Teacher chuno');
-  if(DAYS.indexOf(day)<0)throw new Error('Din chuno');if(!validTime(st)||!validTime(en))throw new Error('Time HH:MM format mein do (jaise 09:30)');
-  if(st>=en)throw new Error('End time start ke baad hona chahiye');
+  if(!cid)throw new Error('Select a class');if(!find('Subjects',x=>String(x.subjectId)===sub))throw new Error('Select a subject');
+  if(!find('Users',u=>String(u.userId)===tid&&u.role==='teacher'))throw new Error('Select a teacher');
+  if(DAYS.indexOf(day)<0)throw new Error('Select a day');if(!validTime(st)||!validTime(en))throw new Error('Enter time as HH:MM (e.g. 09:30)');
+  if(st>=en)throw new Error('End time must be after start time');
   const me=String(d.lessonId||'');
   const clash=table('Lessons').rows.find(l=>String(l.lessonId)!==me&&String(l.day)===day&&String(l.start)<en&&st<String(l.end)&&(String(l.classId)===cid||String(l.teacherId)===tid));
-  if(clash)throw new Error(String(clash.classId)===cid?'Is class ka us time pe doosra period hai ('+clash.lessonId+')':'Yeh teacher us time pe doosri class mein hai ('+clash.lessonId+')');
+  if(clash)throw new Error(String(clash.classId)===cid?'This class already has a period at that time ('+clash.lessonId+')':'This teacher is in another class at that time ('+clash.lessonId+')');
   const o={classId:cid,subjectId:sub,teacherId:tid,day,start:st,end:en};
-  if(me){const ex=find('Lessons',l=>String(l.lessonId)===me);if(!ex)throw new Error('Lesson nahi mila');setRow('Lessons',ex._row,o);return{ok:true,lessonId:me}}
+  if(me){const ex=find('Lessons',l=>String(l.lessonId)===me);if(!ex)throw new Error('Period not found');setRow('Lessons',ex._row,o);return{ok:true,lessonId:me}}
   const id=nextId('Lessons','lessonId','L',3);addRow('Lessons',Object.assign(o,{lessonId:id}));log(s.userId,'lesson_add',id);return{ok:true,lessonId:id}}))}
 
 function deleteLesson(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
- return safe(()=>withLock(()=>{const ex=find('Lessons',l=>String(l.lessonId)===String(b.lessonId));if(!ex)throw new Error('Lesson nahi mila');
+ return safe(()=>withLock(()=>{const ex=find('Lessons',l=>String(l.lessonId)===String(b.lessonId));if(!ex)throw new Error('Period not found');
   tab('Lessons').deleteRow(ex._row);log(s.userId,'lesson_delete',ex.lessonId);return{ok:true}}))}
 
 // Class notices (Phase 4): admin sab ko (ALL) ya kisi class ko; teacher sirf apni classes ko
@@ -440,19 +440,19 @@ function saveClassNotice(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const d=b.notice||{},raw=clean(d.classId,40),cid=raw==='ALL'?'ALL':resolveClass(raw),title=clean(d.title,120),text=clean(d.text,1000),date=dstr(d.date)||todayStr();
-  if(!cid)throw new Error('Class chuno');if(cid==='ALL'&&s.role!=='admin')throw new Error('Sab classes ko sirf admin bhej sakta hai');
-  if(cid!=='ALL'&&!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
-  if(!title)throw new Error('Title zaruri hai');if(!validDate(date))throw new Error('Date galat hai');
+  if(!cid)throw new Error('Select a class');if(cid==='ALL'&&s.role!=='admin')throw new Error('Only the admin can send to all classes');
+  if(cid!=='ALL'&&!canClass(s,cid))throw new Error('You do not have permission for this class');
+  if(!title)throw new Error('Title is required');if(!validDate(date))throw new Error('Invalid date');
   const o={classId:cid,title,text,date};
-  if(d.id){const ex=find('ClassNotices',n=>String(n.id)===String(d.id));if(!ex)throw new Error('Notice nahi mili');
-   if(!(s.role==='admin'||canClass(s,String(ex.classId))&&String(ex.classId)!=='ALL'))throw new Error('Is notice ko edit nahi kar sakte');
+  if(d.id){const ex=find('ClassNotices',n=>String(n.id)===String(d.id));if(!ex)throw new Error('Notice not found');
+   if(!(s.role==='admin'||canClass(s,String(ex.classId))&&String(ex.classId)!=='ALL'))throw new Error('You cannot edit this notice');
    setRow('ClassNotices',ex._row,o);return{ok:true,id:String(ex.id)}}
   const id=nextId('ClassNotices','id','N',3);addRow('ClassNotices',Object.assign(o,{id}));log(s.userId,'notice_add',id);return{ok:true,id}}))}
 
 function deleteClassNotice(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
- return safe(()=>withLock(()=>{const ex=find('ClassNotices',n=>String(n.id)===String(b.id));if(!ex)throw new Error('Notice nahi mili');
-  if(!(s.role==='admin'||canClass(s,String(ex.classId))&&String(ex.classId)!=='ALL'))throw new Error('Is notice ko delete nahi kar sakte');
+ return safe(()=>withLock(()=>{const ex=find('ClassNotices',n=>String(n.id)===String(b.id));if(!ex)throw new Error('Notice not found');
+  if(!(s.role==='admin'||canClass(s,String(ex.classId))&&String(ex.classId)!=='ALL'))throw new Error('You cannot delete this notice');
   tab('ClassNotices').deleteRow(ex._row);log(s.userId,'notice_delete',ex.id);return{ok:true}}))}
 
 // Attendance (Phase 4): har entry nayi row (purani delete nahi), latest row jeetti hai
@@ -462,8 +462,8 @@ function attMap(cid,date){const m={};
 function getAttendance(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>{const cid=resolveClass(b.classId),date=dstr(b.date)||todayStr();
-  if(!cid||!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
-  if(!validDate(date))throw new Error('Date galat hai');
+  if(!cid||!canClass(s,cid))throw new Error('You do not have permission for this class');
+  if(!validDate(date))throw new Error('Invalid date');
   const m=attMap(cid,date);
   return{ok:true,date,marked:Object.keys(m).length>0,students:activeStudents(cid).map(r=>({studentId:String(r.studentId),name:r.name,roll:String(r.roll),status:m[String(r.studentId)]||''}))}})}
 
@@ -471,14 +471,14 @@ function markAttendance(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const cid=resolveClass(b.classId),date=dstr(b.date);
-  if(!cid||!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
-  if(!validDate(date))throw new Error('Date galat hai');
-  if(date>todayStr())throw new Error('Aane wali date ki attendance nahi lag sakti');
+  if(!cid||!canClass(s,cid))throw new Error('You do not have permission for this class');
+  if(!validDate(date))throw new Error('Invalid date');
+  if(date>todayStr())throw new Error('Attendance cannot be marked for a future date');
   const okIds={};activeStudents(cid).forEach(r=>okIds[String(r.studentId)]=1);
   const m=attMap(cid,date),rows=[];
   (Array.isArray(b.marks)?b.marks:[]).forEach(x=>{const sid=String(x.studentId),st=String(x.status).toUpperCase();
-   if(!okIds[sid])throw new Error('Student is class ka nahi hai: '+sid);
-   if(st!=='P'&&st!=='A'&&st!=='L')throw new Error('Status P/A/L hona chahiye');
+   if(!okIds[sid])throw new Error('Student is not in this class: '+sid);
+   if(st!=='P'&&st!=='A'&&st!=='L')throw new Error('Status must be P/A/L');
    if(m[sid]!==st)rows.push({date,classId:cid,studentId:sid,status:st,markedBy:s.userId})});
   addRows('Attendance',rows);log(s.userId,'attendance',cid+' '+date+' ('+rows.length+')');
   return{ok:true,saved:rows.length}}))}
@@ -496,20 +496,20 @@ function saveAssignment(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const d=b.assignment||{},cid=resolveClass(d.classId),sub=clean(d.subjectId,20),title=clean(d.title,200),due=dstr(d.due),link=clean(d.link,300);
-  if(!cid||!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
-  if(!find('Subjects',x=>String(x.subjectId)===sub))throw new Error('Subject chuno');
-  if(!title)throw new Error('Title zaruri hai');if(!validDate(due))throw new Error('Due date galat hai');
-  if(link&&!/^https?:\/\//i.test(link))throw new Error('Link http:// ya https:// se shuru hona chahiye');
-  if(d.id){const ex=find('Assignments',a=>String(a.id)===String(d.id));if(!ex)throw new Error('Homework nahi mila');
-   if(s.role!=='admin'&&String(ex.by)!==s.userId)throw new Error('Sirf apna homework edit kar sakte ho');
+  if(!cid||!canClass(s,cid))throw new Error('You do not have permission for this class');
+  if(!find('Subjects',x=>String(x.subjectId)===sub))throw new Error('Select a subject');
+  if(!title)throw new Error('Title is required');if(!validDate(due))throw new Error('Invalid due date');
+  if(link&&!/^https?:\/\//i.test(link))throw new Error('The link must start with http:// or https://');
+  if(d.id){const ex=find('Assignments',a=>String(a.id)===String(d.id));if(!ex)throw new Error('Homework not found');
+   if(s.role!=='admin'&&String(ex.by)!==s.userId)throw new Error('You can edit only your own homework');
    setRow('Assignments',ex._row,{classId:cid,subjectId:sub,title,due,link});return{ok:true,id:String(ex.id)}}
   const id=nextId('Assignments','id','A',3);addRow('Assignments',{id,classId:cid,subjectId:sub,title,due,link,by:s.userId});
   log(s.userId,'homework_add',id);return{ok:true,id}}))}
 
 function deleteAssignment(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
- return safe(()=>withLock(()=>{const ex=find('Assignments',a=>String(a.id)===String(b.id));if(!ex)throw new Error('Homework nahi mila');
-  if(s.role!=='admin'&&String(ex.by)!==s.userId)throw new Error('Sirf apna homework delete kar sakte ho');
+ return safe(()=>withLock(()=>{const ex=find('Assignments',a=>String(a.id)===String(b.id));if(!ex)throw new Error('Homework not found');
+  if(s.role!=='admin'&&String(ex.by)!==s.userId)throw new Error('You can delete only your own homework');
   tab('Assignments').deleteRow(ex._row);log(s.userId,'homework_delete',ex.id);return{ok:true}}))}
 
 // Fees (Phase 5): structure, payments ledger (sirf nayi rows; galti = void entry), receipt, defaulters
@@ -525,8 +525,8 @@ function saveFeeStructure(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const d=b.fee||{},cid=resolveClass(d.classId),type=clean(d.feeType,40),amt=round2(Number(d.amount)),dm=clean(d.dueMonth,10);
-  if(!cid)throw new Error('Class chuno');if(!type)throw new Error('Fee ka naam zaruri hai');
-  if(!isFinite(amt)||amt<=0||amt>1e7)throw new Error('Amount sahi daalo');
+  if(!cid)throw new Error('Select a class');if(!type)throw new Error('Fee name is required');
+  if(!isFinite(amt)||amt<=0||amt>1e7)throw new Error('Enter a valid amount');
   if(dm!=='monthly'&&!/^\d{4}-(0[1-9]|1[0-2])$/.test(dm))throw new Error('Due month "monthly" ya YYYY-MM hona chahiye');
   const ex=find('FeeStructure',f=>String(f.classId)===cid&&String(f.feeType).toLowerCase()===type.toLowerCase());
   if(ex){setRow('FeeStructure',ex._row,{amount:amt,dueMonth:dm});log(s.userId,'fee_edit',cid+' '+type);return{ok:true}}
@@ -535,11 +535,11 @@ function saveFeeStructure(b){
 function deleteFee(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{const cid=resolveClass(b.classId),ex=find('FeeStructure',f=>String(f.classId)===cid&&String(f.feeType)===String(b.feeType));
-  if(!ex)throw new Error('Fee nahi mili');tab('FeeStructure').deleteRow(ex._row);log(s.userId,'fee_delete',cid+' '+b.feeType);return{ok:true}}))}
+  if(!ex)throw new Error('Fee not found');tab('FeeStructure').deleteRow(ex._row);log(s.userId,'fee_delete',cid+' '+b.feeType);return{ok:true}}))}
 
 function studentFees(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
- return safe(()=>{const r=find('Students',x=>String(x.studentId)===String(b.studentId));if(!r)throw new Error('Student nahi mila');
+ return safe(()=>{const r=find('Students',x=>String(x.studentId)===String(b.studentId));if(!r)throw new Error('Student not found');
   return{ok:true,student:profileOf(r),fees:feesOf(r)}})}
 
 function nextReceipt(){
@@ -550,12 +550,12 @@ function nextReceipt(){
 function addPayment(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
-  const d=b.payment||{},r=find('Students',x=>String(x.studentId)===String(d.studentId));if(!r)throw new Error('Student nahi mila');
+  const d=b.payment||{},r=find('Students',x=>String(x.studentId)===String(d.studentId));if(!r)throw new Error('Student not found');
   const type=clean(d.feeType,40),amt=round2(Number(d.amount)),mode=clean(d.mode,10).toLowerCase(),date=dstr(d.date)||todayStr();
   if(!find('FeeStructure',f=>String(f.classId)===String(r.classId)&&String(f.feeType)===type))throw new Error('Is class ki fee structure mein "'+type+'" nahi hai');
-  if(!isFinite(amt)||amt<=0||amt>1e7)throw new Error('Amount sahi daalo');
-  if(PAY_MODES.indexOf(mode)<0)throw new Error('Mode cash/upi/bank/cheque mein se ho');
-  if(!validDate(date)||date>todayStr())throw new Error('Date galat hai (aane wali date nahi chalegi)');
+  if(!isFinite(amt)||amt<=0||amt>1e7)throw new Error('Enter a valid amount');
+  if(PAY_MODES.indexOf(mode)<0)throw new Error('Mode must be cash/upi/bank/cheque');
+  if(!validDate(date)||date>todayStr())throw new Error('Invalid date (a future date is not allowed)');
   const no=nextReceipt();addRow('Payments',{receiptNo:no,studentId:String(r.studentId),feeType:type,amount:amt,mode,date,receivedBy:s.userId});
   log(s.userId,'payment',no+' '+r.studentId+' '+type+' '+amt);
   return{ok:true,receiptNo:no,fees:feesOf(r)}}))}
@@ -565,10 +565,10 @@ function voidPayment(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const rows=table('Payments').rows,o=rows.find(p=>String(p.receiptNo)===String(b.receiptNo));
-  if(!o)throw new Error('Receipt nahi mili');
-  if(Number(o.amount)<=0||String(o.mode).indexOf('void:')===0)throw new Error('Yeh entry void nahi ho sakti');
-  if(rows.some(p=>String(p.mode)==='void:'+o.receiptNo))throw new Error('Yeh receipt pehle hi void ho chuki hai');
-  const reason=clean(b.reason,100);if(!reason)throw new Error('Void ka karan likho');
+  if(!o)throw new Error('Receipt not found');
+  if(Number(o.amount)<=0||String(o.mode).indexOf('void:')===0)throw new Error('This entry cannot be voided');
+  if(rows.some(p=>String(p.mode)==='void:'+o.receiptNo))throw new Error('This receipt is already voided');
+  const reason=clean(b.reason,100);if(!reason)throw new Error('Write the reason for voiding');
   const no=nextReceipt();addRow('Payments',{receiptNo:no,studentId:String(o.studentId),feeType:String(o.feeType),amount:-Number(o.amount),mode:'void:'+o.receiptNo,date:todayStr(),receivedBy:s.userId});
   log(s.userId,'void',o.receiptNo+' -> '+no+' ('+reason+')');return{ok:true,receiptNo:no}}))}
 
@@ -586,7 +586,7 @@ function listPayments(b){
 
 function getReceipt(b){
  const s=guard(b,['admin','student']);if(!s)return DENIED;
- return safe(()=>{const p=find('Payments',x=>String(x.receiptNo)===String(b.receiptNo));if(!p)throw new Error('Receipt nahi mili');
+ return safe(()=>{const p=find('Payments',x=>String(x.receiptNo)===String(b.receiptNo));if(!p)throw new Error('Receipt not found');
   if(s.role==='student'&&String(p.studentId)!==s.userId)return DENIED;
   const r=find('Students',x=>String(x.studentId)===String(p.studentId))||{},un=nameMap('Users','userId');
   return{ok:true,receipt:{receiptNo:String(p.receiptNo),date:dstr(p.date),feeType:String(p.feeType),amount:Number(p.amount)||0,mode:String(p.mode),receivedBy:un[String(p.receivedBy)]||String(p.receivedBy),
@@ -608,7 +608,7 @@ function subjectsFor(s,cid){const all=table('Subjects').rows;
 
 function listExams(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
- return safe(()=>{const cid=resolveClass(b.classId);if(!cid||!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
+ return safe(()=>{const cid=resolveClass(b.classId);if(!cid||!canClass(s,cid))throw new Error('You do not have permission for this class');
   return{ok:true,exams:table('Exams').rows.filter(e=>String(e.classId)===cid).map(e=>({examId:String(e.examId),title:e.title,date:dstr(e.date),maxMarks:Number(e.maxMarks)||0})),subjects:subjectsFor(s,cid)}})}
 
 function marksMap(examId,subjectId){const m={};
@@ -617,8 +617,8 @@ function marksMap(examId,subjectId){const m={};
 function getMarks(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId)),sub=String(b.subjectId||'');
-  if(!ex)throw new Error('Exam nahi mila');const cid=String(ex.classId);
-  if(!canClass(s,cid)||!teachesSub(s,cid,sub))throw new Error('Is subject ki permission nahi hai');
+  if(!ex)throw new Error('Exam not found');const cid=String(ex.classId);
+  if(!canClass(s,cid)||!teachesSub(s,cid,sub))throw new Error('You do not have permission for this subject');
   const m=marksMap(String(ex.examId),sub);
   return{ok:true,maxMarks:Number(ex.maxMarks)||0,students:activeStudents(cid).map(r=>({studentId:String(r.studentId),name:r.name,roll:String(r.roll),marks:m[String(r.studentId)]===undefined?'':m[String(r.studentId)]}))}})}
 
@@ -626,14 +626,14 @@ function saveMarks(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const ex=find('Exams',e=>String(e.examId)===String(b.examId)),sub=String(b.subjectId||'');
-  if(!ex)throw new Error('Exam nahi mila');const cid=String(ex.classId),max=Number(ex.maxMarks)||0;
-  if(!find('Subjects',x=>String(x.subjectId)===sub))throw new Error('Subject galat hai');
-  if(!canClass(s,cid)||!teachesSub(s,cid,sub))throw new Error('Is subject ki permission nahi hai');
+  if(!ex)throw new Error('Exam not found');const cid=String(ex.classId),max=Number(ex.maxMarks)||0;
+  if(!find('Subjects',x=>String(x.subjectId)===sub))throw new Error('Invalid subject');
+  if(!canClass(s,cid)||!teachesSub(s,cid,sub))throw new Error('You do not have permission for this subject');
   const okIds={};activeStudents(cid).forEach(r=>okIds[String(r.studentId)]=1);
   const m=marksMap(String(ex.examId),sub),rows=[];
   (Array.isArray(b.marks)?b.marks:[]).forEach(x=>{const sid=String(x.studentId);if(x.marks===''||x.marks==null)return;
-   if(!okIds[sid])throw new Error('Student is class ka nahi hai: '+sid);
-   const v=Number(x.marks);if(!isFinite(v)||v<0||v>max)throw new Error(sid+': marks 0 se '+max+' ke beech hone chahiye');
+   if(!okIds[sid])throw new Error('Student is not in this class: '+sid);
+   const v=Number(x.marks);if(!isFinite(v)||v<0||v>max)throw new Error(sid+': marks must be between 0 and '+max);
    if(m[sid]===undefined||Number(m[sid])!==v)rows.push({examId:String(ex.examId),studentId:sid,subjectId:sub,marks:v})});
   addRows('Results',rows);log(s.userId,'marks',ex.examId+' '+sub+' ('+rows.length+')');
   return{ok:true,saved:rows.length}}))}
@@ -654,15 +654,15 @@ function saveExam(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const d=b.exam||{},title=clean(d.title,60),max=Number(d.maxMarks),date=clean(d.date,10);
-  if(!title)throw new Error('Exam ka naam zaruri hai');
-  if(!isFinite(max)||max<=0||max>1000)throw new Error('Max marks 1 se 1000 ke beech hone chahiye');
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error('Date galat hai');
-  if(d.examId){const ex=find('Exams',e=>String(e.examId)===String(d.examId));if(!ex)throw new Error('Exam nahi mila');
+  if(!title)throw new Error('Exam name is required');
+  if(!isFinite(max)||max<=0||max>1000)throw new Error('Max marks must be between 1 and 1000');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error('Invalid date');
+  if(d.examId){const ex=find('Exams',e=>String(e.examId)===String(d.examId));if(!ex)throw new Error('Exam not found');
    const over=table('Results').rows.some(r=>String(r.examId)===String(ex.examId)&&Number(r.marks)>max);
-   if(over)throw new Error('Kuch students ke marks is max se zyada hain, max kam nahi kar sakte');
+   if(over)throw new Error('Some students have marks above this max, so max cannot be lowered');
    setRow('Exams',ex._row,{title,date,maxMarks:max});log(s.userId,'exam_edit',ex.examId);return{ok:true,examId:String(ex.examId)}}
   const ids=(Array.isArray(d.classIds)&&d.classIds.length?d.classIds:[d.classId]).map(resolveClass);
-  if(!ids.length||ids.some(x=>!x))throw new Error('Class chuniye');
+  if(!ids.length||ids.some(x=>!x))throw new Error('Select a class');
   const made=[];[...new Set(ids)].forEach(cid=>{
    if(table('Exams').rows.some(e=>String(e.classId)===cid&&String(e.title).toLowerCase()===title.toLowerCase()))throw new Error('Is class mein "'+title+'" pehle se hai');
    const id=nextId('Exams','examId','E',3);addRow('Exams',{examId:id,title,classId:cid,date,maxMarks:max});made.push(id)});
@@ -670,8 +670,8 @@ function saveExam(b){
 
 function deleteExam(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
- return safe(()=>withLock(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam nahi mila');
-  if(table('Results').rows.some(r=>String(r.examId)===String(ex.examId)))throw new Error('Is exam mein marks bhare hain, delete nahi ho sakta');
+ return safe(()=>withLock(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam not found');
+  if(table('Results').rows.some(r=>String(r.examId)===String(ex.examId)))throw new Error('Marks are entered in this exam, it cannot be deleted');
   tab('Exams').deleteRow(ex._row);log(s.userId,'exam_delete',ex.examId);return{ok:true}}))}
 
 // Ek exam ka poori class ka hisaab: {studentId:{rows,total,max,percent,grade,rank}}
@@ -692,8 +692,8 @@ function examBoard(ex){
 // Admin ya class teacher: poori class ka result sheet
 function getResults(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
- return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam nahi mila');
-  const cid=String(ex.classId);if(s.role!=='admin'&&!isClassTeacher(s,cid))throw new Error('Poora result sirf class teacher ya admin dekh sakta hai');
+ return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam not found');
+  const cid=String(ex.classId);if(s.role!=='admin'&&!isClassTeacher(s,cid))throw new Error('Only the class teacher or admin can see the full result');
   const r=examBoard(ex);
   const students=Object.keys(r.board).map(k=>{const x=r.board[k],m={};x.rows.forEach(y=>m[y.subjectId]=y.marks);
    return{studentId:k,name:x.student.name,roll:String(x.student.roll),marks:m,total:x.total,max:x.max,percent:x.percent,grade:x.grade,pass:x.pass,rank:x.rank||''}});
@@ -701,7 +701,7 @@ function getResults(b){
   return{ok:true,exam:{examId:String(ex.examId),title:ex.title,date:dstr(ex.date),maxMarks:Number(ex.maxMarks)||0},subjects:r.subjects,students}})}
 
 function cardOf(st,ex){
- const r=examBoard(ex),x=r.board[String(st.studentId)];if(!x||!x.rows.length)throw new Error('Is exam ka result abhi nahi aaya');
+ const r=examBoard(ex),x=r.board[String(st.studentId)];if(!x||!x.rows.length)throw new Error('The result of this exam is not out yet');
  const cl=find('Classes',c=>String(c.classId)===String(st.classId))||{},a=attOf(String(st.studentId));
  return{ok:true,exam:{examId:String(ex.examId),title:ex.title,date:dstr(ex.date),maxMarks:Number(ex.maxMarks)||0},
   student:{studentId:String(st.studentId),name:st.name,roll:String(st.roll),admNo:String(st.admNo||''),className:cl.name||String(st.classId),parentName:String(st.parentName||''),dob:dstr(st.dob)},
@@ -710,9 +710,9 @@ function cardOf(st,ex){
 
 function reportCard(b){
  const s=guard(b);if(!s)return DENIED;
- return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam nahi mila');
+ return safe(()=>{const ex=find('Exams',e=>String(e.examId)===String(b.examId));if(!ex)throw new Error('Exam not found');
   let sid=s.role==='student'?s.userId:String(b.studentId||'');
-  const st=find('Students',x=>String(x.studentId)===sid);if(!st||String(st.classId)!==String(ex.classId))throw new Error('Student is exam ka nahi hai');
+  const st=find('Students',x=>String(x.studentId)===sid);if(!st||String(st.classId)!==String(ex.classId))throw new Error('Student is not part of this exam');
   if(s.role==='teacher'&&!isClassTeacher(s,String(ex.classId)))return DENIED;
   return cardOf(st,ex)})}
 
@@ -754,20 +754,20 @@ function uploadNote(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>{
   const cid=resolveClass(b.classId),sub=clean(b.subjectId,20),chapter=clean(b.chapter,100)||'General',category=clean(b.category,12),title=clean(b.title,120),mime=clean(b.mime,40).toLowerCase(),data=String(b.data||'');
-  if(!cid||!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
-  const subj=find('Subjects',x=>String(x.subjectId)===sub);if(!subj)throw new Error('Subject chuno');
-  if(!teachesSub(s,cid,sub))throw new Error('Aap is class mein yeh subject nahi padhate');
-  if(!title)throw new Error('Title zaruri hai');if(NOTE_CATS.indexOf(category)<0)throw new Error('Section (category) chuno');ensureNoteCat();
-  if(!NOTE_TYPES[mime])throw new Error('Sirf PDF ya photo (JPG/PNG/WEBP) chalegi');
-  if(!data||data.length>NOTE_MAX_BYTES*1.4)throw new Error('File 20 MB se badi hai');
-  const root=P.getProperty('NOTES_FOLDER_ID');if(!root)throw new Error('Drive folder set nahi hai. Apps Script mein setupDrive chalao.');
+  if(!cid||!canClass(s,cid))throw new Error('You do not have permission for this class');
+  const subj=find('Subjects',x=>String(x.subjectId)===sub);if(!subj)throw new Error('Select a subject');
+  if(!teachesSub(s,cid,sub))throw new Error('You do not teach this subject in this class');
+  if(!title)throw new Error('Title is required');if(NOTE_CATS.indexOf(category)<0)throw new Error('Choose a section (category)');ensureNoteCat();
+  if(!NOTE_TYPES[mime])throw new Error('Only PDF or photo (JPG/PNG/WEBP) is allowed');
+  if(!data||data.length>NOTE_MAX_BYTES*1.4)throw new Error('File is larger than 20 MB');
+  const root=P.getProperty('NOTES_FOLDER_ID');if(!root)throw new Error('Drive folder is not set. Run setupDrive in Apps Script.');
   const bytes=Utilities.base64Decode(data);
-  if(bytes.length>NOTE_MAX_BYTES)throw new Error('File 20 MB se badi hai');if(!magicOk(bytes,mime))throw new Error('File ka type galat hai (extension badla hua lagta hai)');
+  if(bytes.length>NOTE_MAX_BYTES)throw new Error('File is larger than 20 MB');if(!magicOk(bytes,mime))throw new Error('Invalid file type (the extension seems changed)');
   return withLock(()=>{
    const cls=find('Classes',c=>String(c.classId)===cid),folder=subFolder(subFolder(DriveApp.getFolderById(root),safeName(cls.name)),safeName(subj.name));
    const file=folder.createFile(Utilities.newBlob(bytes,mime,safeName(title)+NOTE_TYPES[mime]));
    try{file.setSharing(DriveApp.Access.ANYONE_WITH_LINK,DriveApp.Permission.VIEW)}
-   catch(e){file.setTrashed(true);throw new Error('Drive sharing allowed nahi hai (Workspace admin ne roka hua hai)')}
+   catch(e){file.setTrashed(true);throw new Error('Drive sharing is not allowed (blocked by the Workspace admin)')}
    const id=nextId('Notes','noteId','NT',4);
    addRow('Notes',{noteId:id,classId:cid,subjectId:sub,chapter,title,fileId:file.getId(),fileName:file.getName(),mime,size:bytes.length,uploadedBy:s.userId,date:todayStr(),category});
    log(s.userId,'note_upload',id+' '+cid+' '+sub);return{ok:true,noteId:id}})})}
@@ -775,16 +775,16 @@ function uploadNote(b){
 function updateNote(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
-  const ex=find('Notes',n=>String(n.noteId)===String(b.noteId));if(!ex)throw new Error('Note nahi mila');
-  if(s.role!=='admin'&&String(ex.uploadedBy)!==s.userId)throw new Error('Sirf apna note edit kar sakte ho');
-  const chapter=clean(b.chapter,100)||'General',title=clean(b.title,120),category=clean(b.category,12);if(!title)throw new Error('Title zaruri hai');if(NOTE_CATS.indexOf(category)<0)throw new Error('Section chuno');ensureNoteCat();
+  const ex=find('Notes',n=>String(n.noteId)===String(b.noteId));if(!ex)throw new Error('Note not found');
+  if(s.role!=='admin'&&String(ex.uploadedBy)!==s.userId)throw new Error('You can edit only your own note');
+  const chapter=clean(b.chapter,100)||'General',title=clean(b.title,120),category=clean(b.category,12);if(!title)throw new Error('Title is required');if(NOTE_CATS.indexOf(category)<0)throw new Error('Choose a section');ensureNoteCat();
   setRow('Notes',ex._row,{chapter,title,category});return{ok:true}}))}
 
 function deleteNote(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
-  const ex=find('Notes',n=>String(n.noteId)===String(b.noteId));if(!ex)throw new Error('Note nahi mila');
-  if(s.role!=='admin'&&String(ex.uploadedBy)!==s.userId)throw new Error('Sirf apna note delete kar sakte ho');
+  const ex=find('Notes',n=>String(n.noteId)===String(b.noteId));if(!ex)throw new Error('Note not found');
+  if(s.role!=='admin'&&String(ex.uploadedBy)!==s.userId)throw new Error('You can delete only your own note');
   try{DriveApp.getFileById(String(ex.fileId)).setTrashed(true)}catch(e){}   // Drive trash mein jati hai (wapas laya ja sakta hai)
   tab('Notes').deleteRow(ex._row);log(s.userId,'note_delete',ex.noteId);return{ok:true}}))}
 
@@ -795,9 +795,9 @@ function enqMail(){
  if(v)return v;try{return Session.getEffectiveUser().getEmail()}catch(e){return ''}}
 // Editor mein ek baar chalao: Gmail permission maangega (Allow karo) aur test email bhejega. Phir Deploy -> Manage deployments -> Edit -> New version.
 function testEnquiryEmail(){
- const to=enqMail();if(!to)throw new Error('Email nahi mila. Settings sheet mein key=notify_email, value=aapka email likho');
- MailApp.sendEmail({to,subject:'Test: school website enquiry email',body:'Agar yeh mail mili to enquiry emails theek chal rahe hain.'});
- Logger.log('Test email bheja: '+to+' | Bacha hua daily quota: '+MailApp.getRemainingDailyQuota())}
+ const to=enqMail();if(!to)throw new Error('Email not found. In the Settings sheet add key=notify_email and your email as the value.');
+ MailApp.sendEmail({to,subject:'Test: school website enquiry email',body:'If you received this mail, enquiry emails are working.'});
+ Logger.log('Test email bheja: '+to+' | Daily quota left: '+MailApp.getRemainingDailyQuota())}
 function enqLimit(key,max,secs){const c=CacheService.getScriptCache(),n=Number(c.get(key)||0);if(n>=max)return false;c.put(key,String(n+1),secs);return true}
 
 // Purane sheet mein 7-10 columns (type, role, email, details) apne aap jud jate hain.
@@ -809,17 +809,17 @@ function enquiry(b){
   if(clean(b.website,50))return{ok:true};   // honeypot: bot ko "ok" dikhao, kuch save mat karo
   const type=ENQ_TYPES[b.type]?b.type:'admission',role=ENQ_ROLES.indexOf(b.role)>=0?b.role:'visitor';
   const name=clean(b.name,60),phone=clean(b.phone,15).replace(/[\s\-()]/g,''),email=clean(b.email,80),msg=clean(b.message,1000);
-  if(name.length<2)throw new Error('Naam likhiye');
-  if((phone||type!=='review')&&!/^\+?\d{8,14}$/.test(phone))throw new Error('Sahi phone number likhiye');
-  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))throw new Error('Sahi email likhiye');
-  if(msg.length<3&&type!=='admission')throw new Error('Message likhiye');
+  if(name.length<2)throw new Error('Please enter a name');
+  if((phone||type!=='review')&&!/^\+?\d{8,14}$/.test(phone))throw new Error('Enter a valid phone number');
+  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))throw new Error('Please enter a valid email');
+  if(msg.length<3&&type!=='admission')throw new Error('Please write a message');
   const d={};(ENQ_DETAIL[type]||[]).forEach(k=>{const v=clean(b.details&&b.details[k],120);if(v)d[k]=v});
   if(type==='review'){const r=parseInt(d.rating,10);if(!(r>=1&&r<=5))throw new Error('Rating (stars) chuniye');d.rating=String(r)}
-  if(!enqLimit('enq_all',60,3600)||!enqLimit('enq_'+(phone||email||name),3,3600))throw new Error('Bahut zyada requests. Thodi der baad try karein');
+  if(!enqLimit('enq_all',60,3600)||!enqLimit('enq_'+(phone||email||name),3,3600))throw new Error('Too many requests. Please try again later');
   const details=JSON.stringify(d);
   const id=withLock(()=>{enqCols();const i=nextId('Enquiries','id','Q',4);addRow('Enquiries',{id:i,name,phone,message:msg,time:new Date(),status:'new',type,role,email,details});return i});
   log('public','enquiry_'+type,id);
-  try{const to=enqMail();if(to)MailApp.sendEmail({to,subject:'['+ENQ_TYPES[type]+'] '+id+': '+name,body:'Type: '+ENQ_TYPES[type]+'\nFrom: '+role+'\nName: '+name+'\nPhone: '+phone+'\nEmail: '+email+'\nDetails: '+Object.keys(d).map(k=>k+'='+d[k]).join(', ')+'\n\n'+msg+'\n\n(Admin panel > Enquiries mein dekhein)'})}catch(e){log('system','enquiry_mail_fail',String(e.message||e).slice(0,100))}
+  try{const to=enqMail();if(to)MailApp.sendEmail({to,subject:'['+ENQ_TYPES[type]+'] '+id+': '+name,body:'Type: '+ENQ_TYPES[type]+'\nFrom: '+role+'\nName: '+name+'\nPhone: '+phone+'\nEmail: '+email+'\nDetails: '+Object.keys(d).map(k=>k+'='+d[k]).join(', ')+'\n\n'+msg+'\n\n(See Admin panel > Enquiries)'})}catch(e){log('system','enquiry_mail_fail',String(e.message||e).slice(0,100))}
   return{ok:true}})}
 
 function enqTime(t){if(t instanceof Date)return Utilities.formatDate(t,'Asia/Kolkata','yyyy-MM-dd HH:mm');return String(t||'')}
@@ -829,9 +829,9 @@ function listEnquiries(b){
   rows.sort((a,b)=>a.id<b.id?1:-1);return{ok:true,enquiries:rows.slice(0,500),newCount:rows.filter(r=>r.status==='new').length}})}
 function updateEnquiry(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
- return safe(()=>withLock(()=>{const r=find('Enquiries',x=>String(x.id)===String(b.id));if(!r)throw new Error('Enquiry nahi mili');
+ return safe(()=>withLock(()=>{const r=find('Enquiries',x=>String(x.id)===String(b.id));if(!r)throw new Error('Enquiry not found');
   if(b.delete){tab('Enquiries').deleteRow(r._row);log(s.userId,'enquiry_delete',r.id);return{ok:true}}
-  if(ENQ_STATUS.indexOf(b.status)<0)throw new Error('Status galat hai');
+  if(ENQ_STATUS.indexOf(b.status)<0)throw new Error('Invalid status');
   enqCols();setRow('Enquiries',r._row,{status:b.status});log(s.userId,'enquiry_'+b.status,r.id);return{ok:true}}))}
 
 // Dashboard: admin ke counts (Phase 2). Logs/charts Phase 9 me.

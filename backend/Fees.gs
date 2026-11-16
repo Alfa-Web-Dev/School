@@ -11,8 +11,8 @@ function saveFeeStructure(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const d=b.fee||{},cid=resolveClass(d.classId),type=clean(d.feeType,40),amt=round2(Number(d.amount)),dm=clean(d.dueMonth,10);
-  if(!cid)throw new Error('Class chuno');if(!type)throw new Error('Fee ka naam zaruri hai');
-  if(!isFinite(amt)||amt<=0||amt>1e7)throw new Error('Amount sahi daalo');
+  if(!cid)throw new Error('Select a class');if(!type)throw new Error('Fee name is required');
+  if(!isFinite(amt)||amt<=0||amt>1e7)throw new Error('Enter a valid amount');
   if(dm!=='monthly'&&!/^\d{4}-(0[1-9]|1[0-2])$/.test(dm))throw new Error('Due month "monthly" ya YYYY-MM hona chahiye');
   const ex=find('FeeStructure',f=>String(f.classId)===cid&&String(f.feeType).toLowerCase()===type.toLowerCase());
   if(ex){setRow('FeeStructure',ex._row,{amount:amt,dueMonth:dm});log(s.userId,'fee_edit',cid+' '+type);return{ok:true}}
@@ -21,11 +21,11 @@ function saveFeeStructure(b){
 function deleteFee(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{const cid=resolveClass(b.classId),ex=find('FeeStructure',f=>String(f.classId)===cid&&String(f.feeType)===String(b.feeType));
-  if(!ex)throw new Error('Fee nahi mili');tab('FeeStructure').deleteRow(ex._row);log(s.userId,'fee_delete',cid+' '+b.feeType);return{ok:true}}))}
+  if(!ex)throw new Error('Fee not found');tab('FeeStructure').deleteRow(ex._row);log(s.userId,'fee_delete',cid+' '+b.feeType);return{ok:true}}))}
 
 function studentFees(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
- return safe(()=>{const r=find('Students',x=>String(x.studentId)===String(b.studentId));if(!r)throw new Error('Student nahi mila');
+ return safe(()=>{const r=find('Students',x=>String(x.studentId)===String(b.studentId));if(!r)throw new Error('Student not found');
   return{ok:true,student:profileOf(r),fees:feesOf(r)}})}
 
 function nextReceipt(){
@@ -36,12 +36,12 @@ function nextReceipt(){
 function addPayment(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
-  const d=b.payment||{},r=find('Students',x=>String(x.studentId)===String(d.studentId));if(!r)throw new Error('Student nahi mila');
+  const d=b.payment||{},r=find('Students',x=>String(x.studentId)===String(d.studentId));if(!r)throw new Error('Student not found');
   const type=clean(d.feeType,40),amt=round2(Number(d.amount)),mode=clean(d.mode,10).toLowerCase(),date=dstr(d.date)||todayStr();
   if(!find('FeeStructure',f=>String(f.classId)===String(r.classId)&&String(f.feeType)===type))throw new Error('Is class ki fee structure mein "'+type+'" nahi hai');
-  if(!isFinite(amt)||amt<=0||amt>1e7)throw new Error('Amount sahi daalo');
-  if(PAY_MODES.indexOf(mode)<0)throw new Error('Mode cash/upi/bank/cheque mein se ho');
-  if(!validDate(date)||date>todayStr())throw new Error('Date galat hai (aane wali date nahi chalegi)');
+  if(!isFinite(amt)||amt<=0||amt>1e7)throw new Error('Enter a valid amount');
+  if(PAY_MODES.indexOf(mode)<0)throw new Error('Mode must be cash/upi/bank/cheque');
+  if(!validDate(date)||date>todayStr())throw new Error('Invalid date (a future date is not allowed)');
   const no=nextReceipt();addRow('Payments',{receiptNo:no,studentId:String(r.studentId),feeType:type,amount:amt,mode,date,receivedBy:s.userId});
   log(s.userId,'payment',no+' '+r.studentId+' '+type+' '+amt);
   return{ok:true,receiptNo:no,fees:feesOf(r)}}))}
@@ -51,10 +51,10 @@ function voidPayment(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const rows=table('Payments').rows,o=rows.find(p=>String(p.receiptNo)===String(b.receiptNo));
-  if(!o)throw new Error('Receipt nahi mili');
-  if(Number(o.amount)<=0||String(o.mode).indexOf('void:')===0)throw new Error('Yeh entry void nahi ho sakti');
-  if(rows.some(p=>String(p.mode)==='void:'+o.receiptNo))throw new Error('Yeh receipt pehle hi void ho chuki hai');
-  const reason=clean(b.reason,100);if(!reason)throw new Error('Void ka karan likho');
+  if(!o)throw new Error('Receipt not found');
+  if(Number(o.amount)<=0||String(o.mode).indexOf('void:')===0)throw new Error('This entry cannot be voided');
+  if(rows.some(p=>String(p.mode)==='void:'+o.receiptNo))throw new Error('This receipt is already voided');
+  const reason=clean(b.reason,100);if(!reason)throw new Error('Write the reason for voiding');
   const no=nextReceipt();addRow('Payments',{receiptNo:no,studentId:String(o.studentId),feeType:String(o.feeType),amount:-Number(o.amount),mode:'void:'+o.receiptNo,date:todayStr(),receivedBy:s.userId});
   log(s.userId,'void',o.receiptNo+' -> '+no+' ('+reason+')');return{ok:true,receiptNo:no}}))}
 
@@ -72,7 +72,7 @@ function listPayments(b){
 
 function getReceipt(b){
  const s=guard(b,['admin','student']);if(!s)return DENIED;
- return safe(()=>{const p=find('Payments',x=>String(x.receiptNo)===String(b.receiptNo));if(!p)throw new Error('Receipt nahi mili');
+ return safe(()=>{const p=find('Payments',x=>String(x.receiptNo)===String(b.receiptNo));if(!p)throw new Error('Receipt not found');
   if(s.role==='student'&&String(p.studentId)!==s.userId)return DENIED;
   const r=find('Students',x=>String(x.studentId)===String(p.studentId))||{},un=nameMap('Users','userId');
   return{ok:true,receipt:{receiptNo:String(p.receiptNo),date:dstr(p.date),feeType:String(p.feeType),amount:Number(p.amount)||0,mode:String(p.mode),receivedBy:un[String(p.receivedBy)]||String(p.receivedBy),

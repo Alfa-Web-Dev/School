@@ -10,17 +10,17 @@ function saveClassNotice(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const d=b.notice||{},raw=clean(d.classId,40),cid=raw==='ALL'?'ALL':resolveClass(raw),title=clean(d.title,120),text=clean(d.text,1000),date=dstr(d.date)||todayStr();
-  if(!cid)throw new Error('Class chuno');if(cid==='ALL'&&s.role!=='admin')throw new Error('Sab classes ko sirf admin bhej sakta hai');
-  if(cid!=='ALL'&&!canClass(s,cid))throw new Error('Is class ki permission nahi hai');
-  if(!title)throw new Error('Title zaruri hai');if(!validDate(date))throw new Error('Date galat hai');
+  if(!cid)throw new Error('Select a class');if(cid==='ALL'&&s.role!=='admin')throw new Error('Only the admin can send to all classes');
+  if(cid!=='ALL'&&!canClass(s,cid))throw new Error('You do not have permission for this class');
+  if(!title)throw new Error('Title is required');if(!validDate(date))throw new Error('Invalid date');
   const o={classId:cid,title,text,date};
-  if(d.id){const ex=find('ClassNotices',n=>String(n.id)===String(d.id));if(!ex)throw new Error('Notice nahi mili');
-   if(!(s.role==='admin'||canClass(s,String(ex.classId))&&String(ex.classId)!=='ALL'))throw new Error('Is notice ko edit nahi kar sakte');
+  if(d.id){const ex=find('ClassNotices',n=>String(n.id)===String(d.id));if(!ex)throw new Error('Notice not found');
+   if(!(s.role==='admin'||canClass(s,String(ex.classId))&&String(ex.classId)!=='ALL'))throw new Error('You cannot edit this notice');
    setRow('ClassNotices',ex._row,o);return{ok:true,id:String(ex.id)}}
   const id=nextId('ClassNotices','id','N',3);addRow('ClassNotices',Object.assign(o,{id}));log(s.userId,'notice_add',id);return{ok:true,id}}))}
 
 function deleteClassNotice(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
- return safe(()=>withLock(()=>{const ex=find('ClassNotices',n=>String(n.id)===String(b.id));if(!ex)throw new Error('Notice nahi mili');
-  if(!(s.role==='admin'||canClass(s,String(ex.classId))&&String(ex.classId)!=='ALL'))throw new Error('Is notice ko delete nahi kar sakte');
+ return safe(()=>withLock(()=>{const ex=find('ClassNotices',n=>String(n.id)===String(b.id));if(!ex)throw new Error('Notice not found');
+  if(!(s.role==='admin'||canClass(s,String(ex.classId))&&String(ex.classId)!=='ALL'))throw new Error('You cannot delete this notice');
   tab('ClassNotices').deleteRow(ex._row);log(s.userId,'notice_delete',ex.id);return{ok:true}}))}

@@ -3,8 +3,8 @@ const SK='sp_token';
 // Login 30 din tak yaad rahta hai (localStorage). Server bhi 30 din ka token deta hai.
 const TOK={
  get(){try{const t=localStorage.getItem(SK),x=+localStorage.getItem(SK+'_exp');if(t){if(x&&x<Date.now()){TOK.clear();return null}return t}}catch(e){}return sessionStorage.getItem(SK)},
- set(t){try{localStorage.setItem(SK,t);localStorage.setItem(SK+'_exp',String(Date.now()+30*864e5))}catch(e){sessionStorage.setItem(SK,t)}},
- clear(){try{localStorage.removeItem(SK);localStorage.removeItem(SK+'_exp')}catch(e){}try{sessionStorage.clear()}catch(e){}}};
+ set(t){try{localStorage.removeItem('sp_shell')}catch(e){}try{localStorage.setItem(SK,t);localStorage.setItem(SK+'_exp',String(Date.now()+30*864e5))}catch(e){sessionStorage.setItem(SK,t)}},
+ clear(){try{localStorage.removeItem('sp_shell');localStorage.removeItem(SK);localStorage.removeItem(SK+'_exp')}catch(e){}try{sessionStorage.clear()}catch(e){}}};
 window.__pend=0;
 async function api(action,data={}){
  __pend++;

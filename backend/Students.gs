@@ -1,15 +1,15 @@
 // Students (Phase 2): list, add/edit, CSV import, promote
 function saveStudentCore(d,actor){
- const name=clean(d.name,80);if(!name)throw new Error('Name zaruri hai');
- const classId=resolveClass(d.classId);if(!classId)throw new Error('Class nahi mili: '+clean(d.classId,30));
+ const name=clean(d.name,80);if(!name)throw new Error('Name is required');
+ const classId=resolveClass(d.classId);if(!classId)throw new Error('Class not found: '+clean(d.classId,30));
  const gender=clean(d.gender,1).toUpperCase();
- if(gender&&'MFO'.indexOf(gender)<0)throw new Error('Gender M/F/O hona chahiye');
- const dob=clean(d.dob,10);if(dob&&!/^\d{4}-\d{2}-\d{2}$/.test(dob))throw new Error('DOB format YYYY-MM-DD hona chahiye');
+ if(gender&&'MFO'.indexOf(gender)<0)throw new Error('Gender must be M/F/O');
+ const dob=clean(d.dob,10);if(dob&&!/^\d{4}-\d{2}-\d{2}$/.test(dob))throw new Error('DOB format must be YYYY-MM-DD');
  const status=clean(d.status,15)||'active';
  const ex=d.studentId?find('Students',r=>String(r.studentId)===String(d.studentId)):null;
- if(d.studentId&&!ex)throw new Error('Student nahi mila');
+ if(d.studentId&&!ex)throw new Error('Student not found');
  const admNo=clean(d.admNo,20);
- if(admNo&&find('Students',r=>String(r.admNo)===admNo&&(!ex||r._row!==ex._row)))throw new Error('Admission no pehle se hai: '+admNo);
+ if(admNo&&find('Students',r=>String(r.admNo)===admNo&&(!ex||r._row!==ex._row)))throw new Error('Admission no already exists: '+admNo);
  const o={name,classId,roll:clean(d.roll,10),gender,dob,parentName:clean(d.parentName,80),parentPhone:clean(d.parentPhone,15).replace(/[^\d+]/g,''),address:clean(d.address,200),status};
  if(ex){if(admNo)o.admNo=admNo;setRow('Students',ex._row,o);log(actor,'student_edit',ex.studentId);
   return{studentId:String(ex.studentId),pin:''}}
@@ -40,7 +40,7 @@ function promoteStudents(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
   const from=resolveClass(b.fromClassId),to=String(b.toClassId)==='PASSOUT'?'PASSOUT':resolveClass(b.toClassId);
-  if(!from||!to)throw new Error('Class galat hai');if(from===to)throw new Error('Dono class same hain');
+  if(!from||!to)throw new Error('Invalid class');if(from===to)throw new Error('Both classes are the same');
   let n=0;table('Students').rows.forEach(r=>{
    if(String(r.classId)===from&&String(r.status).toLowerCase()==='active'){
     setRow('Students',r._row,to==='PASSOUT'?{status:'passed-out'}:{classId:to,roll:''});n++}});
@@ -52,8 +52,8 @@ const CERT_TYPES={bonafide:'BON',tc:'TC',character:'CHR'};
 function issueCertificate(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
  return safe(()=>withLock(()=>{
-  const type=String(b.type||''),pre=CERT_TYPES[type];if(!pre)throw new Error('Certificate type galat hai');
-  const st=find('Students',x=>String(x.studentId)===String(b.studentId));if(!st)throw new Error('Student nahi mila');
+  const type=String(b.type||''),pre=CERT_TYPES[type];if(!pre)throw new Error('Invalid certificate type');
+  const st=find('Students',x=>String(x.studentId)===String(b.studentId));if(!st)throw new Error('Student not found');
   const yr=todayStr().slice(0,4),key=pre+'/'+yr+'/';
   const n=table('Logs').rows.filter(l=>String(l.action)==='certificate'&&String(l.details).indexOf(key)===0).length+1;
   const ref=key+String(n).padStart(4,'0');

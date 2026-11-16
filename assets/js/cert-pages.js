@@ -27,10 +27,10 @@ async function initCerts(){
    const x={};ex.querySelectorAll('input').forEach(i=>x[i.dataset.k]=i.value);
    try{const r=await call('issueCertificate',{type:ty.value,studentId:sel.value});out.innerHTML='<div class="rcpt cert">'+certHtml(ty.value,r,x)+'</div>';
     out.append(btn('Print / Save as PDF',()=>window.print()))}catch(e){toast(e.message,1)}},false)),
-  el('h3',{},'ID cards'),el('p',{class:'mu'},'Poori class ke ID cards ek saath print karo (QR mein student ID hai).'),el('div',{class:'bar'},cls,btn('Make ID cards',()=>idCards(cls,st,out),false))),out);
+  el('h3',{},'ID cards'),el('p',{class:'mu'},'Print ID cards for the whole class at once (the QR holds the student ID).'),el('div',{class:'bar'},cls,btn('Make ID cards',()=>idCards(cls,st,out),false))),out);
  applyI18n()}
 function idCards(sel,all,out){
  const cid=sel.value,cname=sel.selectedOptions[0]?sel.selectedOptions[0].text:cid,rows=all.filter(s=>String(s.classId)===cid&&String(s.status).toLowerCase()==='active');
- if(!rows.length){toast('Is class mein student nahi',1);return}
+ if(!rows.length){toast('No students in this class',1);return}
  out.innerHTML='<div class="idgrid">'+rows.map(s=>'<div class="idc"><div class="idh" style="background:'+E2(CFG.color)+'">'+E2(CFG.shortName||SN())+'<small>'+E2(SN())+'</small></div><div class="idb"><div class="idq">'+(typeof qrSvg==='function'?qrSvg(String(s.studentId),84):'')+'</div><div><b>'+E2(s.name)+'</b><br>ID: '+E2(s.studentId)+'<br>Class: '+E2(cname)+(s.roll?' · Roll '+E2(s.roll):'')+'<br>Parent: '+E2(s.parentName)+'<br>Ph: '+E2(s.parentPhone)+'</div></div><div class="idf">'+E2(CFG.phone)+'</div></div>').join('')+'</div>';
  out.append(btn('Print / Save as PDF',()=>window.print()))}

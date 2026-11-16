@@ -270,5 +270,7 @@ function seo(){const set=(sel,mk,v)=>{let e=document.querySelector(sel);if(!e){e
  let j=document.getElementById('ld');if(!j){j=document.createElement('script');j.type='application/ld+json';j.id='ld';document.head.appendChild(j)}
  j.textContent=JSON.stringify({'@context':'https://schema.org','@type':'School',name:SN(),address:SA(),telephone:CFG.phone,email:CFG.email,url:location.origin+location.pathname.replace(/[^/]*$/,'')})}
 function applyOv(o){if(!o)return;for(const k in (o.PH||{}))PH[k]=o.PH[k];for(const k in (o.SITE||{}))SITE[k]=o.SITE[k];for(const k in (o.CFG||{}))if(k!=='api')CFG[k]=o.CFG[k]}
+// Pichli baar ka content cache se turant lagao (demo text ka flash nahi), fir naya aaye to hi dobara draw karo
+let _oc='';if(!window.STUDIO)try{_oc=localStorage.getItem('site_ov')||'';if(_oc)applyOv(JSON.parse(_oc))}catch(e){_oc=''}
 render();
-if(!window.STUDIO)fetch('content/site.json?v='+Date.now()).then(r=>r.ok?r.json():null).then(o=>{if(o){applyOv(o);render()}}).catch(()=>{});
+if(!window.STUDIO)fetch('content/site.json?v='+Date.now()).then(r=>r.ok?r.text():null).then(t=>{if(t&&t!==_oc){try{const o=JSON.parse(t);applyOv(o);render();try{localStorage.setItem('site_ov',t)}catch(e){}}catch(e){}}}).catch(()=>{});

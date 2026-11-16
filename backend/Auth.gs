@@ -17,12 +17,12 @@ function lookup(role,id){
 function login(b){
  const role=String(b.role||''),id=String(b.id||'').trim(),secret=String(b.secret||'');
  const key='fail:'+role+':'+id.toLowerCase(),cache=CacheService.getScriptCache();
- if(Number(cache.get(key)||0)>=MAX_FAILS)return{ok:false,error:'Bahut galat koshish. 15 minute baad try karo.'};
+ if(Number(cache.get(key)||0)>=MAX_FAILS)return{ok:false,error:'Too many wrong attempts. Try again after 15 minutes.'};
  const u=lookup(role,id);
  if(!(u&&u.active&&hashSecret(secret,u.salt)===u.hash)){
   cache.put(key,String(Number(cache.get(key)||0)+1),LOCK_SEC);
   log(id,'login_fail',role);Utilities.sleep(800);
-  return{ok:false,error:'ID ya password galat hai.'}}
+  return{ok:false,error:'Wrong ID or password.'}}
  cache.remove(key);
  const token=Utilities.getUuid()+newSalt();
  tab('Tokens').appendRow([sha(token),u.userId,u.role,Date.now()+SESSION_HOURS*3600000]);
@@ -38,7 +38,7 @@ function session(token,roles){
  return{userId:String(r.userId),role:r.role}}
 
 function me(b){
- const s=session(b.token);if(!s)return{ok:false,error:'expired'};
+ const s=session(b.token);if(!s)return{ok:false,error:'Session expired. Please login again.'};
  const u=lookup(s.role,s.userId);
  return{ok:true,user:{userId:s.userId,role:s.role,name:u?u.name:''}}}
 

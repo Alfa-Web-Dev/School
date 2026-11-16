@@ -5,7 +5,7 @@ function el(tag,at,...kids){const e=document.createElement(tag);
  kids.flat().forEach(c=>e.append(c&&c.nodeType?c:document.createTextNode(c==null?'':c)));return e}
 async function call(action,data){
  const r=await api(action,data||{});
- if(!r.ok){if(r.error==='expired'){TOK.clear();location.href='../login.html'}throw new Error(r.error||'Error')}
+ if(!r.ok){if(r.error==='Session expired. Please login again.'){TOK.clear();location.href='../login.html'}throw new Error(r.error||'Error')}
  return r}
 function toast(msg,bad){const t=el('div',{class:'toast'+(bad?' bad':'')},msg);document.body.append(t);setTimeout(()=>t.remove(),4000)}
 function modal(title,body,btns){
@@ -22,14 +22,14 @@ function formModal(title,fields,vals,onSave){
   i.value=vals[f.k]==null?'':vals[f.k];if(f.type==='select'&&i.selectedIndex<0)i.selectedIndex=0;inp[f.k]=i;
   return el('div',{},el('label',{},f.l+(f.req?' *':'')),i)}));
  return modal(title,body,[{t:'Cancel',g:1,fn:()=>true},{t:'Save',fn:async()=>{
-  const v={};for(const f of fields){v[f.k]=inp[f.k].value.trim();if(f.req&&!v[f.k])throw new Error(f.l+' zaruri hai')}
+  const v={};for(const f of fields){v[f.k]=inp[f.k].value.trim();if(f.req&&!v[f.k])throw new Error(f.l+' is required')}
   await onSave(v)}}])}
 function showSecret(title,rows,note){
  const txt=rows.map(r=>r.join(': ')).join('\n');
- modal(title,el('div',{},el('pre',{class:'sec'},txt),el('p',{class:'mu'},note||'Yeh sirf abhi dikh raha hai. Copy karke student/parent ko de do.')),
-  [{t:'Copy',g:1,fn:async()=>{try{await navigator.clipboard.writeText(txt);toast('Copied')}catch(e){toast('Copy nahi hua',1)}return false}},{t:'OK',fn:()=>true}])}
+ modal(title,el('div',{},el('pre',{class:'sec'},txt),el('p',{class:'mu'},note||'This is shown only now. Copy it and give it to the student/parent.')),
+  [{t:'Copy',g:1,fn:async()=>{try{await navigator.clipboard.writeText(txt);toast('Copied')}catch(e){toast('Copy failed',1)}return false}},{t:'OK',fn:()=>true}])}
 function tableEl(cols,rows,empty){
- if(!rows.length)return emptyState(empty||'Kuch nahi mila','');
+ if(!rows.length)return emptyState(empty||'Nothing found','');
  return el('div',{class:'tw'},el('table',{class:'tbl'},el('thead',{},el('tr',{},cols.map(c=>el('th',{},c.h)))),
   el('tbody',{},rows.map(r=>el('tr',{},cols.map(c=>el('td',{'data-l':c.h||''},(()=>{const v=c.f(r);return c.h==='Name'&&typeof v==='string'&&v&&window.PA?PA.nameCell(v,r):v})())))))))}
 function btn(t,fn,g){return el('button',{class:'s'+(g===false?'':' g'),type:'button',onclick:fn},t)}
@@ -65,7 +65,7 @@ function barChart(items,title){const w=el('div',{class:'bars'});if(title)w.appen
  items.forEach(x=>{const p=Math.max(0,Math.min(100,+x.pct||0));row.append(el('div',{class:'bc'},el('span',{class:'bv'},String(x.v)),el('div',{class:'bar2'},el('i',{style:'height:'+Math.max(p,4)+'%'})),el('small',{},String(x.l).slice(0,7))))});w.append(row);return w}
 function dayTimetable(m,lessons,mk){const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],t=days[(new Date().getDay()+6)%7];let cur=lessons.some(l=>l.day===t)?t:(days.find(d=>lessons.some(l=>l.day===d))||t);const strip=el('div',{class:'dstrip'}),list=el('div',{class:'tlist'});
  const draw=()=>{strip.innerHTML='';days.forEach(d=>strip.append(el('button',{type:'button',class:'dchip'+(d===cur?' on':'')+(d===t?' tod':''),onclick:()=>{cur=d;draw()}},d)));
-  list.innerHTML='';const ls=lessons.filter(l=>l.day===cur);if(!ls.length)list.append(emptyState('No classes','Is din koi class nahi hai'));
+  list.innerHTML='';const ls=lessons.filter(l=>l.day===cur);if(!ls.length)list.append(emptyState('No classes','No classes on this day'));
   ls.forEach((l,i)=>list.append(el('div',{class:'tcard t'+(i%4)},el('div',{class:'tt'},el('b',{},l.start),el('small',{},l.end)),el('div',{class:'tb2'},el('b',{},l.subject),el('span',{class:'mu'},mk(l))))))};draw();m.append(strip,list)}
 function emptyState(t,s){return PA.empty(t,s)}
 

@@ -15,16 +15,16 @@ function setupSheet(){
 // Script Properties me FIRST_ADMIN_ID, FIRST_ADMIN_PASSWORD, FIRST_ADMIN_NAME daal kar chalao
 function createFirstAdmin(){
  const id=P.getProperty('FIRST_ADMIN_ID'),pw=P.getProperty('FIRST_ADMIN_PASSWORD'),name=P.getProperty('FIRST_ADMIN_NAME')||'Admin';
- if(!id||!pw)throw 'FIRST_ADMIN_ID aur FIRST_ADMIN_PASSWORD Script Properties me daalo';
- if(find('Users',r=>String(r.userId)===id))throw 'Yeh admin pehle se hai';
+ if(!id||!pw)throw 'Set FIRST_ADMIN_ID and FIRST_ADMIN_PASSWORD in Script Properties';
+ if(find('Users',r=>String(r.userId)===id))throw 'This admin already exists';
  const f=setSecretFields(pw);
  tab('Users').appendRow([id,name,'admin','','',f.hash,f.salt,true]);
  P.deleteProperty('FIRST_ADMIN_PASSWORD');
- Logger.log('Admin ban gaya. Password property hata di gayi.')}
+ Logger.log('Admin created. The password property was removed.')}
 
 // Notes ke liye Drive folder (ek baar editor se chalao; pehli baar Drive permission maangega)
 function setupDrive(){
  const old=P.getProperty('NOTES_FOLDER_ID');
- if(old){try{DriveApp.getFolderById(old);Logger.log('Notes folder pehle se hai: '+old);return}catch(e){}}
+ if(old){try{DriveApp.getFolderById(old);Logger.log('Notes folder already exists: '+old);return}catch(e){}}
  const f=DriveApp.createFolder('School Notes');P.setProperty('NOTES_FOLDER_ID',f.getId());
- Logger.log('Notes folder ban gaya: '+f.getUrl())}
+ Logger.log('Notes folder created: '+f.getUrl())}

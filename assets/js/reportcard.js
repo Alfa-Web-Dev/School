@@ -14,11 +14,11 @@ function cardHtml(r){const s=r.student,x=r.exam;
 (async()=>{
  const box=document.getElementById('rc'),q=new URLSearchParams(location.search),ex=q.get('exam')||'',st=q.get('student')||'';
  try{
-  const bad=r=>{if(!r.ok){if(r.error==='expired'||r.error==='Not allowed'){location.href='login.html';return true}throw new Error(r.error)}};
+  const bad=r=>{if(!r.ok){if(r.error==='Session expired. Please login again.'||r.error==='Not allowed'){location.href='login.html';return true}throw new Error(r.error)}};
   let html='';
   if(q.get('all')){const g=await api('getResults',{examId:ex});if(bad(g))return;
    for(const s of g.students.filter(x=>x.max)){const r=await api('reportCard',{examId:ex,studentId:s.studentId});if(bad(r))return;html+=cardHtml(r)}
-   if(!html)throw new Error('Abhi kisi student ka result nahi aaya')}
+   if(!html)throw new Error('No student result is available yet')}
   else{const r=await api('reportCard',{examId:ex,studentId:st});if(bad(r))return;html=cardHtml(r)}
   box.innerHTML=html+'<button class="no-print" onclick="window.print()">Print / Save as PDF</button>'}
  catch(e){box.textContent=e.message||'Error'}})();

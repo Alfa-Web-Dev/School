@@ -5,9 +5,9 @@ function enqMail(){
  if(v)return v;try{return Session.getEffectiveUser().getEmail()}catch(e){return ''}}
 // Editor mein ek baar chalao: Gmail permission maangega (Allow karo) aur test email bhejega. Phir Deploy -> Manage deployments -> Edit -> New version.
 function testEnquiryEmail(){
- const to=enqMail();if(!to)throw new Error('Email nahi mila. Settings sheet mein key=notify_email, value=aapka email likho');
- MailApp.sendEmail({to,subject:'Test: school website enquiry email',body:'Agar yeh mail mili to enquiry emails theek chal rahe hain.'});
- Logger.log('Test email bheja: '+to+' | Bacha hua daily quota: '+MailApp.getRemainingDailyQuota())}
+ const to=enqMail();if(!to)throw new Error('Email not found. In the Settings sheet add key=notify_email and your email as the value.');
+ MailApp.sendEmail({to,subject:'Test: school website enquiry email',body:'If you received this mail, enquiry emails are working.'});
+ Logger.log('Test email bheja: '+to+' | Daily quota left: '+MailApp.getRemainingDailyQuota())}
 function enqLimit(key,max,secs){const c=CacheService.getScriptCache(),n=Number(c.get(key)||0);if(n>=max)return false;c.put(key,String(n+1),secs);return true}
 
 // Purane sheet mein 7-10 columns (type, role, email, details) apne aap jud jate hain.
@@ -19,17 +19,17 @@ function enquiry(b){
   if(clean(b.website,50))return{ok:true};   // honeypot: bot ko "ok" dikhao, kuch save mat karo
   const type=ENQ_TYPES[b.type]?b.type:'admission',role=ENQ_ROLES.indexOf(b.role)>=0?b.role:'visitor';
   const name=clean(b.name,60),phone=clean(b.phone,15).replace(/[\s\-()]/g,''),email=clean(b.email,80),msg=clean(b.message,1000);
-  if(name.length<2)throw new Error('Naam likhiye');
-  if((phone||type!=='review')&&!/^\+?\d{8,14}$/.test(phone))throw new Error('Sahi phone number likhiye');
-  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))throw new Error('Sahi email likhiye');
-  if(msg.length<3&&type!=='admission')throw new Error('Message likhiye');
+  if(name.length<2)throw new Error('Please enter a name');
+  if((phone||type!=='review')&&!/^\+?\d{8,14}$/.test(phone))throw new Error('Enter a valid phone number');
+  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))throw new Error('Please enter a valid email');
+  if(msg.length<3&&type!=='admission')throw new Error('Please write a message');
   const d={};(ENQ_DETAIL[type]||[]).forEach(k=>{const v=clean(b.details&&b.details[k],120);if(v)d[k]=v});
   if(type==='review'){const r=parseInt(d.rating,10);if(!(r>=1&&r<=5))throw new Error('Rating (stars) chuniye');d.rating=String(r)}
-  if(!enqLimit('enq_all',60,3600)||!enqLimit('enq_'+(phone||email||name),3,3600))throw new Error('Bahut zyada requests. Thodi der baad try karein');
+  if(!enqLimit('enq_all',60,3600)||!enqLimit('enq_'+(phone||email||name),3,3600))throw new Error('Too many requests. Please try again later');
   const details=JSON.stringify(d);
   const id=withLock(()=>{enqCols();const i=nextId('Enquiries','id','Q',4);addRow('Enquiries',{id:i,name,phone,message:msg,time:new Date(),status:'new',type,role,email,details});return i});
   log('public','enquiry_'+type,id);
-  try{const to=enqMail();if(to)MailApp.sendEmail({to,subject:'['+ENQ_TYPES[type]+'] '+id+': '+name,body:'Type: '+ENQ_TYPES[type]+'\nFrom: '+role+'\nName: '+name+'\nPhone: '+phone+'\nEmail: '+email+'\nDetails: '+Object.keys(d).map(k=>k+'='+d[k]).join(', ')+'\n\n'+msg+'\n\n(Admin panel > Enquiries mein dekhein)'})}catch(e){log('system','enquiry_mail_fail',String(e.message||e).slice(0,100))}
+  try{const to=enqMail();if(to)MailApp.sendEmail({to,subject:'['+ENQ_TYPES[type]+'] '+id+': '+name,body:'Type: '+ENQ_TYPES[type]+'\nFrom: '+role+'\nName: '+name+'\nPhone: '+phone+'\nEmail: '+email+'\nDetails: '+Object.keys(d).map(k=>k+'='+d[k]).join(', ')+'\n\n'+msg+'\n\n(See Admin panel > Enquiries)'})}catch(e){log('system','enquiry_mail_fail',String(e.message||e).slice(0,100))}
   return{ok:true}})}
 
 function enqTime(t){if(t instanceof Date)return Utilities.formatDate(t,'Asia/Kolkata','yyyy-MM-dd HH:mm');return String(t||'')}
@@ -39,7 +39,7 @@ function listEnquiries(b){
   rows.sort((a,b)=>a.id<b.id?1:-1);return{ok:true,enquiries:rows.slice(0,500),newCount:rows.filter(r=>r.status==='new').length}})}
 function updateEnquiry(b){
  const s=guard(b,['admin']);if(!s)return DENIED;
- return safe(()=>withLock(()=>{const r=find('Enquiries',x=>String(x.id)===String(b.id));if(!r)throw new Error('Enquiry nahi mili');
+ return safe(()=>withLock(()=>{const r=find('Enquiries',x=>String(x.id)===String(b.id));if(!r)throw new Error('Enquiry not found');
   if(b.delete){tab('Enquiries').deleteRow(r._row);log(s.userId,'enquiry_delete',r.id);return{ok:true}}
-  if(ENQ_STATUS.indexOf(b.status)<0)throw new Error('Status galat hai');
+  if(ENQ_STATUS.indexOf(b.status)<0)throw new Error('Invalid status');
   enqCols();setRow('Enquiries',r._row,{status:b.status});log(s.userId,'enquiry_'+b.status,r.id);return{ok:true}}))}
