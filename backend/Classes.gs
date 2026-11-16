@@ -1,8 +1,12 @@
 // Classes + Subjects (Phase 2)
 // Ready-made classes: Nursery, Prep 1, Prep 2, Class 1-10. Sections (A/B/C) optional, admin adds only if needed.
 const PRE=[['NUR','Nursery','Nursery'],['P1','Prep 1','Prep 1'],['P2','Prep 2','Prep 2']].concat(Array.from({length:10},(_,i)=>[String(i+1),'Class '+(i+1),String(i+1)]));
+// Section ka naam: "Class 5A", "Class 5B" (number ke baad seedha letter); Nursery/Prep ke liye "Nursery A", "Prep 1 A"
+const secName=(base,L)=>/\d$/.test(base)&&/^Class /.test(base)?base+L:base+' '+L;
 function ensureClasses(){
- const have={};table('Classes').rows.forEach(r=>have[String(r.grade)]=1);
+ const have={};table('Classes').rows.forEach(r=>{have[String(r.grade)]=1;
+  // purana "Class 5 - A" naam ho to naye format mein badlo (ek baar)
+  const sec=String(r.section||'');if(sec&&/ - /.test(String(r.name))){const base=String(r.name).split(' - ')[0];setRow('Classes',r._row,{name:secName(base,sec)})}});
  if(!PRE.some(p=>!have[p[2]]))return;
  withLock(()=>{const cur={};table('Classes').rows.forEach(r=>cur[String(r.grade)]=1);
   PRE.forEach(p=>{if(!cur[p[2]])addRow('Classes',{classId:'C'+p[0],name:p[1],grade:p[2],section:'',classTeacherId:''})})})}
@@ -33,7 +37,7 @@ function saveSections(b){
   const letters=[...new Set(String(b.sections||'').toUpperCase().split(/[^A-Z0-9]+/).filter(Boolean))].filter(x=>x.length<=3).slice(0,8);
   if(!letters.length)throw new Error('Enter sections like A, B, C');
   let made=0;
-  letters.forEach(L=>{const id='C'+code+L;if(!find('Classes',r=>String(r.classId)===id)){addRow('Classes',{classId:id,name:baseName+' - '+L,grade,section:L,classTeacherId:''});made++}});
+  letters.forEach(L=>{const id='C'+code+L;if(!find('Classes',r=>String(r.classId)===id)){addRow('Classes',{classId:id,name:secName(baseName,L),grade,section:L,classTeacherId:''});made++}});
   const base=find('Classes',r=>String(r.grade)===grade&&!String(r.section));
   if(base&&made&&!classInUse(base.classId))tab('Classes').deleteRow(base._row);
   log(s.userId,'sections_add',grade+' '+letters.join(','));return{ok:true,added:made}}))}
