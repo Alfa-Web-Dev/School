@@ -78,17 +78,26 @@ async function initTeachers(){
 
 /* ---------- Classes & Subjects ---------- */
 const CFIELDS=()=>[{k:'classTeacherId',l:'Class teacher',type:'select',opts:[['','-']].concat(TE.map(t=>[t.userId,t.name+' ('+t.userId+')']))}];
+const nextLetter=l=>{const u=l.map(x=>x.section);for(const c of 'ABCDEFGH')if(!u.includes(c))return c;return ''};
 async function reloadClasses(){
  const r=await call('listClasses');CL=r.classes;SUB=r.subjects;
- $('#cl').innerHTML='';$('#cl').append(tableEl([{h:'Class',f:r=>r.name},{h:'Class teacher',f:r=>tname(r.classTeacherId)},
-  {h:'',f:r=>el('div',{class:'row',style:'flex-wrap:wrap'},[btn('Class teacher',()=>formModal('Class teacher - '+r.name,CFIELDS(),r,async v=>{v.classId=r.classId;await call('saveClass',{cls:v});await reloadClasses()})),
-   btn('+ Section',()=>formModal('Add sections to '+(r.grade&&!/^\d+$/.test(r.grade)?r.grade:'Class '+r.grade),[{k:'sections',l:'Sections (e.g. A, B, C)',req:1}],{},async v=>{await call('saveSections',{grade:r.grade,sections:v.sections});await reloadClasses();toast('Sections added')})),
-   r.section&&!r.inUse?btn('Delete',async()=>{if(confirm('Delete '+r.name+'?')){await call('deleteClass',{classId:r.classId});await reloadClasses()}}):''])}],CL,'No classes yet'));
+ const G=[],mp={};CL.forEach(c=>{const k=String(c.grade);if(!mp[k]){mp[k]={grade:k,base:null,secs:[]};G.push(mp[k])}c.section?mp[k].secs.push(c):mp[k].base=c});
+ const row=(c,label)=>el('div',{class:'cgr'},el('b',{class:'cgn'},label||c.name),el('span',{class:'cgt'},c.classTeacherId?tname(c.classTeacherId):'No class teacher'),
+  el('div',{class:'row'},[btn('Class teacher',()=>formModal('Class teacher - '+c.name,CFIELDS(),c,async v=>{v.classId=c.classId;await call('saveClass',{cls:v});await reloadClasses()})),
+   c.section&&!c.inUse?btn('Delete',async()=>{if(confirm('Delete '+c.name+'?')){await call('deleteClass',{classId:c.classId});await reloadClasses()}}):'']));
+ const box=$('#cl');box.innerHTML='';
+ G.forEach(g=>{const t=g.base?g.base.name:(g.secs[0].name.slice(0,-g.secs[0].section.length)).trim(),any=g.base||g.secs[0];
+  const h=el('div',{class:'cgh'},el('b',{},t),el('em',{},g.secs.length?g.secs.length+(g.secs.length>1?' sections':' section'):'No sections'),
+   btn('+ Section',()=>formModal('Add sections to '+t,[{k:'sections',l:'Section letters (e.g. A, B, C)',req:1}],{sections:g.secs.length?nextLetter(g.secs):'A'},async v=>{await call('saveSections',{grade:g.grade,sections:v.sections});await reloadClasses();toast('Sections added')})));
+  const body=el('div',{class:'cgb'});
+  if(g.base)body.append(row(g.base,g.secs.length?t+' (no section)':t));
+  g.secs.forEach(c=>body.append(row(c)));
+  box.append(el('section',{class:'cg'},h,body))});
  $('#subl').innerHTML='';$('#subl').append(tableEl([{h:'ID',f:r=>r.subjectId},{h:'Subject',f:r=>r.name},
   {h:'',f:r=>btn('Rename',()=>formModal('Rename subject',[{k:'name',l:'Name',req:1}],r,async v=>{v.subjectId=r.subjectId;await call('saveSubject',{subject:v});await reloadClasses()}))}],SUB,'No subjects yet'))}
 async function initClasses(){
  const m=$('#main');m.innerHTML='';TE=(await call('listTeachers')).teachers;
  m.append(el('h1',{'data-i':'n_classes'}),
-  el('p',{class:'mu'},'Nursery, Prep 1, Prep 2 and Class 1 to 10 are ready. Sections (A, B, C) are optional: tap + Section only if your school uses them.'),el('div',{id:'cl'}),
+  el('p',{class:'mu'},'Nursery, Prep 1, Prep 2 and Class 1 to 10 are ready. Sections are optional: tap + Section on a class only if it has divisions like 6A, 6B, 6C.'),el('div',{id:'cl'}),
   el('h3',{},'Subjects'),el('div',{class:'bar'},btn('+ Add subject',()=>formModal('Add subject',[{k:'name',l:'Name',req:1}],{},async v=>{await call('saveSubject',{subject:v});await reloadClasses()}),false)),el('div',{id:'subl'}));
  await reloadClasses();applyI18n()}
