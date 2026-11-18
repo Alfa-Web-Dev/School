@@ -81,3 +81,4 @@ function monthGrid(months){
  const g=el('div',{class:'mg'},months.map(m=>{const t=el('div',{class:'mt '+m.status,title:m.items.map(i=>i.feeType+': '+R(i.paid)+' / '+R(i.due)).join('\n')},
   el('small',{},m.label+(m.status==='partial'?' · '+R(m.paid)+' paid':'')),el('b',{},R(m.status==='partial'||m.status==='due'?m.balance:m.due)),el('span',{class:'mb'},ST[m.status][1]+' '+ST[m.status][0]+(m.status==='partial'?'':'')));return t}));
  return el('div',{},sum,g)}
+function miEl(k){const s=document.createElement('span');s.innerHTML=PA.mini(k);return s}

@@ -1,4 +1,4 @@
-const VERSION='0.3.5';
+const VERSION='0.4.0';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
  Settings:['key','value'],
@@ -18,10 +18,17 @@ const SCHEMA={
  Enquiries:['id','name','phone','message','time','status','type','role','email','details'],
  Tokens:['tokenHash','userId','role','expires'],
  Notes:['noteId','classId','subjectId','chapter','title','fileId','mime','size','uploadedBy','date','category'],
+ Questions:['qid','classId','subjectId','chapter','text','a','b','c','d','correct','explain','difficulty','createdBy','date'],
+ Tests:['testId','title','classId','subjectId','mode','durationMin','start','end','marksPer','negative','proctor','shuffle','qids','status','createdBy','date','instructions'],
+ Attempts:['attemptId','testId','studentId','startedAt','submittedAt','answers','order','score','total','correct','wrong','skipped','status','strikes','flags'],
+ Violations:['id','attemptId','testId','studentId','time','type','detail','photoId'],
  Logs:['time','userId','action','details']
 };
 const out=o=>ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
-const tab=n=>SpreadsheetApp.getActive().getSheetByName(n);
+// Sheet na mile (naye features) to header ke saath apne aap ban jati hai
+function ensureSheet(n){const h=SCHEMA[n];if(!h)return null;const ss=SpreadsheetApp.getActive(),s=ss.getSheetByName(n)||ss.insertSheet(n);
+ if(s.getLastRow()===0){s.getRange(1,1,1,h.length).setValues([h]).setFontWeight('bold');s.setFrozenRows(1)}return s}
+const tab=n=>SpreadsheetApp.getActive().getSheetByName(n)||ensureSheet(n);
 function table(n){const v=tab(n).getDataRange().getValues(),h=v.shift().map(String);
  return{h,rows:v.map((r,i)=>{const o={_row:i+2};h.forEach((k,j)=>o[k]=r[j]);return o})}}
 const find=(n,fn)=>table(n).rows.find(fn);
