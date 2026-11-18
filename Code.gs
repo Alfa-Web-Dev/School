@@ -28,10 +28,10 @@ const out=o=>ContentService.createTextOutput(JSON.stringify(o)).setMimeType(Cont
 // Sheet na mile (naye features) to header ke saath apne aap ban jati hai
 function ensureSheet(n){const h=SCHEMA[n];if(!h)return null;const ss=SpreadsheetApp.getActive(),s=ss.getSheetByName(n)||ss.insertSheet(n);
  if(s.getLastRow()===0){s.getRange(1,1,1,h.length).setValues([h]).setFontWeight('bold');s.setFrozenRows(1)}return s}
-const _mig={};
+const _mig={},MIGRATE=['Questions','Tests','Attempts'];
 // Purani sheet me naye columns aaye to unke header apne aap jud jaate hain (data wahi rehta hai)
 function tab(n){const s=SpreadsheetApp.getActive().getSheetByName(n)||ensureSheet(n);
- if(!_mig[n]&&s&&SCHEMA[n]&&s.getLastRow()>0){_mig[n]=1;const h=SCHEMA[n],cur=s.getRange(1,1,1,Math.max(s.getLastColumn(),1)).getValues()[0].map(String);
+ if(!_mig[n]&&s&&SCHEMA[n]&&MIGRATE.indexOf(n)>=0&&s.getLastRow()>0){_mig[n]=1;const h=SCHEMA[n],cur=s.getRange(1,1,1,Math.max(s.getLastColumn(),1)).getValues()[0].map(String);
   for(let i=0;i<h.length;i++)if(!cur[i])s.getRange(1,i+1).setValue(h[i]).setFontWeight('bold')}
  return s}
 function table(n){const v=tab(n).getDataRange().getValues(),h=v.shift().map(String);
