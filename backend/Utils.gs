@@ -1,4 +1,4 @@
-const VERSION='0.3.4';
+const VERSION='0.3.5';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
  Settings:['key','value'],

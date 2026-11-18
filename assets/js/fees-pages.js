@@ -24,7 +24,7 @@ async function tabCollect(box){
   const types=f.lines.map(l=>l.feeType),ts=el('select',{},types.map(t=>el('option',{value:t},t))),amt=el('input',{type:'number',min:'1',step:'0.01'}),md=el('select',{},['cash','upi','bank','cheque'].map(x=>el('option',{value:x},x))),dt=el('input',{type:'date',value:todayF(),max:todayF()}),msg=el('div',{class:'err'});
   const setAmt=()=>{const l=f.lines.find(x=>x.feeType===ts.value);amt.value=l&&l.balance>0?l.balance:''};ts.onchange=setAmt;setAmt();
   panel.append(el('h3',{},s.name+' ('+s.studentId+') · '+s.className),el('p',{class:'mu'},'Session '+f.year+' · Total due '+rupee(f.totalDue)+' · Paid '+rupee(f.totalPaid)+' · Balance '+rupee(f.balance)),
-   tableEl([{h:'Fee',f:x=>x.feeType},{h:'Due so far',f:x=>rupee(x.due)},{h:'Paid',f:x=>rupee(x.paid)},{h:'Balance',f:x=>rupee(x.balance)}],f.lines,'Fee structure is not set for this class (see the Fee structure tab)'));
+   monthGrid(f.months),tableEl([{h:'Fee',f:x=>x.feeType},{h:'Due so far',f:x=>rupee(x.due)},{h:'Paid',f:x=>rupee(x.paid)},{h:'Balance',f:x=>rupee(x.balance)}],f.lines,'Fee structure is not set for this class (see the Fee structure tab)'));
   if(f.lines.length){const go=el('button',{type:'button'},'Receive payment');
    go.onclick=async()=>{go.disabled=true;msg.textContent='';try{const x=await call('addPayment',{payment:{studentId:id,feeType:ts.value,amount:amt.value,mode:md.value,date:dt.value}});
      toast('Payment received. Receipt '+x.receiptNo);window.open('../receipt.html?no='+encodeURIComponent(x.receiptNo),'_blank');await open(id)}catch(e){msg.textContent=e.message;go.disabled=false}};

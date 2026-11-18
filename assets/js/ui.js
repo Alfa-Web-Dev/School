@@ -71,3 +71,13 @@ function emptyState(t,s){return PA.empty(t,s)}
 
 
 function quickActions(list){const w=el('div',{class:'qa'});list.forEach(([href,k,label,cls])=>{const a=el('a',{href,class:'qi '+(cls||'')});a.innerHTML='<span class="ich">'+icon(k)+'</span><span class="ql"></span>'+PA.mini(PA.prop(k+' '+label));a.querySelector('.ql').textContent=label;w.append(a)});return w}
+
+// 12 mahine ka fee status: Paid / Partial / Due / Upcoming
+function monthGrid(months){
+ const R=n=>'₹'+Math.abs(Number(n||0)).toLocaleString('en-IN'),ST={paid:['Paid','✓'],partial:['Partial','◐'],due:['Due','!'],upcoming:['Upcoming','·']};
+ if(!months||!months.length)return el('div');
+ const cnt=k=>months.filter(m=>m.status===k).length;
+ const sum=el('div',{class:'mgs'},[['paid','Paid'],['partial','Partial'],['due','Due']].map(([k,l])=>el('span',{class:'mgc '+k},el('b',{},String(cnt(k))),' '+l)));
+ const g=el('div',{class:'mg'},months.map(m=>{const t=el('div',{class:'mt '+m.status,title:m.items.map(i=>i.feeType+': '+R(i.paid)+' / '+R(i.due)).join('\n')},
+  el('small',{},m.label+(m.status==='partial'?' · '+R(m.paid)+' paid':'')),el('b',{},R(m.status==='partial'||m.status==='due'?m.balance:m.due)),el('span',{class:'mb'},ST[m.status][1]+' '+ST[m.status][0]+(m.status==='partial'?'':'')));return t}));
+ return el('div',{},sum,g)}

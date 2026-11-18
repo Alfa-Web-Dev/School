@@ -33,7 +33,7 @@ async function initSAtt(){
 async function initSFees(){
  const m=page('n_fees'),r=await call('myFees');
  m.append(el('p',{class:'mu'},'Session '+r.year),ringCard(r.totalDue?r.totalPaid*100/r.totalDue:100,'Fees paid',rupee(r.totalPaid)+' of '+rupee(r.totalDue)),el('div',{class:'grid'},stat('Total due',rupee(r.totalDue)),stat('Paid',rupee(r.totalPaid)),stat('Balance',rupee(r.balance))),
-  el('h3',{},'Fee details'),tableEl([{h:'Fee',f:x=>x.feeType},{h:'Amount',f:x=>rupee(x.amount)+(x.dueMonth==='monthly'?' /month':'')},{h:'Due so far',f:x=>rupee(x.due)},{h:'Paid',f:x=>rupee(x.paid)},{h:'Balance',f:x=>rupee(x.balance)}],r.lines,'Fee structure is not set'),
+  el('h3',{},'Month-wise status'),monthGrid(r.months),el('h3',{},'Fee details'),tableEl([{h:'Fee',f:x=>x.feeType},{h:'Amount',f:x=>rupee(x.amount)+(x.dueMonth==='monthly'?' /month':'')},{h:'Due so far',f:x=>rupee(x.due)},{h:'Paid',f:x=>rupee(x.paid)},{h:'Balance',f:x=>rupee(x.balance)}],r.lines,'Fee structure is not set'),
   el('h3',{},'Payments / Receipts'),tableEl([{h:'Receipt',f:x=>el('a',{href:'../receipt.html?no='+encodeURIComponent(x.receiptNo),target:'_blank',rel:'noopener'},x.receiptNo)},{h:'Date',f:x=>x.date},{h:'Fee',f:x=>x.feeType},{h:'Amount',f:x=>rupee(x.amount)},{h:'Mode',f:x=>x.mode}],r.payments,'No payments yet'));
  upiBlock(m,r)}
 async function initSResults(){

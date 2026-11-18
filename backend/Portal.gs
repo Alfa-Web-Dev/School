@@ -25,7 +25,7 @@ function feeCtx(){
  return{start,year:yr.name||'',curYM:Utilities.formatDate(now,TZ,'yyyy-MM'),
   months:Math.max(0,Math.min(12,(ny-Number(start.slice(0,4)))*12+(nm-Number(start.slice(5,7)))+1)),
   structure:table('FeeStructure').rows,pays:table('Payments').rows}}
-function feesOfCtx(r,c){
+function feesOfCtx(r,c,wm){
  const sid=String(r.studentId),cid=String(r.classId);
  const pays=c.pays.filter(p=>String(p.studentId)===sid&&dstr(p.date)>=c.start)
   .map(p=>({receiptNo:String(p.receiptNo),feeType:String(p.feeType),amount:Number(p.amount)||0,mode:String(p.mode),date:dstr(p.date)}));
@@ -36,8 +36,19 @@ function feesOfCtx(r,c){
   const paid=Math.round(pays.filter(p=>p.feeType===type).reduce((a,p)=>a+p.amount,0)*100)/100;
   return{feeType:type,amount:amt,dueMonth:dm,due,paid,balance:Math.round((due-paid)*100)/100}});
  const sum=k=>Math.round(lines.reduce((a,l)=>a+l[k],0)*100)/100;
- return{lines,payments:pays,totalDue:sum('due'),totalPaid:sum('paid'),balance:sum('balance'),year:c.year}}
-function feesOf(r){return feesOfCtx(r,feeCtx())}
+ const out={lines,payments:pays,totalDue:sum('due'),totalPaid:sum('paid'),balance:sum('balance'),year:c.year};
+ if(wm)out.months=monthsOf(lines,c);return out}
+// Month-wise status: har fee type ka paid amount sabse purane month se bharte hue baant do (payment mein month nahi hota)
+function monthsOf(lines,c){
+ const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],sy=Number(c.start.slice(0,4)),sm=Number(c.start.slice(5,7));
+ const list=[];for(let i=0;i<12;i++){const m=(sm-1+i)%12,y=sy+Math.floor((sm-1+i)/12);list.push({ym:y+'-'+String(m+1).padStart(2,'0'),label:MN[m]+' '+y,items:[]})}
+ const by={};list.forEach(x=>by[x.ym]=x);
+ lines.forEach(l=>{let rem=l.paid;const per=l.dueMonth==='monthly'?list.map(x=>x.ym):(by[l.dueMonth]?[l.dueMonth]:[]);
+  per.forEach(ym=>{const take=Math.max(0,Math.min(rem,l.amount));rem=Math.round((rem-take)*100)/100;by[ym].items.push({feeType:l.feeType,due:l.amount,paid:Math.round(take*100)/100})})});
+ return list.filter(x=>x.items.length).map(x=>{const due=x.items.reduce((a,i)=>a+i.due,0),paid=x.items.reduce((a,i)=>a+i.paid,0);
+  const st=x.ym>c.curYM?'upcoming':(paid>=due?'paid':(paid>0?'partial':'due'));
+  return{ym:x.ym,label:x.label,due:Math.round(due*100)/100,paid:Math.round(paid*100)/100,balance:Math.round((due-paid)*100)/100,status:st,items:x.items}})}
+function feesOf(r){return feesOfCtx(r,feeCtx(),true)}
 
 function noticesOf(r){
  return table('ClassNotices').rows.filter(n=>String(n.classId)==='ALL'||String(n.classId)===String(r.classId))
