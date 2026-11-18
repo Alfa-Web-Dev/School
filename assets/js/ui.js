@@ -7,11 +7,11 @@ async function call(action,data){
  const r=await api(action,data||{});
  if(!r.ok){if(r.error==='Session expired. Please login again.'){TOK.clear();location.href='../login.html'}throw new Error(r.error||'Error')}
  return r}
-function toast(msg,bad){const t=el('div',{class:'toast'+(bad?' bad':'')},msg);document.body.append(t);setTimeout(()=>t.remove(),4000)}
+function toast(msg,bad){if(bad){window.__tb=Date.now();window.btnFail&&btnFail()}const t=el('div',{class:'toast'+(bad?' bad':'')},msg);document.body.append(t);setTimeout(()=>t.remove(),4000)}
 function modal(title,body,btns){
  const d=el('dialog',{class:'dlg'}),err=el('div',{class:'err'});
  d.append(el('h2',{},title),body,err,el('div',{class:'row end'},btns.map(b=>el('button',{class:b.g?'g':'',type:'button',
-  onclick:async()=>{err.textContent='';try{if(await b.fn(d)!==false)d.close()}catch(e){err.textContent=e.message}}},b.t))));
+  onclick:async()=>{err.textContent='';try{if(await b.fn(d)!==false)d.close()}catch(e){err.textContent=e.message;window.btnFail&&btnFail()}}},b.t))));
  document.body.append(d);d.onclose=()=>d.remove();d.showModal();return d}
 // fields: [{k,l,type:text|tel|date|select|textarea,opts:[[value,label]],req}]
 function formModal(title,fields,vals,onSave){

@@ -11,7 +11,7 @@ const parentOf=p=>{const a=p.split('.');a.pop();return a.length?getAt(a.join('.'
 const clone=o=>JSON.parse(JSON.stringify(o));
 const b64=s=>btoa(unescape(encodeURIComponent(s)));
 const IMGK=['photo','k','logo'];
-let toastT;const toast=(m,bad)=>{let t=q('#stt');if(!t){t=h('div',{id:'stt',class:'stt'});document.body.append(t)}t.textContent=m;t.className='stt show'+(bad?' bad':'');clearTimeout(toastT);toastT=setTimeout(()=>t.className='stt',bad?6000:3500)};
+let toastT;const toast=(m,bad)=>{if(bad)window.__tb=Date.now();let t=q('#stt');if(!t){t=h('div',{id:'stt',class:'stt'});document.body.append(t)}t.textContent=m;t.className='stt show'+(bad?' bad':'');clearTimeout(toastT);toastT=setTimeout(()=>t.className='stt',bad?6000:3500)};
 const upd=()=>{const n=ST.dS.size+ST.dP.size+ST.dC.size;const b=q('#spub');if(b){b.textContent=n?'Publish ('+n+')':'Publish';b.disabled=!n;const pn=q('#pubn');if(pn)pn.textContent=n?n+' unsaved change(s)':'All saved'}};
 
 // ---------- image helpers ----------
@@ -97,10 +97,11 @@ function bar(){
  window.addEventListener('beforeunload',e=>{if(ST.dS.size+ST.dP.size+ST.dC.size){e.preventDefault();e.returnValue=''}});
 }
 // ---------- GitHub ----------
-const gh=(path,opt)=>fetch('https://api.github.com'+path,{...(opt||{}),headers:{Authorization:'Bearer '+ST.tok,Accept:'application/vnd.github+json',...((opt||{}).headers||{})}});
+const gh=(path,opt)=>trackNet(fetch('https://api.github.com'+path,{...(opt||{}),headers:{Authorization:'Bearer '+ST.tok,Accept:'application/vnd.github+json',...((opt||{}).headers||{})}}),!!(opt&&opt.method&&opt.method!=='GET'));
 async function getFile(p){const r=await gh('/repos/'+ST.repo+'/contents/'+p+'?t='+Date.now());if(r.status===404)return null;if(!r.ok)throw new Error('GitHub '+r.status);const j=await r.json();return{sha:j.sha,text:decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))))}}
 async function put(p,content,msg,sha){const r=await gh('/repos/'+ST.repo+'/contents/'+p,{method:'PUT',body:JSON.stringify({message:msg,content,...(sha?{sha}:{})})});if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.message||('GitHub '+r.status))}}
-async function publish(){
+function publish(){const p=publish0();if(window.btnHold)btnHold(p);return p}
+async function publish0(){
  const btn=q('#spub');btn.disabled=true;
  try{
   toast('Publishing…');

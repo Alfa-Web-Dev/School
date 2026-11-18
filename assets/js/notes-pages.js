@@ -15,7 +15,7 @@ const catName=k=>(NCATS.find(c=>c[0]===k)||NCATS[8])[1];
 const subHue=s=>{let h=0;for(const ch of String(s))h=(h*31+ch.charCodeAt(0))%360;return h};
 
 function bookEl(n,actions){
- const h=subHue(n.subject),cv=el('div',{class:'bkc',style:'--g:linear-gradient(150deg,hsl('+h+',70%,62%),hsl('+(h+40)+',65%,46%))',onclick:()=>viewNote(n)});
+ const h=subHue(n.subject),cv=el('div',{class:'bkc',style:'--g:hsl('+h+',58%,52%)',onclick:()=>viewNote(n)});
  const t=el('div',{class:'bkt'},el('span',{},n.title),el('small',{},n.subject));cv.append(t);
  const img=el('img',{src:gThumb(n.fileId),loading:'lazy',alt:'',referrerpolicy:'no-referrer'});img.onload=()=>{t.style.display='none'};img.onerror=()=>img.remove();cv.append(img);
  if(n.mime==='application/pdf')cv.append(el('i',{class:'bkb'},'PDF'));
