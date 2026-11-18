@@ -7,13 +7,13 @@ const jparse=(v,d)=>{try{return JSON.parse(String(v))}catch(e){return d}};
 const setNum=(k,d)=>{const r=find('Settings',x=>String(x.key)===k),n=r?Number(r.value):NaN;return isFinite(n)&&n>0?n:d};
 const maxStrikes=()=>setNum('proctor_max_strikes',3);
 
-function qOf(q,withAns){const o={qid:String(q.qid),classId:String(q.classId),subjectId:String(q.subjectId),chapter:String(q.chapter||''),text:String(q.text).trim(),
- opts:OPTK.filter(k=>String(q[k]).trim()!=='').map(k=>({k,t:String(q[k]).trim()})),difficulty:String(q.difficulty||'medium')};
- if(withAns){o.correct=String(q.correct);o.explain=String(q.explain||'').trim();o.createdBy=String(q.createdBy)}return o}
+function qOf(q,withAns){const ty=String(q.type||'mcq'),o={qid:String(q.qid),classId:String(q.classId),subjectId:String(q.subjectId),chapter:String(q.chapter||''),text:String(q.text).trim(),type:ty,marks:ty==='mcq'?0:(Number(q.marks)||5),
+ opts:ty==='mcq'?OPTK.filter(k=>String(q[k]).trim()!=='').map(k=>({k,t:String(q[k]).trim()})):[],difficulty:String(q.difficulty||'medium')};
+ if(withAns){o.keyAns=String(q.keyAns||'').trim();o.correct=String(q.correct);o.explain=String(q.explain||'').trim();o.createdBy=String(q.createdBy)}return o}
 function staffClasses(s){return s.role==='admin'?null:teacherClassIds(s.userId)}
 const testView=(t,att)=>({testId:String(t.testId),title:String(t.title),classId:String(t.classId),subjectId:String(t.subjectId),mode:String(t.mode),durationMin:Number(t.durationMin)||0,
  start:Number(t.start)||0,end:Number(t.end)||0,marksPer:Number(t.marksPer)||1,negative:Number(t.negative)||0,proctor:String(t.proctor||'off'),shuffle:String(t.shuffle).toUpperCase()==='TRUE',
- qids:String(t.qids).split(',').filter(Boolean),status:String(t.status),instructions:String(t.instructions||'')});
+ qids:String(t.qids).split(',').filter(Boolean),status:String(t.status),instructions:String(t.instructions||''),reveal:String(t.reveal)==='submit'?'submit':'end'});
 
 // ---------------- staff: question bank ----------------
 function listQuestions(b){
@@ -29,9 +29,12 @@ function checkQ(s,d){
  if(!cid||!canClass(s,cid))throw new Error('You do not have permission for this class');
  if(!find('Subjects',x=>String(x.subjectId)===sub))throw new Error('Select a subject');
  if(!teachesSub(s,cid,sub))throw new Error('You do not teach this subject in this class');
- const o={classId:cid,subjectId:sub,chapter:txt(d.chapter,100),text:txt(d.text,600),explain:txt(d.explain,500),difficulty:DIFFS.indexOf(String(d.difficulty))>=0?String(d.difficulty):'medium'};
- OPTK.forEach(k=>o[k]=txt(d[k],200));
+ const ty=['short','long'].indexOf(String(d.type))>=0?String(d.type):'mcq';
+ const o={type:ty,classId:cid,subjectId:sub,chapter:txt(d.chapter,100),text:txt(d.text,ty==='mcq'?600:1000),explain:txt(d.explain,500),difficulty:DIFFS.indexOf(String(d.difficulty))>=0?String(d.difficulty):'medium'};
  if(!o.text)throw new Error('Question text is required');
+ if(ty!=='mcq'){const mk=Number(d.marks);if(!(mk>0&&mk<=100))throw new Error('Marks must be between 1 and 100');o.marks=mk;o.keyAns=txt(d.keyAns,1500);OPTK.forEach(k=>o[k]='');o.correct='';return o}
+ o.marks='';o.keyAns='';
+ OPTK.forEach(k=>o[k]=txt(d[k],200));
  if(!o.a||!o.b)throw new Error('Give at least options A and B');
  const c=clean(d.correct,1).toLowerCase();if(OPTK.indexOf(c)<0||!o[c])throw new Error('Choose the correct option (it must not be empty)');
  o.correct=c;return o}
@@ -79,7 +82,7 @@ function saveTest(b){
   if(T_MODES.indexOf(mode)<0)throw new Error('Choose practice or test');
   const qids=[...new Set((Array.isArray(d.qids)?d.qids:[]).map(String))];if(!qids.length)throw new Error('Add at least 1 question');if(qids.length>200)throw new Error('Maximum 200 questions');
   const qm={};table('Questions').rows.forEach(q=>qm[String(q.qid)]=q);
-  qids.forEach(q=>{if(!qm[q]||String(qm[q].classId)!==cid)throw new Error('Question '+q+' does not belong to this class')});
+  qids.forEach(q=>{if(!qm[q]||String(qm[q].classId)!==cid)throw new Error('Question '+q+' does not belong to this class');if(mode==='practice'&&String(qm[q].type||'mcq')!=='mcq')throw new Error('Practice sets can have only MCQ questions')});
   const dur=Math.round(Number(d.durationMin)||0),marks=Number(d.marksPer)||1,neg=Number(d.negative)||0;
   let start=0,end=0,proctor=T_PROCTOR.indexOf(String(d.proctor))>=0?String(d.proctor):'off';
   if(mode==='test'){start=parseIST(d.start);end=parseIST(d.end);if(!start||!end)throw new Error('Set start and end time');if(end<=start)throw new Error('End time must be after start time');
@@ -87,7 +90,7 @@ function saveTest(b){
   else{proctor='off'}
   if(marks<=0||marks>100)throw new Error('Marks per question must be 1-100');if(neg<0||neg>marks)throw new Error('Negative marks must be between 0 and marks per question');
   const o={title,classId:cid,subjectId:sub,mode,durationMin:mode==='test'?dur:(dur||0),start,end,marksPer:marks,negative:neg,proctor,shuffle:d.shuffle?'TRUE':'FALSE',qids:qids.join(','),
-   status:String(d.status)==='published'?'published':'draft',instructions:txt(d.instructions,600)};
+   status:String(d.status)==='published'?'published':'draft',instructions:txt(d.instructions,600),reveal:String(d.reveal)==='submit'?'submit':'end'};
   if(d.testId){const ex=find('Tests',x=>String(x.testId)===String(d.testId));if(!ex)throw new Error('Test not found');
    if(s.role!=='admin'&&String(ex.createdBy)!==s.userId)throw new Error('You can edit only your own tests');
    const used=table('Attempts').rows.some(a=>String(a.testId)===String(ex.testId)&&String(a.status)!=='reset');
@@ -114,17 +117,30 @@ function testResults(b){
   const sts=activeStudents(v.classId).sort((a,c)=>(parseInt(a.roll,10)||0)-(parseInt(c.roll,10)||0));
   const rows=sts.map(r=>{const mine=atts.filter(a=>String(a.studentId)===String(r.studentId)),best=mine.sort((a,c)=>Number(c.score)-Number(a.score))[0];
    return{studentId:String(r.studentId),name:r.name,roll:String(r.roll),attempts:mine.length,attemptId:best?String(best.attemptId):'',status:best?String(best.status):'none',score:best?Number(best.score):null,total:best?Number(best.total):null,
-    correct:best?Number(best.correct):null,wrong:best?Number(best.wrong):null,strikes:best?Number(best.strikes)||0:0,violations:vio.filter(x=>String(x.studentId)===String(r.studentId)).length}});
+    correct:best?Number(best.correct):null,wrong:best?Number(best.wrong):null,pending:best?Number(best.pending)||0:0,strikes:best?Number(best.strikes)||0:0,violations:vio.filter(x=>String(x.studentId)===String(r.studentId)).length}});
   const done=rows.filter(r=>r.score!==null),avg=done.length?Math.round(done.reduce((a,r)=>a+r.score,0)/done.length*100)/100:0;
-  return{ok:true,test:Object.assign(v,{count:v.qids.length}),rows,stats:{students:rows.length,attempted:done.length,avg,highest:done.length?Math.max.apply(null,done.map(r=>r.score)):0,blocked:rows.filter(r=>r.status==='blocked').length}}})}
+  return{ok:true,test:Object.assign(v,{count:v.qids.length}),rows,stats:{students:rows.length,attempted:done.length,avg,highest:done.length?Math.max.apply(null,done.map(r=>r.score)):0,blocked:rows.filter(r=>r.status==='blocked').length,pending:rows.reduce((x,r)=>x+(r.pending?1:0),0)}}})}
 
 function attemptDetail(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
  return safe(()=>{const a=find('Attempts',x=>String(x.attemptId)===String(b.attemptId));if(!a)throw new Error('Attempt not found');const t=staffTest(s,a.testId);
-  const qm={};table('Questions').rows.forEach(q=>qm[String(q.qid)]=q);const ans=jparse(a.answers,{}),ord=jparse(a.order,[]);
-  const review=ord.map(o=>{const q=qm[o.q];return q?Object.assign(qOf(q,true),{mine:ans[o.q]||''}):null}).filter(Boolean);
+  const qm={};table('Questions').rows.forEach(q=>qm[String(q.qid)]=q);const ans=jparse(a.answers,{}),grd=jparse(a.grades,{}),ord=jparse(a.order,[]);
+  const review=ord.map(o=>{const q=qm[o.q];return q?Object.assign(qOf(q,true),{mine:ans[o.q]||'',grade:grd[o.q]||null}):null}).filter(Boolean);
   const vio=table('Violations').rows.filter(x=>String(x.attemptId)===String(a.attemptId)).map(x=>({id:String(x.id),time:Number(x.time),type:String(x.type),detail:String(x.detail||''),photo:!!String(x.photoId||'')}));
-  return{ok:true,attempt:{attemptId:String(a.attemptId),studentId:String(a.studentId),status:String(a.status),score:Number(a.score),total:Number(a.total),correct:Number(a.correct),wrong:Number(a.wrong),skipped:Number(a.skipped),strikes:Number(a.strikes)||0,startedAt:Number(a.startedAt),submittedAt:Number(a.submittedAt)||0},review,violations:vio,test:testView(t)}})}
+  return{ok:true,attempt:{attemptId:String(a.attemptId),studentId:String(a.studentId),status:String(a.status),score:Number(a.score),total:Number(a.total),correct:Number(a.correct),wrong:Number(a.wrong),skipped:Number(a.skipped),pending:Number(a.pending)||0,strikes:Number(a.strikes)||0,startedAt:Number(a.startedAt),submittedAt:Number(a.submittedAt)||0},review,violations:vio,test:testView(t)}})}
+
+// Teacher/AI-suggested marks for subjective answers; teacher confirms here
+function gradeAttempt(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{const a=find('Attempts',x=>String(x.attemptId)===String(b.attemptId));if(!a)throw new Error('Attempt not found');const t=staffTest(s,a.testId);
+  if(String(a.status)==='inprogress')throw new Error('The student is still writing this test');
+  const ord=jparse(a.order,[]),ids={};ord.forEach(o=>ids[o.q]=1);const qm=qMap(ids),gr=jparse(a.grades,{}),inp=b.grades||{};
+  Object.keys(inp).forEach(q=>{const qq=qm[q];if(!qq||String(qq.type||'mcq')==='mcq'||!ids[q])return;const mk=Number(qq.marks)||5,m=Number(inp[q].m);
+   if(inp[q].m===''||inp[q].m===null||inp[q].m===undefined){delete gr[q];return}
+   if(!isFinite(m)||m<0||m>mk)throw new Error('Marks for a question must be between 0 and '+mk);
+   gr[q]={m:Math.round(m*100)/100,c:clean(inp[q].c,300),by:inp[q].by==='ai'?'ai':s.userId}});
+  const g=gradeOrder(ord,jparse(a.answers,{}),t,qm,gr);setRow('Attempts',a._row,Object.assign(g,{grades:JSON.stringify(gr)}));log(s.userId,'attempt_graded',a.attemptId+' '+g.score+'/'+g.total);
+  return{ok:true,score:g.score,total:g.total,pending:g.pending}}))}
 
 function violationPhoto(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;
@@ -138,13 +154,16 @@ function resetAttempt(b){
   setRow('Attempts',a._row,{status:'reset'});log(s.userId,'attempt_reset',a.attemptId+' '+a.studentId);return{ok:true}}))}
 
 // ---------------- grading ----------------
-function gradeOrder(order,ans,t,qm){let c=0,w=0,k=0;const mp=Number(t.marksPer)||1,ng=Number(t.negative)||0;
- order.forEach(o=>{const q=qm[o.q];if(!q)return;const a=ans[o.q];if(!a)k++;else if(a===String(q.correct))c++;else w++});
- const score=Math.round((c*mp-w*ng)*100)/100;return{score,total:order.length*mp,correct:c,wrong:w,skipped:k}}
+function gradeOrder(order,ans,t,qm,gr){gr=gr||{};let c=0,w=0,k=0,ms=0,sm=0,pend=0,total=0;const mp=Number(t.marksPer)||1,ng=Number(t.negative)||0;
+ order.forEach(o=>{const q=qm[o.q];if(!q)return;const a=ans[o.q],ty=String(q.type||'mcq');
+  if(ty==='mcq'){total+=mp;if(!a)k++;else if(a===String(q.correct)){c++;ms+=mp}else{w++;ms-=ng}}
+  else{const mk=Number(q.marks)||5;total+=mk;if(!a||!String(a).trim())k++;else{const g=gr[o.q];
+   if(g&&g.m!==undefined&&g.m!==''){const m=Math.min(mk,Math.max(0,Number(g.m)||0));sm+=m;if(m>=mk/2)c++;else w++}else pend++}}});
+ return{score:Math.round((ms+sm)*100)/100,total:Math.round(total*100)/100,correct:c,wrong:w,skipped:k,pending:pend}}
 function qMap(ids){const m={};table('Questions').rows.forEach(q=>{if(!ids||ids[String(q.qid)])m[String(q.qid)]=q});return m}
 function finishAttempt(a,t,answers,status){
  const order=jparse(a.order,[]),ids={};order.forEach(o=>ids[o.q]=1);const ans=answers||jparse(a.answers,{});
- const g=gradeOrder(order,ans,t,qMap(ids));setRow('Attempts',a._row,Object.assign(g,{answers:JSON.stringify(ans),submittedAt:Date.now(),status:status||'submitted'}));return g}
+ const g=gradeOrder(order,ans,t,qMap(ids),jparse(a.grades,{}));setRow('Attempts',a._row,Object.assign(g,{answers:JSON.stringify(ans),submittedAt:Date.now(),status:status||'submitted'}));return g}
 const deadlineOf=(a,t)=>String(t.mode)==='test'?Math.min(Number(a.startedAt)+(Number(t.durationMin)||0)*60000,Number(t.end)||1e15):0;
 function finalizeIfExpired(a,t,now){if(String(a.status)!=='inprogress'||String(t.mode)!=='test')return false;
  if(now>deadlineOf(a,t)+45000){finishAttempt(a,t,null,'submitted');return true}return false}
@@ -152,29 +171,29 @@ function finalizeIfExpired(a,t,now){if(String(a.status)!=='inprogress'||String(t
 // ---------------- student ----------------
 function myTests(b){
  const r=stu(b);if(!r)return DENIED;
- const cid=String(r.classId),now=Date.now(),sn=nameMap('Subjects','subjectId'),atts=table('Attempts').rows.filter(a=>String(a.studentId)===String(r.studentId)&&String(a.status)!=='reset');
+ const cid=String(r.classId),now=Date.now(),sn=nameMap('Subjects','subjectId'),QM=qMap(),atts=table('Attempts').rows.filter(a=>String(a.studentId)===String(r.studentId)&&String(a.status)!=='reset');
  const tests=table('Tests').rows.filter(t=>String(t.status)==='published'&&String(t.classId)===cid).reverse().map(t=>{const v=testView(t);
   const mine=atts.filter(a=>String(a.testId)===v.testId);mine.filter(a=>String(a.status)==='inprogress').forEach(a=>finalizeIfExpired(a,t,now));
   const mm=table('Attempts').rows.filter(a=>String(a.testId)===v.testId&&String(a.studentId)===String(r.studentId)&&String(a.status)!=='reset');
   const done=mm.filter(a=>String(a.status)==='submitted'||String(a.status)==='blocked'),best=done.sort((x,y)=>Number(y.score)-Number(x.score))[0],prog=mm.find(a=>String(a.status)==='inprogress');
   const state=v.mode==='practice'?'practice':(now<v.start?'upcoming':(now>v.end?'ended':'live'));
-  return{testId:v.testId,title:v.title,subject:sn[v.subjectId]||'Mixed',mode:v.mode,state,start:v.start,end:v.end,durationMin:v.durationMin,count:v.qids.length,marks:v.qids.length*v.marksPer,proctor:v.proctor,
-   attempts:done.length,best:best?{attemptId:String(best.attemptId),score:Number(best.score),total:Number(best.total),status:String(best.status)}:null,
+  return{testId:v.testId,title:v.title,subject:sn[v.subjectId]||'Mixed',mode:v.mode,state,start:v.start,end:v.end,durationMin:v.durationMin,count:v.qids.length,marks:v.qids.reduce((x,id)=>{const q=QM[id];return x+(q?(String(q.type||'mcq')==='mcq'?v.marksPer:(Number(q.marks)||5)):0)},0),proctor:v.proctor,
+   attempts:done.length,best:best?{attemptId:String(best.attemptId),score:Number(best.score),total:Number(best.total),status:String(best.status),pending:Number(best.pending)||0}:null,
    blocked:mm.some(a=>String(a.status)==='blocked'),inprogress:prog?String(prog.attemptId):''}});
- const topics={};table('Questions').rows.filter(q=>String(q.classId)===cid).forEach(q=>{const sid=String(q.subjectId),ch=String(q.chapter||'General').trim()||'General';
+ const topics={};table('Questions').rows.filter(q=>String(q.classId)===cid&&String(q.type||'mcq')==='mcq').forEach(q=>{const sid=String(q.subjectId),ch=String(q.chapter||'General').trim()||'General';
   const o=topics[sid]=topics[sid]||{subjectId:sid,subject:sn[sid]||sid,total:0,chapters:{}};o.total++;o.chapters[ch]=(o.chapters[ch]||0)+1});
  return{ok:true,tests,now,topics:Object.keys(topics).map(k=>({subjectId:k,subject:topics[k].subject,total:topics[k].total,chapters:Object.keys(topics[k].chapters).sort().map(c=>({chapter:c,count:topics[k].chapters[c]}))}))}}
 
 function permOrder(qids,doShuffle){const qs=doShuffle?shuffle(qids):qids;return qs.map(q=>({q,o:doShuffle?shuffle(OPTK).join(''):'abcd'}))}
 function paperOf(order,qm){return order.map(o=>{const q=qm[o.q];if(!q)return null;const full=qOf(q,false),by={};full.opts.forEach(x=>by[x.k]=x);
- return{qid:full.qid,text:full.text,opts:o.o.split('').map(k=>by[k]).filter(Boolean)}}).filter(Boolean)}
+ return{qid:full.qid,text:full.text,type:full.type,marks:full.marks,opts:o.o.split('').map(k=>by[k]).filter(Boolean)}}).filter(Boolean)}
 
 function startTest(b){
  const r=stu(b);if(!r)return DENIED;
  return safe(()=>withLock(()=>{
   const cid=String(r.classId),now=Date.now();let t,order,mode,title,adhoc=null;
   if(b.practice){const p=b.practice,sub=clean(p.subjectId,20),ch=clean(p.chapter,100),n=Math.max(3,Math.min(30,Math.round(Number(p.count))||10));
-   const pool=table('Questions').rows.filter(q=>String(q.classId)===cid&&(!sub||String(q.subjectId)===sub)&&(!ch||(String(q.chapter||'General').trim()||'General')===ch));
+   const pool=table('Questions').rows.filter(q=>String(q.classId)===cid&&String(q.type||'mcq')==='mcq'&&(!sub||String(q.subjectId)===sub)&&(!ch||(String(q.chapter||'General').trim()||'General')===ch));
    if(pool.length<1)throw new Error('No questions available for this topic yet');
    const pick=shuffle(pool.map(q=>String(q.qid))).slice(0,n);order=permOrder(pick,true);mode='practice';
    t={testId:'PRACTICE',title:'Practice: '+(ch||'Mixed'),mode:'practice',marksPer:1,negative:0,proctor:'off',durationMin:0,end:0,instructions:'Practice mode: you get instant feedback after each answer.'}}
@@ -200,7 +219,9 @@ function resumeOf(a,t,r,now){
 
 function ownAttempt(r,id){const a=find('Attempts',x=>String(x.attemptId)===String(id)&&String(x.studentId)===String(r.studentId));if(!a)throw new Error('Attempt not found');return a}
 function attemptTest(a){if(String(a.testId)==='PRACTICE')return{testId:'PRACTICE',mode:'practice',marksPer:1,negative:0,proctor:'off',durationMin:0,end:0};const t=find('Tests',x=>String(x.testId)===String(a.testId));if(!t)throw new Error('Test not found');return t}
-const cleanAns=(ans)=>{const o={};if(ans&&typeof ans==='object')Object.keys(ans).slice(0,250).forEach(q=>{const v=String(ans[q]).toLowerCase();if(OPTK.indexOf(v)>=0)o[String(q).slice(0,12)]=v});return o};
+const cleanAns=(ans)=>{const o={};let len=0;if(ans&&typeof ans==='object')Object.keys(ans).slice(0,250).forEach(q=>{let v=String(ans[q]==null?'':ans[q]);
+ if(v.length===1&&OPTK.indexOf(v.toLowerCase())>=0)v=v.toLowerCase();else v=v.replace(/\u0000/g,'').slice(0,3000);
+ if(!v.trim())return;if(len+v.length>44000)return;len+=v.length+16;o[String(q).slice(0,12)]=v});return o};
 
 function saveProgress(b){
  const r=stu(b);if(!r)return DENIED;
@@ -216,13 +237,13 @@ function checkAnswer(b){
   if(OPTK.indexOf(k)<0)throw new Error('Invalid option');ans[String(b.qid)]=k;setRow('Attempts',a._row,{answers:JSON.stringify(ans)});
   return{ok:true,correct:k===String(q.correct),right:String(q.correct),explain:String(q.explain||'').trim()}})}
 
-function resultOf(a,g,t){const mx=g.total||1;return{score:g.score,total:g.total,correct:g.correct,wrong:g.wrong,skipped:g.skipped,percent:Math.round(g.score*1000/mx)/10,status:String(a.status),mode:String(t.mode),
+function resultOf(a,g,t){const mx=g.total||1;return{score:g.score,total:g.total,correct:g.correct,wrong:g.wrong,skipped:g.skipped,pending:Number(g.pending)||0,percent:Math.round(g.score*1000/mx)/10,status:String(a.status),mode:String(t.mode),
  timeTaken:Math.round((Date.now()-Number(a.startedAt))/1000)}}
 
 function submitTest(b){
  const r=stu(b);if(!r)return DENIED;
  return safe(()=>withLock(()=>{const a=ownAttempt(r,b.attemptId),t=attemptTest(a);
-  if(String(a.status)!=='inprogress'){return{ok:true,result:resultOf(a,{score:Number(a.score),total:Number(a.total),correct:Number(a.correct),wrong:Number(a.wrong),skipped:Number(a.skipped)},t),already:true}}
+  if(String(a.status)!=='inprogress'){return{ok:true,result:resultOf(a,{score:Number(a.score),total:Number(a.total),correct:Number(a.correct),wrong:Number(a.wrong),skipped:Number(a.skipped),pending:Number(a.pending)||0},t),already:true}}
   const late=String(t.mode)==='test'&&Date.now()>deadlineOf(a,t)+45000;
   const g=finishAttempt(a,t,late?null:cleanAns(b.answers),'submitted');log(r.studentId,'test_submit',a.attemptId+' '+g.score+'/'+g.total);
   return{ok:true,result:resultOf(find('Attempts',x=>String(x.attemptId)===String(a.attemptId)),g,t)}}))}
@@ -230,10 +251,10 @@ function submitTest(b){
 function attemptReview(b){
  const r=stu(b);if(!r)return DENIED;
  return safe(()=>{const a=ownAttempt(r,b.attemptId),t=attemptTest(a);if(String(a.status)==='inprogress')throw new Error('Submit the test first');
-  if(String(t.mode)==='test'&&Date.now()<=Number(t.end))throw new Error('Answers open after the test ends for everyone ('+Utilities.formatDate(new Date(Number(t.end)),TZ,'d MMM, h:mm a')+')');
-  const ans=jparse(a.answers,{}),ord=jparse(a.order,[]),ids={};ord.forEach(o=>ids[o.q]=1);const qm=qMap(ids);
-  return{ok:true,title:String(t.title),result:resultOf(a,{score:Number(a.score),total:Number(a.total),correct:Number(a.correct),wrong:Number(a.wrong),skipped:Number(a.skipped)},t),
-   review:ord.map(o=>{const q=qm[o.q];if(!q)return null;const full=qOf(q,true),by={};full.opts.forEach(x=>by[x.k]=x);return{qid:full.qid,text:full.text,opts:o.o.split('').map(k=>by[k]).filter(Boolean),correct:full.correct,explain:full.explain,mine:ans[o.q]||''}}).filter(Boolean)}})}
+  if(String(t.mode)==='test'&&String(t.reveal)!=='submit'&&Date.now()<=Number(t.end))throw new Error('Answers open after the test ends for everyone ('+Utilities.formatDate(new Date(Number(t.end)),TZ,'d MMM, h:mm a')+')');
+  const ans=jparse(a.answers,{}),grd=jparse(a.grades,{}),ord=jparse(a.order,[]),ids={};ord.forEach(o=>ids[o.q]=1);const qm=qMap(ids);
+  return{ok:true,title:String(t.title),result:resultOf(a,{score:Number(a.score),total:Number(a.total),correct:Number(a.correct),wrong:Number(a.wrong),skipped:Number(a.skipped),pending:Number(a.pending)||0},t),
+   review:ord.map(o=>{const q=qm[o.q];if(!q)return null;const full=qOf(q,true),by={};full.opts.forEach(x=>by[x.k]=x);const g=grd[o.q];return{qid:full.qid,text:full.text,type:full.type,marks:full.marks,opts:o.o.split('').map(k=>by[k]).filter(Boolean),correct:full.correct,explain:full.explain,keyAns:full.keyAns,mine:ans[o.q]||'',grade:g?{m:Number(g.m),c:String(g.c||'')}:null}}).filter(Boolean)}})}
 
 // ---------------- proctoring ----------------
 const COUNTED=['face_missing','multiple_faces','looking_away','tab_switch','fullscreen_exit','camera_off','camera_covered','window_blur'];

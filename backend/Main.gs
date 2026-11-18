@@ -31,5 +31,5 @@ const ROUTES={
  listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',
  backupNow:'backupNow',aiGet:'aiGet',aiSave:'aiSave',
  listQuestions:'listQuestions',saveQuestion:'saveQuestion',importQuestions:'importQuestions',deleteQuestion:'deleteQuestion',listTests:'listTests',saveTest:'saveTest',
- deleteTest:'deleteTest',testResults:'testResults',attemptDetail:'attemptDetail',violationPhoto:'violationPhoto',resetAttempt:'resetAttempt',myTests:'myTests',startTest:'startTest',
+ deleteTest:'deleteTest',testResults:'testResults',attemptDetail:'attemptDetail',gradeAttempt:'gradeAttempt',violationPhoto:'violationPhoto',resetAttempt:'resetAttempt',myTests:'myTests',startTest:'startTest',
  saveProgress:'saveProgress',checkAnswer:'checkAnswer',submitTest:'submitTest',attemptReview:'attemptReview',reportViolation:'reportViolation'};

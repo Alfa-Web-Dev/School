@@ -78,7 +78,10 @@ function draw(){
  const top=el('div',{class:'xtop'},el('div',{class:'xtt'},el('b',{},r.title),el('small',{class:'mu'},answered+' / '+n+' answered')),
   X.practice?'':el('div',{class:'xtm'},el('span',{id:'xt'},fmt((r.deadline-(Date.now()+X.skew))/1000))),
   r.proctor==='camera'?el('video',{id:'xcam',class:'xpip',playsinline:'',muted:'',autoplay:''}):'');
- const card=el('div',{class:'xc xq'},el('div',{class:'xqn'},'Question '+(X.i+1)+' of '+n),el('h3',{class:'xqt'},q.text),el('div',{class:'xos'},opts),
+ const sub=q.type&&q.type!=='mcq',ta=sub?el('textarea',{class:'xta',rows:q.type==='long'?10:5,maxlength:3000,placeholder:'Type your answer here'}):null,cc=el('small',{class:'mu'},'');
+ if(ta){ta.value=X.ans[q.qid]||'';const upd=()=>{cc.textContent=ta.value.length+' / 3000';};upd();
+  ta.oninput=()=>{upd();if(ta.value.trim())X.ans[q.qid]=ta.value;else delete X.ans[q.qid];save();const pb=document.querySelectorAll('.xp button')[X.i];if(pb)pb.classList.toggle('ans',!!ta.value.trim());const sm=document.querySelector('.xtt small');if(sm)sm.textContent=Object.keys(X.ans).filter(k=>r.questions.some(z=>z.qid===k)).length+' / '+n+' answered'}}
+ const card=el('div',{class:'xc xq'},el('div',{class:'xqn'},'Question '+(X.i+1)+' of '+n+(sub?' · '+q.marks+' marks':'')),el('h3',{class:'xqt'},q.text),sub?el('div',{},ta,cc):el('div',{class:'xos'},opts),
   fb?el('div',{class:'xfb '+(fb.correct?'ok':'no')},el('b',{},fb.correct?'Correct!':'Not quite.'),fb.explain?el('p',{},fb.explain):'' ):'');
  const nav=el('div',{class:'xnav'},btn('Previous',()=>{X.i--;draw()},true),X.practice?'':btn(X.mark.has(q.qid)?'Unmark':'Mark for review',()=>{X.mark.has(q.qid)?X.mark.delete(q.qid):X.mark.add(q.qid);draw()},true),
   X.i<n-1?btn('Next',()=>{X.i++;draw()},false):btn(X.practice?'Finish':'Submit',()=>confirmSubmit(),false));
@@ -104,13 +107,16 @@ async function submit(auto){
 function result(res,auto){
  const pct=Math.max(0,Math.min(100,res.percent||0)),ring=el('div',{class:'xring',style:'--p:'+pct},el('b',{},Math.round(pct)+'%'));
  const c=el('div',{class:'xc xcen'},el('div',{class:'xi'},miEl('trophy')),el('h2',{},auto?'Time is up. Test submitted':(X.practice?'Practice complete':'Test submitted')),ring,
-  el('p',{class:'xsc'},el('b',{},res.score+' / '+res.total),' marks'),el('div',{class:'tcs xcen'},el('span',{class:'tchip ok'},res.correct+' correct'),el('span',{class:'tchip bad'},res.wrong+' wrong'),el('span',{class:'tchip'},res.skipped+' skipped')),
+  el('p',{class:'xsc'},el('b',{},res.score+' / '+res.total),' marks'),res.pending?el('p',{class:'mu'},res.pending+' written answer(s) will be marked by your teacher. Your total will update.'):'',el('div',{class:'tcs xcen'},el('span',{class:'tchip ok'},res.correct+' correct'),el('span',{class:'tchip bad'},res.wrong+' wrong'),el('span',{class:'tchip'},res.skipped+' skipped')),
   el('div',{class:'row'},[btn('Review answers',()=>review(X.r.attemptId),true),btn('Back to tests',back,false)]));show(wrap(c))}
 
 async function review(id){
  try{const r=await call('attemptReview',{attemptId:id}),box=el('div',{class:'xw'},el('div',{class:'bar'},btn('← Back',back,true)),el('h2',{},r.title));
-  r.review.forEach((q,i)=>box.append(el('div',{class:'xc rv '+(!q.mine?'sk':q.mine===q.correct?'ok':'no')},el('b',{},(i+1)+'. '+q.text),
-   el('ol',{class:'qop'},q.opts.map(o=>el('li',{class:o.k===q.correct?'ok':(o.k===q.mine?'wr':'')},o.t+(o.k===q.correct?'  ✓':'')+(o.k===q.mine&&o.k!==q.correct?'  ← your answer':'')))),q.explain?el('p',{class:'mu'},q.explain):'')));show(box)}
+  r.review.forEach((q,i)=>{if(q.type&&q.type!=='mcq'){const g=q.grade;box.append(el('div',{class:'xc rv '+(g?(g.m>=q.marks/2?'ok':'no'):'sk')},el('b',{},(i+1)+'. '+q.text),el('p',{class:'wans'},q.mine||'(not answered)'),
+    el('p',{},el('b',{},g?'Marks: '+g.m+' / '+q.marks:'Waiting for teacher marks ('+q.marks+' marks)')),g&&g.c?el('p',{class:'mu'},'Feedback: '+g.c):'',q.keyAns?el('details',{},el('summary',{},'Model answer'),el('p',{class:'mu'},q.keyAns)):''))}
+   else box.append(el('div',{class:'xc rv '+(!q.mine?'sk':q.mine===q.correct?'ok':'no')},el('b',{},(i+1)+'. '+q.text),
+   el('ol',{class:'qop'},q.opts.map(o=>el('li',{class:o.k===q.correct?'ok':(o.k===q.mine?'wr':'')},o.t+(o.k===q.correct?'  ✓':'')+(o.k===q.mine&&o.k!==q.correct?'  ← your answer':'')))),q.explain?el('p',{class:'mu'},q.explain):''))});
+  show(box)}
  catch(e){toast(e.message,1)}}
 if(typeof window!=='undefined')window.__review=review;
 boot();

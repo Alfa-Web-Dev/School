@@ -8,7 +8,7 @@ async function initMyTests(){
   c.append(el('div',{class:'tct'},el('div',{class:'tci'},miEl(t.mode==='practice'?'notebook':'exam')),el('div',{class:'tcm'},el('b',{},t.title),el('span',{class:'mu'},t.subject)),
    el('span',{class:'tchip '+({live:'live',upcoming:'sch',ended:'end',practice:'pr'}[st]||'')},{live:'Live',upcoming:'Upcoming',ended:'Ended',practice:'Practice'}[st])),
    el('div',{class:'tcs'},el('span',{class:'tchip'},t.count+' questions'),t.mode==='test'?el('span',{class:'tchip'},t.durationMin+' min'):'',t.proctor==='camera'?el('span',{class:'tchip pc'},'Camera proctored'):'',
-    t.mode==='test'?el('span',{class:'tchip'},S_IST(t.start)+' → '+S_IST(t.end)):'',t.best?el('span',{class:'tchip '+(t.best.status==='blocked'?'bad':'ok')},(t.best.status==='blocked'?'Blocked · ':'Score ')+t.best.score+' / '+t.best.total):''));
+    t.mode==='test'?el('span',{class:'tchip'},S_IST(t.start)+' → '+S_IST(t.end)):'',t.best?el('span',{class:'tchip '+(t.best.status==='blocked'?'bad':'ok')},(t.best.status==='blocked'?'Blocked · ':'Score ')+t.best.score+' / '+t.best.total+(t.best.pending?' · marking pending':'')):''));
   const row=el('div',{class:'row'});
   if(t.blocked)row.append(el('span',{class:'mu'},'You were blocked from this test. Contact your teacher.'));
   else if(t.mode==='practice')row.append(btn(t.inprogress?'Resume':'Practice',()=>open(t),false));

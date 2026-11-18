@@ -47,7 +47,7 @@ function testForm(t,classes,done){
   sub=selEl([],''),mode=selEl([['test','Scheduled test'],['practice','Practice set']],t.mode||'test'),
   start=el('input',{type:'datetime-local',value:T_INPUT(t.start)}),end=el('input',{type:'datetime-local',value:T_INPUT(t.end)}),
   dur=el('input',{type:'number',min:'5',max:'300',value:t.durationMin||30}),marks=el('input',{type:'number',min:'1',value:t.marksPer||1}),neg=el('input',{type:'number',min:'0',step:'0.25',value:t.negative||0}),
-  proc=selEl(T_PROC,t.proctor||'off'),shuf=el('input',{type:'checkbox'}),ins=el('textarea',{rows:2,placeholder:'Instructions shown before the test starts'}),
+  proc=selEl(T_PROC,t.proctor||'off'),rev=selEl([['end','After the test ends for everyone'],['submit','Right after the student submits']],t.reveal||'end'),shuf=el('input',{type:'checkbox'}),ins=el('textarea',{rows:2,placeholder:'Instructions shown before the test starts'}),
   q=el('input',{placeholder:'Search questions'}),qlist=el('div',{class:'qpick'}),qcount=el('b',{},'0');
  shuf.checked=!!t.shuffle;ins.value=t.instructions||'';const picked=new Set(t.qids||[]);let all=[];
  const fillSub=()=>{const c=classes.find(x=>x.classId===cls.value);sub.innerHTML='';sub.append(el('option',{value:''},'Mixed / all subjects'));(c?c.subjects:[]).forEach(s=>sub.append(el('option',{value:s.subjectId},s.name)));sub.value=(c&&c.subjects.some(s=>s.subjectId===t.subjectId))?t.subjectId:''};
@@ -55,7 +55,7 @@ function testForm(t,classes,done){
   const vis=all.filter(x=>(!sub.value||x.subjectId===sub.value)&&(!tx||(x.text+' '+x.chapter).toLowerCase().includes(tx)));
   if(!vis.length){qlist.append(el('p',{class:'mu'},'No questions for this class/subject yet. Add them in the Question bank tab.'));return}
   vis.forEach(x=>{const cb=el('input',{type:'checkbox'});cb.checked=picked.has(x.qid);cb.onchange=()=>{cb.checked?picked.add(x.qid):picked.delete(x.qid);qcount.textContent=String(picked.size)};
-   qlist.append(el('label',{class:'qrow'},cb,el('span',{},el('b',{},x.text),el('small',{class:'mu'},(x.chapter?x.chapter+' · ':'')+x.difficulty))))})};
+   qlist.append(el('label',{class:'qrow'},cb,el('span',{},el('b',{},x.text),el('small',{class:'mu'},(x.type!=='mcq'?(x.type==='long'?'Long answer':'Short answer')+' · '+x.marks+' marks · ':'')+(x.chapter?x.chapter+' · ':'')+x.difficulty))))})};
  const loadQ=async()=>{if(!isNew&&t.classId===cls.value&&all.length)return;const r=await call('listQuestions',{classId:cls.value});all=r.questions;draw()};
  cls.onchange=()=>{picked.clear();fillSub();loadQ()};sub.onchange=draw;q.oninput=draw;
  const sync=()=>{[start,end,dur].forEach(i=>i.closest('.tf').style.display=mode.value==='test'?'':'none');proc.closest('.tf').style.display=mode.value==='test'?'':'none'};mode.onchange=sync;
@@ -65,12 +65,12 @@ function testForm(t,classes,done){
  const body=el('div',{class:'frm tform'},fld('Title *',title),el('div',{class:'g2'},fld('Class *',cls),fld('Subject',sub)),fld('Type',mode),
   el('div',{class:'g2'},fld('Starts *',start),fld('Ends *',end)),el('div',{class:'g3'},fld('Duration (min)',dur),fld('Marks / question',marks),fld('Negative marks',neg)),
   fld('Proctoring',proc,'Camera mode asks the student for camera permission and watches for abnormal behaviour. 3 warnings block the student.'),
-  el('label',{class:'chk'},shuf,' Shuffle questions and options'),fld('Instructions',ins),
+  fld('Show answers and marks',rev,'When students can see correct answers, model answers and your feedback.'),el('label',{class:'chk'},shuf,' Shuffle questions and options'),fld('Instructions',ins),
   el('div',{class:'qh'},el('b',{},'Questions'),el('span',{class:'mu'},'Selected: '),qcount,el('span',{style:'flex:1'}),pickN,randBtn),q,qlist);
  sync();if(!all.length)loadQ();
  const save=status=>async()=>{if(!picked.size)throw new Error('Select at least 1 question');
   await call('saveTest',{test:{testId:t.testId,title:title.value,classId:cls.value,subjectId:sub.value,mode:mode.value,durationMin:dur.value,start:start.value,end:end.value,marksPer:marks.value,negative:neg.value,
-   proctor:proc.value,shuffle:shuf.checked,qids:[...picked],instructions:ins.value,status}});toast(status==='published'?'Test published':'Saved as draft');await done()};
+   proctor:proc.value,reveal:rev.value,shuffle:shuf.checked,qids:[...picked],instructions:ins.value,status}});toast(status==='published'?'Test published':'Saved as draft');await done()};
  const d=modal(isNew?'New test':'Edit test',body,[{t:'Cancel',g:1,fn:()=>true},{t:'Save draft',g:1,fn:save('draft')},{t:'Publish',fn:save('published')}]);d.classList.add('wide')}
 
 /* ---------------- question bank ---------------- */
@@ -86,21 +86,23 @@ async function viewBank(box,classes){
 function qCard(x,classes,reload){
  const c=el('div',{class:'qcard'});
  c.append(el('div',{class:'qct'},el('b',{},x.text),chip(x.difficulty,'d-'+x.difficulty)),
-  el('ol',{class:'qop'},x.opts.map(o=>el('li',{class:o.k===x.correct?'ok':''},o.t))),
-  el('div',{class:'tcs'},chip(x.subject),x.chapter?chip(x.chapter):'',x.explain?chip('Has explanation'):''),
+  x.type==='mcq'?el('ol',{class:'qop'},x.opts.map(o=>el('li',{class:o.k===x.correct?'ok':''},o.t))):el('p',{class:'mu'},(x.type==='long'?'Long answer':'Short answer')+' · '+x.marks+' marks'+(x.keyAns?' · has model answer':'')),
+  el('div',{class:'tcs'},x.type!=='mcq'?chip(x.type==='long'?'Long answer':'Short answer','pc'):'',chip(x.subject),x.chapter?chip(x.chapter):'',x.explain?chip('Has explanation'):''),
   x.editable?el('div',{class:'row'},[btn('Edit',()=>qForm(x,classes,x.classId,reload)),btn('Delete',async()=>{if(confirm('Delete this question?')){await call('deleteQuestion',{qid:x.qid});reload()}})]):'');return c}
 
 function qForm(x,classes,cid,done){
  x=x||{};const isNew=!x.qid;
- const cls=selEl(classes.map(c=>[c.classId,c.name]),x.classId||cid),sub=selEl([],''),ch=el('input',{placeholder:'Chapter (optional)',value:x.chapter||''}),text=el('textarea',{rows:3,placeholder:'Type the question'}),
+ const ty=selEl([['mcq','MCQ (4 options)'],['short','Short answer'],['long','Long answer']],x.type||'mcq'),mk=el('input',{type:'number',min:'1',max:'100',value:x.marks||5}),key=el('textarea',{rows:3,placeholder:'Model answer or marking points (used by AI and teacher while marking; students see it after review)'}),cls=selEl(classes.map(c=>[c.classId,c.name]),x.classId||cid),sub=selEl([],''),ch=el('input',{placeholder:'Chapter (optional)',value:x.chapter||''}),text=el('textarea',{rows:3,placeholder:'Type the question'}),
   op={},ex=el('textarea',{rows:2,placeholder:'Explanation shown after answering (optional)'}),cor=selEl([['a','A'],['b','B'],['c','C'],['d','D']],x.correct||'a'),dif=selEl(T_DIFF,x.difficulty||'medium');
- text.value=x.text||'';ex.value=x.explain||'';
+ text.value=x.text||'';ex.value=x.explain||'';key.value=x.keyAns||'';
  ['a','b','c','d'].forEach(k=>op[k]=el('input',{placeholder:'Option '+k.toUpperCase()+(k<='b'?' *':''),value:((x.opts||[]).find(o=>o.k===k)||{}).t||''}));
  const fillSub=()=>{const c=classes.find(z=>z.classId===cls.value);sub.innerHTML='';(c?c.subjects:[]).forEach(s=>sub.append(el('option',{value:s.subjectId},s.name)));if(x.subjectId)sub.value=x.subjectId};cls.onchange=fillSub;fillSub();
- const body=el('div',{class:'frm tform'},el('div',{class:'g2'},fld('Class',cls),fld('Subject',sub)),fld('Chapter',ch),fld('Question *',text),el('div',{class:'g2'},fld('A',op.a),fld('B',op.b)),el('div',{class:'g2'},fld('C',op.c),fld('D',op.d)),
-  el('div',{class:'g2'},fld('Correct answer',cor),fld('Difficulty',dif)),fld('Explanation',ex));
+ const mcqBox=el('div',{},el('div',{class:'g2'},fld('A',op.a),fld('B',op.b)),el('div',{class:'g2'},fld('C',op.c),fld('D',op.d)),fld('Correct answer',cor),fld('Explanation',ex)),
+  subBox=el('div',{},fld('Marks for this question',mk),fld('Model answer / marking points',key));
+ const body=el('div',{class:'frm tform'},fld('Question type',ty),el('div',{class:'g2'},fld('Class',cls),fld('Subject',sub)),fld('Chapter',ch),fld('Question *',text),mcqBox,subBox,fld('Difficulty',dif));
+ const sync=()=>{mcqBox.style.display=ty.value==='mcq'?'':'none';subBox.style.display=ty.value==='mcq'?'none':''};ty.onchange=sync;sync();
  const d=modal(isNew?'Add question':'Edit question',body,[{t:'Cancel',g:1,fn:()=>true},{t:'Save',fn:async()=>{
-  await call('saveQuestion',{q:{qid:x.qid,classId:cls.value,subjectId:sub.value,chapter:ch.value,text:text.value,a:op.a.value,b:op.b.value,c:op.c.value,d:op.d.value,correct:cor.value,explain:ex.value,difficulty:dif.value}});toast('Saved');await done()}}]);d.classList.add('wide')}
+  await call('saveQuestion',{q:{qid:x.qid,type:ty.value,marks:mk.value,keyAns:key.value,classId:cls.value,subjectId:sub.value,chapter:ch.value,text:text.value,a:op.a.value,b:op.b.value,c:op.c.value,d:op.d.value,correct:cor.value,explain:ex.value,difficulty:dif.value}});toast('Saved');await done()}}]);d.classList.add('wide')}
 
 function bulkForm(classes,cid,done){
  const cls=selEl(classes.map(c=>[c.classId,c.name]),cid),sub=selEl([],''),ch=el('input',{placeholder:'Chapter (optional)'}),ta=el('textarea',{rows:9,placeholder:'2 + 2 = ? | 3 | 4 | 5 | 6 | b | Because 2 + 2 is 4'});
@@ -119,19 +121,43 @@ async function showResults(testId,box,classes){
  const back=btn('← All tests',()=>{box.innerHTML='';viewTests(box,classes)});
  const stc=(l,v)=>el('div',{class:'card stat'},el('div',{class:'big'},String(v)),el('div',{class:'mu'},l));
  box.append(el('div',{class:'bar'},back),el('h3',{},t.title),el('p',{class:'mu'},t.count+' questions · '+(t.mode==='test'?T_IST(t.start)+' → '+T_IST(t.end):'Practice set')),
-  el('div',{class:'grid'},stc('Students',S.students),stc('Attempted',S.attempted),stc('Average',S.avg),stc('Blocked',S.blocked)));
+  el('div',{class:'grid'},stc('Students',S.students),stc('Attempted',S.attempted),stc('Average',S.avg),stc('Blocked',S.blocked),stc('To mark',S.pending||0)));
  const label={submitted:['Submitted','ok'],blocked:['Blocked','bad'],inprogress:['In progress','sch'],none:['Not attempted','']};
  box.append(tableEl([{h:'Roll',f:x=>x.roll},{h:'Name',f:x=>x.name},{h:'Status',f:x=>chip(label[x.status][0],label[x.status][1])},
-  {h:'Score',f:x=>x.score==null?'-':x.score+' / '+x.total},{h:'Warnings',f:x=>x.strikes?chip(x.strikes+'/3','bad'):'0'},
+  {h:'Score',f:x=>x.score==null?'-':el('span',{},x.score+' / '+x.total+' ',x.pending?chip(x.pending+' to mark','sch'):'')},{h:'Warnings',f:x=>x.strikes?chip(x.strikes+'/3','bad'):'0'},
   {h:'',f:x=>x.attemptId?el('div',{class:'row'},[btn('View',()=>attemptView(x.attemptId,()=>showResults(testId,box,classes))),(x.status==='blocked'||x.violations)?btn('Allow retake',async()=>{if(confirm('Cancel this attempt and let '+x.name+' take the test again?')){await call('resetAttempt',{attemptId:x.attemptId});toast('Reset. The student can start again.');showResults(testId,box,classes)}}):'']):''}],r.rows,'No students in this class'))}
 
 async function attemptView(id,after){
- const r=await call('attemptDetail',{attemptId:id}),a=r.attempt,body=el('div',{class:'tform'});
- body.append(el('div',{class:'tcs'},chip(a.status,a.status==='blocked'?'bad':'ok'),chip('Score '+a.score+' / '+a.total),chip(a.correct+' correct'),chip(a.wrong+' wrong'),chip(a.skipped+' skipped')));
- const vio=r.violations;body.append(el('h3',{},'Proctoring log ('+vio.filter(v=>v.type!=='snapshot').length+' warnings)'));
+ const r=await call('attemptDetail',{attemptId:id}),a=r.attempt,body=el('div',{class:'tform'});let scoreChip;
+ const gin={};
+ const info=el('div',{class:'tcs'});const draw=(sc,tt,pd)=>{info.innerHTML='';info.append(chip(a.status,a.status==='blocked'?'bad':'ok'),chip('Score '+sc+' / '+tt),chip(a.correct+' correct'),chip(a.wrong+' wrong'),chip(a.skipped+' skipped'),pd?chip(pd+' to mark','sch'):'')};draw(a.score,a.total,a.pending);body.append(info);
+ const subj=r.review.filter(q=>q.type!=='mcq'&&q.mine);
+ if(subj.length){const ai=btn('AI suggest marks',async e=>{const b=e.target;b.disabled=true;b.textContent='AI is reading…';let fail=0;
+   for(const q of subj){try{const g=await aiMark(q);gin[q.qid].m.value=g.marks;gin[q.qid].c.value=g.comment;gin[q.qid].ai=1}catch(x){fail++}}
+   b.disabled=false;b.textContent='AI suggest marks';toast(fail?fail+' answer(s) could not be checked by AI. Please mark them yourself.':'AI suggestions filled in. Check them, then press Save marks.',!!fail)},true);
+  body.append(el('p',{class:'mu'},'Written answers need marks. AI only suggests; the marks become final when you press Save marks. Only the question and the answer text are sent to the AI, never the student name.'),ai)}
+ const vio=r.violations;
+ if(r.review.some(q=>q.type!=='mcq')){body.append(el('h3',{},'Written answers'));
+  r.review.filter(q=>q.type!=='mcq').forEach((q,i)=>{const m=el('input',{type:'number',min:'0',max:q.marks,step:'0.5',placeholder:'0 - '+q.marks,value:q.grade?q.grade.m:'',style:'width:90px'}),c=el('input',{placeholder:'Feedback for the student (optional)',value:q.grade?q.grade.c:''});gin[q.qid]={m,c};
+   body.append(el('div',{class:'rv '+(q.grade?'ok':(q.mine?'sk':''))},el('b',{},q.text),el('small',{class:'mu'},(q.type==='long'?'Long answer':'Short answer')+' · '+q.marks+' marks'),
+    el('p',{class:'wans'},q.mine||'(no answer)'),q.keyAns?el('details',{},el('summary',{},'Model answer'),el('p',{class:'mu'},q.keyAns)):'',q.mine?el('div',{class:'g2'},el('div',{class:'tf'},el('label',{},'Marks'),m),el('div',{class:'tf'},el('label',{},'Feedback'),c)):''))});}
+ body.append(el('h3',{},'Proctoring log ('+vio.filter(v=>v.type!=='snapshot').length+' warnings)'));
  if(!vio.length)body.append(el('p',{class:'mu'},'No events recorded.'));
  const vl=el('div',{class:'vlist'});vio.forEach(v=>{const row=el('div',{class:'vrow'},el('b',{},(VIO[v.type]||v.type)),el('span',{class:'mu'},new Date(v.time).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata'})+(v.detail?' · '+v.detail:'')));
   if(v.photo){const slot=el('div',{class:'vph'});row.append(btn('Photo',async b=>{const bt=b.target;bt.disabled=true;try{const p=await call('violationPhoto',{id:v.id});slot.innerHTML='';slot.append(el('img',{src:p.data,alt:'proctor photo'}));bt.remove()}catch(e){toast(e.message,1);bt.disabled=false}}),slot)}vl.append(row)});body.append(vl);
- body.append(el('h3',{},'Answers'));r.review.forEach((q,i)=>{const ok=q.mine===q.correct;body.append(el('div',{class:'rv '+(!q.mine?'sk':ok?'ok':'no')},el('b',{},(i+1)+'. '+q.text),
-  el('ol',{class:'qop'},q.opts.map(o=>el('li',{class:o.k===q.correct?'ok':(o.k===q.mine?'wr':'')},o.t+(o.k===q.mine?'  ← student':''))))))});
- const d=modal('Attempt review',body,[{t:'Close',fn:()=>true}]);d.classList.add('wide')}
+ const mc=r.review.filter(q=>q.type==='mcq');
+ if(mc.length){body.append(el('h3',{},'MCQ answers'));mc.forEach((q,i)=>{const ok=q.mine===q.correct;body.append(el('div',{class:'rv '+(!q.mine?'sk':ok?'ok':'no')},el('b',{},q.text),
+  el('ol',{class:'qop'},q.opts.map(o=>el('li',{class:o.k===q.correct?'ok':(o.k===q.mine?'wr':'')},o.t+(o.k===q.mine?'  ← student':''))))))})}
+ const btns=[{t:'Close',g:1,fn:()=>true}];
+ if(Object.keys(gin).length)btns.push({t:'Save marks',fn:async()=>{const g={};Object.keys(gin).forEach(k=>{const v=gin[k];g[k]={m:v.m.value,c:v.c.value,by:v.ai?'ai':'teacher'}});
+  const x=await call('gradeAttempt',{attemptId:id,grades:g});toast('Marks saved. Total '+x.score+' / '+x.total);if(after)after()}});
+ const d=modal('Attempt review',body,btns);d.classList.add('wide')}
+
+// Free AI (same key-less endpoint as the helper) suggests marks; teacher always confirms
+async function aiMark(q){
+ const c=Object.assign({endpoint:'https://text.pollinations.ai/openai',model:'openai'},(window.CFG&&CFG.ai)||{});
+ const prompt='You are a fair school teacher marking a student answer. Question: '+q.text+'\nMaximum marks: '+q.marks+'\nModel answer / marking points: '+(q.keyAns||'(none given, use your own knowledge)')+'\nStudent answer: '+String(q.mine).slice(0,2500)+
+  '\nGive marks between 0 and '+q.marks+' (half marks allowed) and one short feedback sentence addressed to the student. Reply ONLY with JSON like {"marks":3,"comment":"..."}';
+ const res=await fetch(c.endpoint,{method:'POST',headers:Object.assign({'Content-Type':'application/json'},c.apiKey?{Authorization:'Bearer '+c.apiKey}:{}),body:JSON.stringify({model:c.model,messages:[{role:'user',content:prompt}],temperature:.2,max_tokens:200})});
+ if(!res.ok)throw new Error('ai');const j=await res.json(),t=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'',m=t.match(/\{[\s\S]*\}/);if(!m)throw new Error('ai');
+ const o=JSON.parse(m[0]);let mk=Math.round(Number(o.marks)*2)/2;if(!isFinite(mk))throw new Error('ai');mk=Math.max(0,Math.min(Number(q.marks),mk));return{marks:mk,comment:String(o.comment||'').slice(0,300)}}

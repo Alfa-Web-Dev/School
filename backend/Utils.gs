@@ -1,4 +1,4 @@
-const VERSION='0.4.0';
+const VERSION='0.4.1';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
  Settings:['key','value'],
@@ -18,9 +18,9 @@ const SCHEMA={
  Enquiries:['id','name','phone','message','time','status','type','role','email','details'],
  Tokens:['tokenHash','userId','role','expires'],
  Notes:['noteId','classId','subjectId','chapter','title','fileId','mime','size','uploadedBy','date','category'],
- Questions:['qid','classId','subjectId','chapter','text','a','b','c','d','correct','explain','difficulty','createdBy','date'],
- Tests:['testId','title','classId','subjectId','mode','durationMin','start','end','marksPer','negative','proctor','shuffle','qids','status','createdBy','date','instructions'],
- Attempts:['attemptId','testId','studentId','startedAt','submittedAt','answers','order','score','total','correct','wrong','skipped','status','strikes','flags'],
+ Questions:['qid','classId','subjectId','chapter','text','a','b','c','d','correct','explain','difficulty','createdBy','date','type','marks','keyAns'],
+ Tests:['testId','title','classId','subjectId','mode','durationMin','start','end','marksPer','negative','proctor','shuffle','qids','status','createdBy','date','instructions','reveal'],
+ Attempts:['attemptId','testId','studentId','startedAt','submittedAt','answers','order','score','total','correct','wrong','skipped','status','strikes','flags','grades','pending'],
  Violations:['id','attemptId','testId','studentId','time','type','detail','photoId'],
  Logs:['time','userId','action','details']
 };
@@ -28,7 +28,12 @@ const out=o=>ContentService.createTextOutput(JSON.stringify(o)).setMimeType(Cont
 // Sheet na mile (naye features) to header ke saath apne aap ban jati hai
 function ensureSheet(n){const h=SCHEMA[n];if(!h)return null;const ss=SpreadsheetApp.getActive(),s=ss.getSheetByName(n)||ss.insertSheet(n);
  if(s.getLastRow()===0){s.getRange(1,1,1,h.length).setValues([h]).setFontWeight('bold');s.setFrozenRows(1)}return s}
-const tab=n=>SpreadsheetApp.getActive().getSheetByName(n)||ensureSheet(n);
+const _mig={};
+// Purani sheet me naye columns aaye to unke header apne aap jud jaate hain (data wahi rehta hai)
+function tab(n){const s=SpreadsheetApp.getActive().getSheetByName(n)||ensureSheet(n);
+ if(!_mig[n]&&s&&SCHEMA[n]&&s.getLastRow()>0){_mig[n]=1;const h=SCHEMA[n],cur=s.getRange(1,1,1,Math.max(s.getLastColumn(),1)).getValues()[0].map(String);
+  for(let i=0;i<h.length;i++)if(!cur[i])s.getRange(1,i+1).setValue(h[i]).setFontWeight('bold')}
+ return s}
 function table(n){const v=tab(n).getDataRange().getValues(),h=v.shift().map(String);
  return{h,rows:v.map((r,i)=>{const o={_row:i+2};h.forEach((k,j)=>o[k]=r[j]);return o})}}
 const find=(n,fn)=>table(n).rows.find(fn);
