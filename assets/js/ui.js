@@ -82,3 +82,14 @@ function monthGrid(months){
   el('small',{},m.label+(m.status==='partial'?' · '+R(m.paid)+' paid':'')),el('b',{},R(m.status==='partial'||m.status==='due'?m.balance:m.due)),el('span',{class:'mb'},ST[m.status][1]+' '+ST[m.status][0]+(m.status==='partial'?'':'')));return t}));
  return el('div',{},sum,g)}
 function miEl(k){const s=document.createElement('span');s.innerHTML=PA.mini(k);return s}
+// Free AI tutor (same key-less endpoint as the helper chat). history: [{role,content}] ; returns text
+async function aiAsk(system,history,opt){
+ opt=opt||{};const c=Object.assign({endpoint:'https://text.pollinations.ai/openai',model:'openai'},(window.CFG&&CFG.ai)||{});
+ const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),opt.timeout||45000);
+ try{const res=await fetch(c.endpoint,{method:'POST',signal:ctl.signal,headers:Object.assign({'Content-Type':'application/json'},c.apiKey?{Authorization:'Bearer '+c.apiKey}:{}),
+   body:JSON.stringify({model:c.model,messages:[{role:'system',content:system}].concat(history),temperature:opt.temp==null?.4:opt.temp,max_tokens:opt.max||700})});
+  if(!res.ok)throw new Error('AI is busy');const j=await res.json(),t=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'';
+  if(!String(t).trim())throw new Error('AI is busy');return String(t).trim()}
+ catch(e){throw new Error(e.name==='AbortError'?'AI took too long':(e.message||'AI is busy'))}finally{clearTimeout(to)}}
+// tiny safe markdown: **bold**, line breaks, bullet dashes
+function mdLite(t){const d=document.createElement('div');d.className='md';String(t).split('\n').forEach(l=>{const p=document.createElement('p');const parts=l.split(/(\*\*[^*]+\*\*)/);parts.forEach(x=>{if(/^\*\*[^*]+\*\*$/.test(x)){const b=document.createElement('b');b.textContent=x.slice(2,-2);p.append(b)}else p.append(document.createTextNode(x.replace(/^#+\s*/,'')))});if(l.trim())d.append(p)});return d}

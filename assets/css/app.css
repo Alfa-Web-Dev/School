@@ -432,3 +432,5 @@ button.busy{position:relative;pointer-events:none;opacity:.75;cursor:progress}
 button.busy:after{content:"";display:inline-block;width:14px;height:14px;margin-left:10px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-2px;animation:bsp .7s linear infinite}
 button.done{background:#16a34a!important;color:#fff!important;border-color:#16a34a!important}
 @keyframes bsp{to{transform:rotate(360deg)}}
+.dq .md p{margin:4px 0;line-height:1.5}.dai,.dta{border-radius:14px;padding:10px 14px;background:var(--bg)}.dta{background:#dcfce7}.dq details summary{cursor:pointer;font-weight:600;margin:4px 0}
+.dq textarea{width:100%}
