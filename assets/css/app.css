@@ -441,3 +441,12 @@ button.done{background:#16a34a!important;color:#fff!important;border-color:#16a3
 .fcard2.back{background:#f0fdf4;border-color:#16a34a}.fct{flex:1;display:flex;flex-direction:column;justify-content:center;font-size:22px;line-height:1.4}.fct p{margin:4px 0}
 .fcb{justify-content:center;gap:12px}.fcb button{flex:1;max-width:180px}.fcend{margin-top:16px}
 .gpass{border:2px dashed #16a34a;background:#f0fdf4;border-radius:18px;padding:14px;text-align:center}.gpass h2{margin:6px 0 2px}.gpass p{margin:2px 0}
+
+/* QR attendance */
+.qrcard{display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--card,#fff);border:1px solid var(--line,#e5e5e5);border-radius:14px;padding:20px;max-width:340px;margin:0 auto}
+.qrname{font-size:1.2rem;font-weight:700}.qrcv{width:240px;height:240px;image-rendering:pixelated;background:#fff;padding:8px;border-radius:8px}
+.qrleft,.qrnote{text-align:center;font-size:.85rem;color:var(--mu,#666)}.qrnote{max-width:340px;margin:12px auto}
+.scan{display:flex;flex-direction:column;gap:10px;min-width:min(86vw,360px)}.scbox{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:1/1}
+.scvid{width:100%;height:100%;object-fit:cover}.scframe{position:absolute;inset:18%;border:2px solid #fff;border-radius:10px;opacity:.85;pointer-events:none}
+.scres{padding:10px;border-radius:8px;background:var(--bg2,#f4f4f4);text-align:center;font-weight:600}.scres.ok{background:#e6f4ea;color:#1e6b34}.scres.bad{background:#fdecea;color:#a1271b}.scres.warn{background:#fff4e0;color:#8a5a00}
+.sclog{max-height:140px;overflow:auto;display:flex;flex-direction:column;gap:4px}.scrow{padding:6px 8px;border-bottom:1px solid var(--line,#eee);font-size:.9rem}

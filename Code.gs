@@ -1,4 +1,4 @@
-const VERSION='0.5.3';
+const VERSION='0.5.4';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
  Settings:['key','value'],
@@ -200,7 +200,7 @@ const ROUTES={
  listEnquiries:'listEnquiries',updateEnquiry:'updateEnquiry',dashboardStats:'dashboardStats',listLogs:'listLogs',
  backupNow:'backupNow',aiGet:'aiGet',aiSave:'aiSave',
  listQuestions:'listQuestions',saveQuestion:'saveQuestion',importQuestions:'importQuestions',deleteQuestion:'deleteQuestion',listTests:'listTests',saveTest:'saveTest',
- deleteTest:'deleteTest',testResults:'testResults',attemptDetail:'attemptDetail',gradeAttempt:'gradeAttempt',doubtOptions:'doubtOptions',askDoubt:'askDoubt',updateAiAnswer:'updateAiAnswer',closeDoubt:'closeDoubt',myDoubts:'myDoubts',listDoubts:'listDoubts',answerDoubt:'answerDoubt',myStudy:'myStudy',myLeaves:'myLeaves',requestLeave:'requestLeave',cancelLeave:'cancelLeave',listLeaves:'listLeaves',decideLeave:'decideLeave',listCards:'listCards',saveCard:'saveCard',deleteCard:'deleteCard',importCards:'importCards',myDeck:'myDeck',reviewCards:'reviewCards',classInsights:'classInsights',violationPhoto:'violationPhoto',resetAttempt:'resetAttempt',myTests:'myTests',startTest:'startTest',
+ deleteTest:'deleteTest',testResults:'testResults',attemptDetail:'attemptDetail',gradeAttempt:'gradeAttempt',doubtOptions:'doubtOptions',askDoubt:'askDoubt',updateAiAnswer:'updateAiAnswer',closeDoubt:'closeDoubt',myDoubts:'myDoubts',listDoubts:'listDoubts',answerDoubt:'answerDoubt',myStudy:'myStudy',myLeaves:'myLeaves',myQr:'myQr',scanAttendance:'scanAttendance',requestLeave:'requestLeave',cancelLeave:'cancelLeave',listLeaves:'listLeaves',decideLeave:'decideLeave',listCards:'listCards',saveCard:'saveCard',deleteCard:'deleteCard',importCards:'importCards',myDeck:'myDeck',reviewCards:'reviewCards',classInsights:'classInsights',violationPhoto:'violationPhoto',resetAttempt:'resetAttempt',myTests:'myTests',startTest:'startTest',
  saveProgress:'saveProgress',checkAnswer:'checkAnswer',submitTest:'submitTest',attemptReview:'attemptReview',reportViolation:'reportViolation'};
 
 // Student portal (Phase 3): student sirf apni hi data dekh sakta hai. changeSecret sab roles ke liye.
@@ -1401,6 +1401,36 @@ function decideLeave(b){
   const d=String(b.decision);if(d!=='approved'&&d!=='rejected')throw new Error('Invalid decision');
   if(dstr(l.toDate)<todayStr())throw new Error('This request date has passed');
   setRow('LeaveRequests',l._row,{status:d,decidedBy:s.userId,decidedAt:Date.now(),remark:txt(b.remark,200)});log(s.userId,'leave_'+d,l.leaveId);return{ok:true}}))}
+
+// ---------- QR attendance: student shows a QR that changes every 30 seconds; teacher scans it ----------
+const QR_WIN=30000;
+function qrSecret(){const P=PropertiesService.getScriptProperties();let k=P.getProperty('QR_SECRET');if(!k){k=Utilities.getUuid()+Utilities.getUuid();P.setProperty('QR_SECRET',k)}return k}
+function qrSig(sid,win){const raw=Utilities.computeHmacSha256Signature(sid+'.'+win,qrSecret());return raw.map(b=>('0'+(b&255).toString(16)).slice(-2)).join('').slice(0,12)}
+const qrCode=(sid,win)=>sid+'.'+win+'.'+qrSig(sid,win);
+
+function myQr(b){
+ const r=stu(b);if(!r)return DENIED;
+ return safe(()=>{const now=Date.now(),win=Math.floor(now/QR_WIN),c=find('Classes',x=>String(x.classId)===String(r.classId));
+  return{ok:true,code:qrCode(String(r.studentId),win),ttl:Math.max(1,Math.ceil(((win+1)*QR_WIN-now)/1000)),name:String(r.name),roll:String(r.roll||''),admNo:String(r.admNo||''),className:c?String(c.name):'',window:QR_WIN/1000}})}
+
+// verifies a scanned code, returns studentId or throws
+function qrVerify(code){
+ const p=String(code||'').trim().split('.');if(p.length!==3||!/^\d+$/.test(p[1]))throw new Error('This is not a valid student QR');
+ const win=Number(p[1]),cur=Math.floor(Date.now()/QR_WIN);
+ if(win>cur+1||win<cur-2)throw new Error('This QR is too old. Ask the student to show the live QR on their phone.');
+ if(qrSig(p[0],win)!==p[2])throw new Error('This QR is not valid');return p[0]}
+
+function scanAttendance(b){
+ const s=guard(b,['admin','teacher']);if(!s)return DENIED;
+ return safe(()=>withLock(()=>{
+  const cid=resolveClass(b.classId);if(!cid||!canClass(s,cid))throw new Error('You do not have permission for this class');
+  const sid=qrVerify(b.code),st=find('Students',x=>String(x.studentId)===sid&&String(x.status)!=='left'&&String(x.status).toLowerCase()!=='inactive');
+  if(!st)throw new Error('Student not found');
+  if(String(st.classId)!==cid)throw new Error(String(st.name)+' is not in this class');
+  const date=todayStr(),m=attMap(cid,date),want=b.late?'L':'P',cur=m[sid];
+  const out={ok:true,name:String(st.name),roll:String(st.roll||''),status:want};
+  if(cur==='P'||cur==='L'){out.already=true;out.status=cur;return out}
+  addRow('Attendance',{date,classId:cid,studentId:sid,status:want,markedBy:s.userId});log(s.userId,'attendance_qr',cid+' '+sid);return out}))}
 
 // Phase 7: website enquiry form (public, bina login) + admin inbox. Email owner ko jaati hai (ya Settings tab: key notify_email).
 const ENQ_STATUS=['new','contacted','closed'];

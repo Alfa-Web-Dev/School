@@ -20,7 +20,7 @@ async function initTAtt(){
   const r=await call('getAttendance',{classId:cs.value,date:dt.value});st=r.students.map(s=>Object.assign({},s));draw(r.marked)}
  function draw(marked){box.innerHTML='';
   if(!st.length){box.append(el('p',{class:'mu'},'No active students in this class'));return}
-  box.append(el('div',{class:'bar'},btn('All Present',()=>{st.forEach(s=>s.status='P');draw(marked)}),el('span',{class:'mu'},marked?'Attendance for this day is already marked (changing it creates a new entry)':'')),
+  box.append(el('div',{class:'bar'},btn('Scan QR',()=>openScanner(cs.value,()=>load()),true),btn('All Present',()=>{st.forEach(s=>s.status='P');draw(marked)}),el('span',{class:'mu'},marked?'Attendance for this day is already marked (changing it creates a new entry)':'')),
    tableEl([{h:'Roll',f:s=>s.roll},{h:'Name',f:s=>el('span',{},s.name+' ',s.leave?el('span',{class:'tchip ok'},'On approved leave'):'')},{h:'Status',f:s=>el('div',{class:'row'},['P','A','L'].map(k=>el('button',{type:'button',class:'s tg'+(s.status===k?' on '+k:''),onclick:()=>{s.status=k;draw(marked)}},k==='P'?'Present':k==='A'?'Absent':'Late')))}],st),
    el('div',{class:'bar'},btn('Save attendance',async()=>{
     const un=st.filter(s=>!s.status).length;if(un&&!confirm(un+' students have no status (they will not be saved). Save anyway?'))return;
