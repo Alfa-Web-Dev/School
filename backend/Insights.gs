@@ -44,6 +44,7 @@ function myStudy(b){
    .map(e=>({title:String(e.title),date:dstr(e.date),daysLeft:Math.round((new Date(dstr(e.date)+'T00:00:00+05:30')-new Date(todayStr()+'T00:00:00+05:30'))/864e5)}));
   const week=[];for(let i=0;i<7;i++){const dt=new Date(Date.now()+19800000+i*864e5).toISOString().slice(0,10);week.push({date:dt,tasks:pick(dayN+i,3).map(t=>({subject:t.subject,chapter:t.chapter,subjectId:t.subjectId}))})}
   const att=topics.reduce((x,t)=>x+t.att,0),cor=topics.reduce((x,t)=>x+t.pct*t.att/100,0),days=T.days[sid]||{};
+  table('CardProgress').rows.forEach(p=>{if(String(p.studentId)===sid&&Number(p.last))days[istDay(p.last)]=1});
   let best=0,run=0;Object.keys(days).sort().forEach((d,i,a)=>{run=(i&&(new Date(d)-new Date(a[i-1]))===864e5)?run+1:1;best=Math.max(best,run)});
   return{ok:true,streak:streakOf(days),bestStreak:best,studiedToday:!!days[istDay(Date.now())],overall:att?Math.round(cor/att*100):null,answered:att,topics,today:todayTasks,exams,week}})}
 

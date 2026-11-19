@@ -8,10 +8,11 @@ const TOK={
 window.__pend=0;
 const READ_RE=/^(list|get|my|view|search|find|load|check|teacherHome|studentFees|defaulters|noteOptions|adminExams|reportCard|dashboard|adminHome|testResults|attemptDetail|attemptReview|violationPhoto|me$)/;
 async function api(action,data={}){
+ let quiet=false;if(data&&data.__quiet){data=Object.assign({},data);delete data.__quiet;quiet=true}
  __pend++;
  if(!window.__skOnce&&/^(list|get|my|teacherHome|studentFees|defaulters|noteOptions|adminExams|reportCard|dashboard|adminHome)/.test(action)){const m=document.getElementById('main');if(m&&!document.getElementById('skm')){window.__skOnce=1;const k=document.createElement('div');k.id='skm';k.className='sk-m skp';k.innerHTML='<div class="sk-g"><i class="sk"></i><i class="sk"></i><i class="sk"></i><i class="sk"></i></div><i class="sk sk-w"></i><i class="sk sk-w"></i>';m.append(k);window.__skDone=()=>{if(!window.__pend){const x=document.getElementById('skm');if(x)x.remove()}};setTimeout(()=>{const x=document.getElementById('skm');if(x)x.remove()},12000)}}
- try{return await trackNet(fetch(CFG.api,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-  body:JSON.stringify({action,token:TOK.get(),...data})}).then(r=>r.json()),!READ_RE.test(action))}
+ try{const pr=fetch(CFG.api,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+  body:JSON.stringify({action,token:TOK.get(),...data})}).then(r=>r.json());return await (quiet?pr:trackNet(pr,!READ_RE.test(action)))}
  finally{__pend--;if(!__pend&&window.__skDone)setTimeout(window.__skDone,60)}}
 
 /* ---- Button feedback + double-click protection (works for every button, every page) ---- */

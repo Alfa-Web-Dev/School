@@ -1,4 +1,4 @@
-const VERSION='0.5.1';
+const VERSION='0.5.2';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
  Settings:['key','value'],
@@ -22,6 +22,8 @@ const SCHEMA={
  Tests:['testId','title','classId','subjectId','mode','durationMin','start','end','marksPer','negative','proctor','shuffle','qids','status','createdBy','date','instructions','reveal'],
  Attempts:['attemptId','testId','studentId','startedAt','submittedAt','answers','order','score','total','correct','wrong','skipped','status','strikes','flags','grades','pending'],
  Doubts:['doubtId','studentId','classId','subjectId','chapter','question','aiAnswer','status','teacherAnswer','answeredBy','date','answeredAt'],
+ Flashcards:['cardId','classId','subjectId','chapter','front','back','createdBy','date'],
+ CardProgress:['studentId','key','box','due','last'],
  Violations:['id','attemptId','testId','studentId','time','type','detail','photoId'],
  Logs:['time','userId','action','details']
 };
