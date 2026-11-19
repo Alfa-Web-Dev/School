@@ -434,3 +434,6 @@ button.done{background:#16a34a!important;color:#fff!important;border-color:#16a3
 @keyframes bsp{to{transform:rotate(360deg)}}
 .dq .md p{margin:4px 0;line-height:1.5}.dai,.dta{border-radius:14px;padding:10px 14px;background:var(--bg)}.dta{background:#dcfce7}.dq details summary{cursor:pointer;font-weight:600;margin:4px 0}
 .dq textarea{width:100%}
+.pbar{height:8px;background:var(--bg);border-radius:999px;overflow:hidden}.pbar i{display:block;height:100%;border-radius:999px}
+.wkr{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--bd)}.wkr b{flex:none;width:92px}.wkr span{color:var(--mu)}.wkr:last-child{border:0}
+.trow{gap:8px}
