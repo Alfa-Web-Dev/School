@@ -455,3 +455,7 @@ button.done{background:#16a34a!important;color:#fff!important;border-color:#16a3
 .bdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:12px}
 .bdg{display:flex;flex-direction:column;gap:4px;padding:12px;border:1px solid var(--line,#e5e5e5);border-radius:12px;background:var(--card,#fff);opacity:.6}
 .bdg.on{opacity:1;border-color:#1e6b34}.bdg small{color:var(--mu,#666)}
+
+/* Career */
+.cbars{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}.cbar{display:grid;grid-template-columns:90px 1fr 24px;gap:8px;align-items:center;font-size:.9rem}
+.cbar i{display:block;height:10px;border-radius:5px;background:var(--ink,#333)}
