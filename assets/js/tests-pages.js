@@ -81,7 +81,7 @@ async function viewBank(box,classes){
   if(!r.questions.length){list.append(emptyState('No questions yet','Add questions one by one, or paste many at once with Bulk add.'));return}
   r.questions.forEach(x=>list.append(qCard(x,classes,load)))};
  fc.onchange=()=>{fillSub();load()};fs.onchange=load;let tm;fq.oninput=()=>{clearTimeout(tm);tm=setTimeout(load,300)};fillSub();
- box.append(el('div',{class:'bar'},btn('+ Add question',()=>qForm(null,classes,fc.value,load),false),btn('Bulk add',()=>bulkForm(classes,fc.value,load))),el('div',{class:'bar'},fc,fs,fq),list);await load()}
+ box.append(el('div',{class:'bar'},btn('+ Add question',()=>qForm(null,classes,fc.value,load),false),btn('Bulk add',()=>bulkForm(classes,fc.value,load)),btn('Generate with AI',()=>aiGenForm(classes,fc.value,load))),el('div',{class:'bar'},fc,fs,fq),list);await load()}
 
 function qCard(x,classes,reload){
  const c=el('div',{class:'qcard'});
@@ -161,3 +161,41 @@ async function aiMark(q){
  const res=await fetch(c.endpoint,{method:'POST',headers:Object.assign({'Content-Type':'application/json'},c.apiKey?{Authorization:'Bearer '+c.apiKey}:{}),body:JSON.stringify({model:c.model,messages:[{role:'user',content:prompt}],temperature:.2,max_tokens:200})});
  if(!res.ok)throw new Error('ai');const j=await res.json(),t=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'',m=t.match(/\{[\s\S]*\}/);if(!m)throw new Error('ai');
  const o=JSON.parse(m[0]);let mk=Math.round(Number(o.marks)*2)/2;if(!isFinite(mk))throw new Error('ai');mk=Math.max(0,Math.min(Number(q.marks),mk));return{marks:mk,comment:String(o.comment||'').slice(0,300)}}
+
+/* ---------------- AI question generator ---------------- */
+// Pure: turns the AI reply into clean question objects (exported for tests)
+function parseGen(text,kind){
+ let t=String(text||'').replace(/```[a-z]*/gi,'').trim();const i=t.indexOf('['),j=t.lastIndexOf(']');if(i<0||j<i)throw new Error('The AI reply could not be read. Please try again.');
+ let arr;try{arr=JSON.parse(t.slice(i,j+1))}catch(e){throw new Error('The AI reply could not be read. Please try again.')}
+ const out=[],seen={};
+ arr.forEach(x=>{if(!x||typeof x!=='object')return;const q=String(x.q||x.question||'').trim();if(q.length<5||seen[q.toLowerCase()])return;
+  if(String(x.type||kind)==='short'||(kind==='short')){const ans=String(x.answer||x.keyAns||'').trim();if(!ans)return;seen[q.toLowerCase()]=1;out.push({type:'short',text:q.slice(0,1000),keyAns:ans.slice(0,1500),marks:Math.min(10,Math.max(1,Number(x.marks)||2)),explain:''});return}
+  const raw=['a','b','c','d'].map(k=>String(x[k]==null?'':x[k]).trim());if(raw.some(v=>!v)||new Set(raw.map(v=>v.toLowerCase())).size<4)return;
+  const cm=String(x.correct||'').trim().toLowerCase().match(/^[abcd]/);if(!cm)return;const ci='abcd'.indexOf(cm[0]);
+  // shuffle so the right answer is not always the same letter
+  const idx=[0,1,2,3].sort(()=>Math.random()-.5),opts=idx.map(k=>raw[k]),correct='abcd'[idx.indexOf(ci)];
+  seen[q.toLowerCase()]=1;out.push({type:'mcq',text:q.slice(0,600),a:opts[0].slice(0,200),b:opts[1].slice(0,200),c:opts[2].slice(0,200),d:opts[3].slice(0,200),correct,explain:String(x.explain||'').trim().slice(0,500)})});
+ if(!out.length)throw new Error('The AI did not return usable questions. Please try again.');return out}
+
+function aiGenForm(classes,cid,done){
+ const cls=selEl(classes.map(c=>[c.classId,c.name]),cid),sub=selEl([],''),ch=el('input',{placeholder:'Chapter name (e.g. Fractions)'}),notes=el('textarea',{rows:5,placeholder:'Paste the chapter text or key points here (optional, but gives better questions). Or just type the topic.'}),
+  cnt=selEl([[5,'5 questions'],[10,'10 questions'],[15,'15 questions']],10),kind=selEl([['mcq','MCQ'],['short','Short answer']],'mcq'),dif=selEl([['easy','Easy'],['medium','Medium'],['hard','Hard'],['mixed','Mixed']],'mixed'),lang=selEl([['English','English'],['Hindi','Hindi']],'English');
+ const fill=()=>{const c=classes.find(z=>z.classId===cls.value);sub.innerHTML='';(c?c.subjects:[]).forEach(s=>sub.append(el('option',{value:s.subjectId},s.name)))};cls.onchange=fill;fill();
+ const out=el('div'),form=el('div',{class:'frm tform'},el('div',{class:'g2'},fld('Class',cls),fld('Subject',sub)),fld('Chapter *',ch),fld('Chapter text or topic',notes,'Only this text and the settings below are sent to the AI.'),el('div',{class:'g2'},fld('How many',cnt),fld('Type',kind)),el('div',{class:'g2'},fld('Difficulty',dif),fld('Language',lang)),out);
+ let gen=[];
+ const preview=()=>{out.innerHTML='';out.append(el('p',{class:'mu'},'Check each question. Change the correct answer if the AI is wrong, and untick questions you do not want.'));
+  gen.forEach(g=>{const cb=el('input',{type:'checkbox'});cb.checked=true;cb.onchange=()=>g.on=cb.checked;g.on=true;
+   const row=el('div',{class:'rv'},el('label',{class:'chk'},cb,el('b',{},g.text)));
+   if(g.type==='mcq'){const cs=selEl([['a','A'],['b','B'],['c','C'],['d','D']],g.correct,()=>{g.correct=cs.value;draw()}),ol=el('ol',{class:'qop'});const draw=()=>{ol.innerHTML='';'abcd'.split('').forEach(k=>ol.append(el('li',{class:k===g.correct?'ok':''},g[k])))};draw();row.append(ol,el('div',{class:'tcs'},el('small',{class:'mu'},'Correct answer:'),cs))}
+   else row.append(el('p',{class:'mu'},'Model answer: '+g.keyAns+' · '+g.marks+' marks'));
+   out.append(row)})};
+ const run=async()=>{const b=[...document.querySelectorAll('dialog .row.end button')].find(x=>/Generate|Write again|AI is writing/.test(x.textContent));if(!ch.value.trim())throw new Error('Enter the chapter name');b.disabled=true;const t0=b.textContent;b.textContent='AI is writing…';
+  try{const c=classes.find(z=>z.classId===cls.value),sj=sub.options[sub.selectedIndex]?sub.options[sub.selectedIndex].text:'',n=Number(cnt.value);
+   const sys='You are an experienced school teacher in India writing exam questions for '+(c?c.name:'school')+' students. Language: '+lang.value+'. Reply with ONLY a JSON array and nothing else. Questions must be factually correct, clear and suitable for the class level.';
+   const shape=kind.value==='mcq'?'Each item: {"q":"question","a":"option","b":"option","c":"option","d":"option","correct":"a","explain":"one short sentence"}. Exactly one option is correct and the 4 options must be different.':'Each item: {"type":"short","q":"question","answer":"model answer in 1-3 sentences","marks":2}.';
+   const msg='Subject: '+sj+'\nChapter: '+ch.value.trim()+'\nDifficulty: '+dif.value+'\nWrite '+n+' '+(kind.value==='mcq'?'multiple choice':'short answer')+' questions. '+shape+(notes.value.trim()?'\nBase the questions only on this text:\n'+notes.value.trim().slice(0,5000):'');
+   const reply=await aiAsk(sys,[{role:'user',content:msg}],{max:3000,timeout:70000,temp:.5});gen=parseGen(reply,kind.value);preview();b.textContent='Write again'}
+  catch(err){b.textContent=t0;throw err}finally{b.disabled=false}};
+ const d=modal('Generate questions with AI',form,[{t:'Cancel',g:1,fn:()=>true},{t:'Generate',g:1,fn:async()=>{await run();return false}},{t:'Add selected',fn:async()=>{const rows=gen.filter(g=>g.on);if(!rows.length)throw new Error('Nothing selected yet. Press Generate first.');
+   const r=await call('importQuestions',{classId:cls.value,subjectId:sub.value,chapter:ch.value.trim(),rows});toast(r.added+' questions added'+(r.errors.length?' · '+r.errors.length+' skipped':''));await done()}}]);d.classList.add('wide')}
+if(typeof module!=='undefined')module.exports={parseGen};
