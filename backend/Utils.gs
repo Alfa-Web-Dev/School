@@ -1,4 +1,4 @@
-const VERSION='0.5.7';
+const VERSION='0.5.8';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
  Settings:['key','value'],
@@ -29,6 +29,7 @@ const SCHEMA={
  SlotBookings:['bookingId','slotId','studentId','topic','status','created'],
  Awards:['awardId','studentId','classId','title','category','note','awardDate','givenBy','created'],
  CareerProfiles:['studentId','scores','top','updated'],
+ AlertLog:['key','sentAt','by'],
  Violations:['id','attemptId','testId','studentId','time','type','detail','photoId'],
  Logs:['time','userId','action','details']
 };
