@@ -7,8 +7,8 @@ function getAttendance(b){
  return safe(()=>{const cid=resolveClass(b.classId),date=dstr(b.date)||todayStr();
   if(!cid||!canClass(s,cid))throw new Error('You do not have permission for this class');
   if(!validDate(date))throw new Error('Invalid date');
-  const m=attMap(cid,date);
-  return{ok:true,date,marked:Object.keys(m).length>0,students:activeStudents(cid).map(r=>({studentId:String(r.studentId),name:r.name,roll:String(r.roll),status:m[String(r.studentId)]||''}))}})}
+  const m=attMap(cid,date),lv=leaveOn(cid,date);
+  return{ok:true,date,marked:Object.keys(m).length>0,students:activeStudents(cid).map(r=>({studentId:String(r.studentId),name:r.name,roll:String(r.roll),status:m[String(r.studentId)]||'',leave:!!lv[String(r.studentId)]}))}})}
 
 function markAttendance(b){
  const s=guard(b,['admin','teacher']);if(!s)return DENIED;

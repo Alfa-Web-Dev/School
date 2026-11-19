@@ -440,3 +440,4 @@ button.done{background:#16a34a!important;color:#fff!important;border-color:#16a3
 .fcard2{display:flex;flex-direction:column;justify-content:space-between;align-items:center;text-align:center;width:100%;min-height:260px;background:var(--card);border:2px solid var(--bd);border-radius:24px;padding:20px;margin:12px 0;color:var(--tx);box-shadow:none!important}
 .fcard2.back{background:#f0fdf4;border-color:#16a34a}.fct{flex:1;display:flex;flex-direction:column;justify-content:center;font-size:22px;line-height:1.4}.fct p{margin:4px 0}
 .fcb{justify-content:center;gap:12px}.fcb button{flex:1;max-width:180px}.fcend{margin-top:16px}
+.gpass{border:2px dashed #16a34a;background:#f0fdf4;border-radius:18px;padding:14px;text-align:center}.gpass h2{margin:6px 0 2px}.gpass p{margin:2px 0}

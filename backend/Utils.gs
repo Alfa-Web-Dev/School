@@ -1,4 +1,4 @@
-const VERSION='0.5.2';
+const VERSION='0.5.3';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
  Settings:['key','value'],
@@ -24,6 +24,7 @@ const SCHEMA={
  Doubts:['doubtId','studentId','classId','subjectId','chapter','question','aiAnswer','status','teacherAnswer','answeredBy','date','answeredAt'],
  Flashcards:['cardId','classId','subjectId','chapter','front','back','createdBy','date'],
  CardProgress:['studentId','key','box','due','last'],
+ LeaveRequests:['leaveId','studentId','classId','type','fromDate','toDate','outMin','pickupBy','reason','status','decidedBy','decidedAt','remark','created'],
  Violations:['id','attemptId','testId','studentId','time','type','detail','photoId'],
  Logs:['time','userId','action','details']
 };
