@@ -51,14 +51,28 @@ async function initSHome(){
  m.append(r.homework.length?el('div',{class:'flist'},r.homework.map((x,i)=>feedCard(PA.prop(x.subject,'notebook')==='chart'?'notebook':PA.prop(x.subject,'notebook'),i,x.title,'Due '+x.due,(x.subject||'')+(x.by?' · '+x.by:''),safeUrl(x.link)?el('a',{class:'fl',href:x.link,target:'_blank',rel:'noopener'},'Open link'):''))):emptyState('No homework','No homework yet'))}
 async function initSNotices(){const m=page('n_notices'),r=await call('myNotices');m.append(noticeList(r.notices))}
 async function initSettings(){
- const m=page('n_settings'),isS=location.pathname.indexOf('/student/')>=0;
- const f=el('div',{class:'card',style:'max-width:420px'});
+ const m=page('n_settings'),isS=location.pathname.indexOf('/student/')>=0,u=window.__U||{};
+ const card=(t,sub)=>{const c=el('div',{class:'card',style:'max-width:520px;margin-bottom:16px'},el('h3',{style:'margin-top:0'},t));if(sub)c.append(el('p',{class:'mu'},sub));m.append(c);return c};
+ // account
+ const acc=card('Account');acc.append(el('div',{class:'row',style:'gap:14px;align-items:center'},(()=>{const d=el('div');d.innerHTML=AV.html(AV.get(u.userId,u.name),'lg');return d.firstChild})(),el('div',{},el('b',{},u.name||''),el('div',{class:'mu',style:'margin:0'},(u.role?u.role.charAt(0).toUpperCase()+u.role.slice(1):'')+(u.userId?' · '+u.userId:'')))));
+ // avatar
+ const av=card('Profile picture','Choose the picture shown on your dashboard.'),g=el('div',{class:'avg'}),cur=AV.get(u.userId,u.name);
+ for(let i=0;i<AV.count;i++){const b=el('button',{type:'button','data-i':i,class:i===cur?'on':''});b.innerHTML=AV.svg(i);g.append(b)}
+ g.onclick=e=>{const b=e.target.closest('button[data-i]');if(!b)return;AV.set(u.userId,+b.dataset.i);location.reload()};av.append(g);
+ // text size
+ const ts=card('Text size','Make everything bigger if it is hard to read.'),zs=[['Normal','1'],['Large','1.1'],['Extra large','1.2']],seg=el('div',{class:'seg'});let z='1';try{z=localStorage.getItem('ui_zoom')||'1'}catch(e){}
+ zs.forEach(([l,v])=>{const b=el('button',{type:'button',class:v===z?'on':''},l);b.onclick=()=>{try{localStorage.setItem('ui_zoom',v)}catch(e){}document.body.style.zoom=v;[...seg.children].forEach(x=>x.classList.toggle('on',x===b))};seg.append(b)});ts.append(seg);
+ // PIN / password
+ const f=card(isS?'Change PIN':'Change password');
  const o=el('input',{type:'password',placeholder:isS?'Old PIN':'Old password'}),n=el('input',{type:'password',placeholder:isS?'New PIN (4-8 digits)':'New password (8+ characters)'}),c=el('input',{type:'password',placeholder:'Confirm new'}),msg=el('div',{class:'err'});
  f.append(el('label',{},isS?'Old PIN':'Old password'),o,el('label',{},isS?'New PIN':'New password'),n,el('label',{},'Confirm'),c,
   el('button',{type:'button',onclick:async()=>{msg.style.color='';msg.textContent='';
    try{if(n.value!==c.value)throw new Error('The two new values do not match');await call('changeSecret',{oldSecret:o.value,newSecret:n.value});o.value=n.value=c.value='';msg.style.color='#16a34a';msg.textContent='Changed'}
    catch(e){msg.textContent=e.message}}},'Save'),msg);
- m.append(f);
+ // app
+ const ap=card('App','If a page looks old or something is not updating, refresh the app.');
+ ap.append(el('div',{class:'row',style:'flex-wrap:wrap'},btn('Refresh app',async()=>{try{if(navigator.serviceWorker){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}}catch(e){}location.reload()},true),
+  btn('Log out',async()=>{try{await api('logout')}catch(e){}TOK.clear();location.href='../login.html'},true)));
  if(location.pathname.indexOf('/admin/')>=0)aiCard(m)}
 async function aiCard(m){
  const c=el('div',{class:'card',style:'max-width:420px;margin-top:16px'}),msg=el('div',{class:'mu'});let r={on:true,name:'Tuto'};try{r=await call('aiGet')}catch(e){}
