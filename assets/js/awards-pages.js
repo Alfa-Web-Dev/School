@@ -13,7 +13,7 @@ function printAward(a,student,className){
 /* ---------------- student ---------------- */
 async function initMyAwards(){
  const m=page('n_awards'),r=await call('myAchievements');
- const g=el('div',{class:'bdgrid'});r.badges.forEach(b=>g.append(el('div',{class:'bdg'+(b.earned?' on':'')},el('b',{},b.title),el('small',{},b.desc),el('span',{class:'mu'},b.earned?'Earned ✓':b.progress))));
+ const g=el('div',{class:'abgrid'});r.badges.forEach(b=>g.append(el('div',{class:'abdg'+(b.earned?' on':'')},el('b',{},b.title),el('small',{},b.desc),el('span',{class:'mu'},b.earned?'Earned ✓':b.progress))));
  m.append(el('h3',{class:'sh'},'Badges'),g,el('h3',{class:'sh'},'Awards'));
  if(!r.awards.length){m.append(emptyState('No awards yet','Awards from your teachers will appear here.'));return}
  r.awards.forEach(a=>m.append(el('div',{class:'tcard'},el('div',{class:'tct'},el('div',{class:'tcm'},el('b',{},a.title),el('span',{class:'mu'},aDay(a.date)+(a.by?' · '+a.by:'')),a.note?el('span',{class:'mu'},a.note):''),aChip(A_CAT[a.category]||'Other','ok')),
