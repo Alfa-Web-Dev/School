@@ -58,7 +58,7 @@ window.initAI=async function(role,u){
  b.addEventListener('pointermove',e=>{if(!st)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;if(!moved&&Math.hypot(dx,dy)<6)return;moved=true;place(st.l+dx,st.t+dy)});
  const end=()=>{if(!st)return;st=null;b.classList.remove('drag');if(moved){const r=b.offsetLeft+sz()/2>innerWidth/2;try{localStorage.setItem(PK,JSON.stringify({r:r,y:b.offsetTop/innerHeight}))}catch(e){}home()}};
  b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
- b.onclick=()=>{if(moved){moved=false;return}w.hidden?open():close()};window.openAI=()=>{if(w.hidden)open()};w.querySelector('#aix').onclick=close;
+ b.onclick=()=>{if(moved){moved=false;return}w.hidden?open():close()};window.openAI=()=>{if(w.hidden)open()};{const bb=document.getElementById('bai');if(bb){bb.innerHTML=FACE;bb.onclick=()=>{w.hidden?open():close()};document.body.classList.add('aion')}}w.querySelector('#aix').onclick=close;
  w.querySelector('#aic').onclick=()=>{if(ctl)ctl.abort();hist=[];save();busy=false;w.querySelector('#ais').disabled=false;welcome()};
  w.querySelector('#aif').onsubmit=e=>{e.preventDefault();send(T.value)};
  T.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(T.value)}};
