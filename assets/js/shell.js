@@ -36,12 +36,14 @@ async function initShell(role,page,phase){
  saveShell(u);paint(role,page,u,phase);return u}
 function paint(role,page,u,phase){
  const nav=NAV[role].map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('');
+ const ACCT={student:['profile','idcard','awards','career','study','settings'],teacher:['settings'],admin:['certificates','logs','settings']}[role]||[];
+ const acct=NAV[role].filter(([p])=>ACCT.indexOf(p)>=0&&!(role==='student'&&p==='profile')&&p!=='settings').map(([p,k])=>'<a class="ph" href="'+p+'.html">'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('');
  const DAILY={admin:['index','students','fees'],teacher:['index','attendance','homework'],student:['index','attendance','homework']}[role]||['index'];
  const bn=NAV[role].filter(([p])=>DAILY.indexOf(p)>=0).map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('')+'<button type="button" id="bmore"'+(DAILY.indexOf(page)<0?' class="on"':'')+'>'+icon('more')+'<span data-i="n_more"></span></button>';
  document.getElementById('shell').innerHTML=
   '<header><a class="brand" href="index.html">'+(logoUrl()?'<img src="'+logoUrl()+'" alt="">':'<span class="lm">'+((CFG.shortName||'S').trim().charAt(0))+'</span>')+'<span class="bn">'+(typeof SN==='function'?SN():CFG.name)+'</span></a><span class="sp"></span><button id="um" class="um" aria-label="Menu" aria-expanded="false"></button>'+
   '<div id="umenu" class="umenu" hidden style="display:none"><div class="up">'+AV.html(AV.get(u.userId,u.name),'')+'<div><b>'+u.name+'</b><small data-i="role_'+u.role+'"></small></div></div>'+
-  (role==='student'?'<a href="profile.html">'+icon('profile')+'My profile</a>':'')+'<button id="chav">'+icon('profile')+'Change avatar</button><a href="settings.html">'+icon('settings')+'Settings</a>'+
+  (role==='student'?'<a href="profile.html">'+icon('profile')+'My profile</a>':'')+acct+'<button id="chav">'+icon('profile')+'Change avatar</button><a href="settings.html">'+icon('settings')+'Settings</a>'+
   '<button id="inst" hidden>'+icon('dashboard')+'Install app</button><a href="../index.html">'+icon('content')+'Visit website</a><hr><button id="lo" class="out"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Logout</button></div></header>'+
   '<div class="wrap"><nav>'+nav+'</nav><main id="main"><div id="skm1" class="sk-m"><i class="sk sk-t"></i><div class="sk-g"><i class="sk"></i><i class="sk"></i><i class="sk"></i><i class="sk"></i></div><i class="sk sk-w"></i><i class="sk sk-w"></i></div></main></div><div id="bnav"><div class="bpill">'+bn+'</div><button type="button" id="bai" aria-label="AI helper"></button></div>';
  {const mm=document.getElementById('main');new MutationObserver(()=>{const k=document.getElementById('skm1');if(k&&mm.children.length>1)k.remove()}).observe(mm,{childList:true})}
@@ -61,7 +63,8 @@ function paint(role,page,u,phase){
 // phone: "More" sheet = every page that is not in the 3 daily icons, plus the AI helper
 function openMore(role,page,daily){
  if(document.getElementById('msheet'))return;
- const items=NAV[role].filter(([p])=>daily.indexOf(p)<0).map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('');
+ const ACCT={student:['profile','idcard','awards','career','study','settings'],teacher:['settings'],admin:['certificates','logs','settings']}[role]||[];
+ const items=NAV[role].filter(([p])=>daily.indexOf(p)<0&&ACCT.indexOf(p)<0).map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('');
  const ai='';
  const o=document.createElement('div');o.id='msheet';o.className='msheet';
  o.innerHTML='<div class="msb"><div class="msh"><b data-i="n_more"></b><button type="button" id="msx" aria-label="Close">×</button></div><div class="msg">'+ai+items+'</div></div>';

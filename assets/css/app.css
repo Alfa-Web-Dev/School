@@ -483,3 +483,4 @@ button.done{background:#16a34a!important;color:#fff!important;border-color:#16a3
 }
 
 .hello.hl2 .dt{background:var(--card)}
+@media(min-width:701px){.umenu a.ph{display:none}}
