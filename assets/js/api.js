@@ -17,7 +17,7 @@ async function api(action,data={}){
 
 /* ---- Button feedback + double-click protection (works for every button, every page) ---- */
 (function(){
- const NOLOCK='.cn,.dchip,.ctab,.seg,.tg,.chip,.tab,nav,.xos,.xp,.xnav,.avg,.umenu,#aib,.aih,.mg,.roles,.tabsb';
+ const NOLOCK='#bnav,.msheet,.cn,.dchip,.ctab,.seg,.tg,.chip,.tab,nav,.xos,.xp,.xnav,.avg,.umenu,#aib,.aih,.mg,.roles,.tabsb';
  const LB=[[/upload/i,'Uploading…','Uploaded ✓'],[/publish|push|go live/i,'Publishing…','Published ✓'],[/delete|remove|clean/i,'Deleting…','Deleted ✓'],[/import/i,'Importing…','Imported ✓'],[/send|notify|remind/i,'Sending…','Sent ✓'],[/submit|finish/i,'Submitting…','Submitted ✓'],[/log ?in|sign in/i,'Signing in…','Signed in ✓'],[/start|begin|resume/i,'Starting…','Started ✓'],[/backup/i,'Backing up…','Backup done ✓'],[/add|create|new|\+/i,'Adding…','Added ✓'],[/save|update|apply|confirm|mark|set|pay|collect|approve|reset|retake|allow|assign|change|copy|promote/i,'Saving…','Saved ✓']];
  const B={el:null,t:0};
  const on=(b,mut)=>{if(b.classList.contains('busy'))return;b.classList.add('busy');

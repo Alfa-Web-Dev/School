@@ -459,3 +459,22 @@ button.done{background:#16a34a!important;color:#fff!important;border-color:#16a3
 /* Career */
 .cbars{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}.cbar{display:grid;grid-template-columns:90px 1fr 24px;gap:8px;align-items:center;font-size:.9rem}
 .cbar i{display:block;height:10px;border-radius:5px;background:var(--ink,#333)}
+
+/* phone footer: 3 daily icons + More (no scrolling bar); AI helper lives inside More */
+#bnav,.msheet{display:none}
+@media(max-width:700px){
+ nav{display:none!important}
+ #aib{display:none!important}
+ #bnav{display:flex;position:fixed;left:12px;right:12px;bottom:12px;z-index:30;background:var(--card);border-radius:999px;padding:7px;gap:4px;box-shadow:0 12px 40px rgba(15,23,42,.22)}
+ #bnav a,#bnav button{flex:1 1 0;min-width:0;margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 4px;border-radius:999px;font-size:11px;font-weight:600;color:var(--mu);text-decoration:none;background:none;border:0;box-shadow:none}
+ #bnav .ic{width:22px;height:22px}#bnav .on{background:var(--c);color:var(--cx)}
+ .msheet{display:flex;position:fixed;inset:0;z-index:95;background:#0b122099;align-items:flex-end}
+ .msb{width:100%;max-height:82vh;overflow:auto;background:var(--card);border-radius:26px 26px 0 0;padding:16px 16px 28px}
+ .msh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.msh b{font-size:18px}
+ .msh button{width:36px;height:36px;padding:0;margin:0;border-radius:50%;background:var(--bg);color:var(--tx);border:0;box-shadow:none;font-size:20px}
+ .msg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+ .msg a,.msg button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;border-radius:18px;background:var(--p3);color:var(--tx);font-size:12.5px;font-weight:600;text-align:center;text-decoration:none;border:0;box-shadow:none;margin:0;width:auto}
+ .msg a:nth-child(3n+2),.msg button+a:nth-child(3n+3){background:var(--p1)}.msg a:nth-child(3n+3){background:var(--p2)}
+ .msg .ic{width:24px;height:24px}.msg .on{background:var(--c)!important;color:var(--cx)}
+ body.noscr{overflow:hidden}
+}
