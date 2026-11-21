@@ -72,7 +72,7 @@ async function initSettings(){
  // app
  const ap=card('App','If a page looks old or something is not updating, refresh the app.');
  ap.append(el('div',{class:'row',style:'flex-wrap:wrap'},btn('Refresh app',async()=>{try{if(navigator.serviceWorker){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}}catch(e){}location.reload()},true),
-  btn('Log out',async()=>{try{await api('logout')}catch(e){}TOK.clear();location.href='../login.html'},true)));
+  btn('Log out',async()=>{try{await api('logout')}catch(e){}TOK.clear();location.href='login.html'},true)));
  if(location.pathname.indexOf('/admin/')>=0)aiCard(m)}
 async function aiCard(m){
  const c=el('div',{class:'card',style:'max-width:420px;margin-top:16px'}),msg=el('div',{class:'mu'});let r={on:true,name:'Tuto'};try{r=await call('aiGet')}catch(e){}

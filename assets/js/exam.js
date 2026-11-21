@@ -8,11 +8,11 @@ const big=(ic,t,p,...b)=>wrap(el('div',{class:'xc xcen'},el('div',{class:'xi'},m
 const back=()=>location.href='tests.html';
 
 async function boot(){
- if(!TOK.get()){location.href='../login.html';return}
+ if(!TOK.get()){location.href='login.html';return}
  if(Q.get('r')){await loadBrand().catch(()=>{});return review(Q.get('r'))}
  await loadBrand().catch(()=>{});let r;
  try{r=await api('me')}catch(e){show(big('exam','Connection problem','Check your internet and try again.',btn('Retry',()=>location.reload())));return}
- if(!r.ok||r.user.role!=='student'){location.href='../login.html';return}
+ if(!r.ok||r.user.role!=='student'){location.href='login.html';return}
  const pr=Q.get('p');let info;
  try{
   if(pr){const[sid,ch,n]=pr.split('|');info={mode:'practice',title:'Practice: '+(ch||'Mixed'),practice:{subjectId:sid,chapter:ch,count:Number(n)||10},count:Number(n)||10,proctor:'off',instructions:'Practice mode: after each answer you instantly see whether it was right, with an explanation. Nothing here affects your marks.'}}

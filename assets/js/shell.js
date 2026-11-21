@@ -25,12 +25,12 @@ async function initShell(role,page,phase){
  if(cu){window.__U=cu;paint(role,page,cu,phase);
   (async()=>{try{await loadBrand();const r=await api('me');
    if(r.ok){if(r.user.role!==role)location.href='../'+HOME[r.user.role]+'/index.html';else{saveShell(r.user);if(r.user.userId!==cu.userId)location.reload()}}
-   else if(r.error==='Session expired. Please login again.'){TOK.clear();location.href='../login.html'}}catch(e){}})();
+   else if(r.error==='Session expired. Please login again.'){TOK.clear();location.href='login.html'}}catch(e){}})();
   return cu}
  await loadBrand();
  let r;const retry=()=>{document.body.innerHTML='<div style="min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px;font-family:sans-serif"><div><p style="font-size:17px">Connection problem. Your login is safe.</p><button onclick="location.reload()" style="padding:12px 26px;border:0;border-radius:999px;background:#111;color:#fff;font-size:16px">Try again</button></div></div>'};
  try{r=await api('me')}catch(e){retry();return}
- if(!r.ok){if(r.error==='Session expired. Please login again.'){TOK.clear();location.href='../login.html'}else retry();return}
+ if(!r.ok){if(r.error==='Session expired. Please login again.'){TOK.clear();location.href='login.html'}else retry();return}
  const u=r.user;window.__U=u;
  if(u.role!==role){location.href='../'+HOME[u.role]+'/index.html';return}
  saveShell(u);paint(role,page,u,phase);return u}
@@ -48,7 +48,7 @@ function paint(role,page,u,phase){
   '<div class="wrap"><nav>'+nav+'</nav><main id="main"><div id="skm1" class="sk-m"><i class="sk sk-t"></i><div class="sk-g"><i class="sk"></i><i class="sk"></i><i class="sk"></i><i class="sk"></i></div><i class="sk sk-w"></i><i class="sk sk-w"></i></div></main></div><div id="bnav"><div class="bpill">'+bn+'</div><button type="button" id="bai" aria-label="AI helper"></button></div>';
  {const mm=document.getElementById('main');new MutationObserver(()=>{const k=document.getElementById('skm1');if(k&&mm.children.length>1)k.remove()}).observe(mm,{childList:true})}
  const um=document.getElementById('um'),mn=document.getElementById('umenu');um.onclick=e=>{e.stopPropagation();const o=mn.hidden;mn.hidden=!o;mn.style.display=o?'block':'none';um.setAttribute('aria-expanded',o)};document.addEventListener('click',e=>{if(!mn.contains(e.target)&&e.target!==um){mn.hidden=true;mn.style.display='none';um.setAttribute('aria-expanded',false)}});
- document.getElementById('lo').onclick=async()=>{try{await api('logout')}catch(e){}TOK.clear();location.href='../login.html'};
+ document.getElementById('lo').onclick=async()=>{try{await api('logout')}catch(e){}TOK.clear();location.href='login.html'};
  const ib=document.getElementById('inst');if(ib){ib.hidden=!_ip;ib.onclick=async()=>{if(!_ip)return;_ip.prompt();await _ip.userChoice;_ip=null;ib.hidden=true}}
  try{const z=localStorage.getItem('ui_zoom');if(z)document.body.style.zoom=z}catch(e){}
  applyI18n();
