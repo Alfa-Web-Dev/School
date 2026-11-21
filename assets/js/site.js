@@ -38,9 +38,8 @@ function shell(){
  $('foot').innerHTML='<footer><div class="wrap"><div class="fg"><div'+E('CFG','logo,name,nameHi,shortName')+'><a class="brand" href="index.html">'+lg+'<span>'+esc(SN())+'</span></a><p>'+esc(s_('desc'))+'</p></div>'
  +'<div'+E('hours')+'><h5>'+s_('hrs')+'</h5><ul>'+SITE.hours.map(h=>'<li>'+esc(L(h.d))+'<br><b style="color:#fff">'+esc(L(h.t))+'</b></li>').join('')+'</ul></div>'
  +'<div'+E('CFG','phone,whatsapp,email,address,addressHi,social')+'><h5>'+s_('reach')+'</h5><ul><li><a href="'+MAPU()+'" target="_blank" rel="noopener">'+esc(SA())+'</a></li><li><a href="tel:'+esc(CFG.phone)+'">'+esc(CFG.phone)+'</a></li><li><a href="mailto:'+esc(CFG.email)+'">'+esc(CFG.email)+'</a></li><li><a href="login.html">'+s_('portal')+'</a></li>'+SOC+'</ul></div></div>'
- +'<div class="fbar"><span>© '+new Date().getFullYear()+' '+esc(SN())+'. '+s_('rights')+'</span><span><a href="privacy.html">'+s_('privacy')+'</a> · <a href="#" id="pwa-inst" hidden>'+(getLang()==='hi'?'ऐप इंस्टॉल करें':'Install app')+'</a><span id="pwa-sep" hidden> · </span><a href="#" id="lg2">'+(getLang()==='hi'?'अंग्रेज़ी':'Hindi')+'</a></span></div></div></footer>'
+ +'<div class="fbar"><span>© '+new Date().getFullYear()+' '+esc(SN())+'. '+s_('rights')+'</span><span><a href="privacy.html">'+s_('privacy')+'</a> · <a href="#" id="lg2">'+(getLang()==='hi'?'अंग्रेज़ी':'Hindi')+'</a></span></div></div></footer>'
  +'<a class="wa" href="https://wa.me/'+esc(CFG.whatsapp)+'" target="_blank" rel="noopener" aria-label="'+s_('wa')+'"><svg class="i" viewBox="0 0 24 24" style="width:28px;height:28px">'+IC.chat+'</svg></a>';
- {const pi=$('pwa-inst'),show=()=>{if(window._ip&&pi){pi.hidden=false;const sp=$('pwa-sep');if(sp)sp.hidden=false}};show();if(pi)pi.onclick=async e=>{e.preventDefault();const p=window._ip;if(!p)return;p.prompt();try{await p.userChoice}catch(x){}window._ip=null;pi.hidden=true;const sp=$('pwa-sep');if(sp)sp.hidden=true}}
  $('lg2').onclick=e=>{e.preventDefault();setLang(getLang()==='hi'?'en':'hi');render()};
  $('mb').onclick=()=>$('mb').setAttribute('aria-expanded',$('links').classList.toggle('open'));
 }
@@ -276,9 +275,3 @@ let _oc='';if(!window.STUDIO)try{_oc=localStorage.getItem('site_ov')||'';if(_oc)
 render();
 if(!window.STUDIO)fetch('content/site.json?v='+Date.now()).then(r=>r.ok?r.text():null).then(t=>{if(t&&t!==_oc){try{const o=JSON.parse(t);applyOv(o);render();try{localStorage.setItem('site_ov',t)}catch(e){}}catch(e){}}}).catch(()=>{});
 
-
-// ---- PWA: install prompt + service worker + manifest named after the school ----
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window._ip=e;const b=document.getElementById('pwa-inst');if(b){b.hidden=false;const sp=document.getElementById('pwa-sep');if(sp)sp.hidden=false}});
-if('serviceWorker' in navigator)window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});
- try{const l=document.querySelector('link[rel="manifest"]');if(l&&typeof CFG!=='undefined'&&CFG.name&&window.fetch)fetch(l.href).then(r=>r.json()).then(m=>{const u=x=>new URL(x,l.href).href;m.name=String(CFG.name).trim();m.short_name='School';if(CFG.color)m.theme_color=CFG.color;m.start_url=u(m.start_url);m.scope=u(m.scope);m.id=u(m.id);m.icons=m.icons.map(i=>Object.assign({},i,{src:u(i.src)}));
-  l.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}))}).catch(()=>{})}catch(e){}});

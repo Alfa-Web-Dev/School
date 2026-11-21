@@ -1,8 +1,7 @@
-// public website ka service worker (root scope). Network-first; API (POST) kabhi cache nahi hota.
-// admin/, teacher/, student/ ke apne service worker hain aur wahi unke pages ko control karte hain.
-const C='sp-site-v1';
-self.addEventListener('install',e=>self.skipWaiting());
-self.addEventListener('activate',e=>e.waitUntil(clients.claim()));
-self.addEventListener('fetch',e=>{
- if(e.request.method!=='GET'||!e.request.url.startsWith(self.location.origin))return;
- e.respondWith(fetch(e.request).then(r=>{if(r.ok){const c=r.clone();caches.open(C).then(x=>x.put(e.request,c))}return r}).catch(()=>caches.match(e.request).then(m=>m||(e.request.mode==='navigate'?caches.match('index.html'):undefined))))});
+// Public website ab PWA nahi hai. Ye file sirf un phones ke liye hai jinhone purana service worker install kar liya tha:
+// ye khud ko hata deta hai aur uska cache saaf kar deta hai. Admin/teacher/student ke apne service worker alag folder me hain.
+self.addEventListener('install',()=>self.skipWaiting());
+self.addEventListener('activate',e=>e.waitUntil((async()=>{
+ try{const ks=await caches.keys();await Promise.all(ks.filter(k=>k.indexOf('sp-site-')===0).map(k=>caches.delete(k)))}catch(x){}
+ try{await self.registration.unregister()}catch(x){}
+})()));
