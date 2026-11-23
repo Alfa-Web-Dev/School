@@ -484,3 +484,9 @@ button.done{background:#16a34a!important;color:#fff!important;border-color:#16a3
 
 .hello.hl2 .dt{background:var(--card)}
 @media(min-width:701px){.umenu a.ph{display:none}}
+
+/* loading skeleton follows the theme (was bright grey in dark mode) */
+:root{--sk:#ececf0}
+@media(prefers-color-scheme:dark){:root{--sk:#202024}}
+.sk{background:var(--sk);animation:skp 1.4s ease-in-out infinite}
+.sk-n{background:var(--card);box-shadow:0 8px 30px rgba(0,0,0,.18)}
