@@ -14,6 +14,7 @@ const ROLE={
   sys:'You are an assistant for school teachers. Help with lesson plans, question papers, rubrics, classroom ideas and parent communication. Be practical and concise.'},
  admin:{hi:'How can I help you run the school?',chips:['Draft a holiday notice','Write a fee reminder message','Ideas to improve attendance'],
   sys:'You are an assistant for a school administrator. Help draft notices, circulars, emails and messages, policies and plans. Be professional, practical and concise.'}};
+const SPARK='<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M22 7l3.6 10.4L36 21l-10.4 3.6L22 35l-3.6-10.4L8 21l10.4-3.6z" fill="#fff"/><path d="M37 28l1.9 5.1L44 35l-5.1 1.9L37 42l-1.9-5.1L30 35l5.1-1.9z" fill="#fff" opacity=".92"/><path d="M38 6l1.1 3L42 10l-2.9 1L38 14l-1.1-3L34 10l2.9-1z" fill="#fff" opacity=".8"/></svg>';
 const FACE='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="aibg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9ccff"/><stop offset="1" stop-color="#b7a4f7"/></linearGradient></defs><rect width="100" height="100" fill="url(#aibg)"/><circle cx="82" cy="16" r="16" fill="#fff" opacity=".3"/><path d="M16 100C16 78 32 72 50 72C68 72 84 78 84 100Z" fill="#4f46e5"/><path d="M42 72L50 82L58 72Z" fill="#fff"/><rect x="43" y="62" width="14" height="14" rx="5" fill="#f2c29b"/><ellipse cx="50" cy="48" rx="22" ry="23" fill="#f8d2ad"/><circle cx="28" cy="50" r="4.5" fill="#f2c29b"/><circle cx="72" cy="50" r="4.5" fill="#f2c29b"/><path d="M28 42C26 24 40 20 50 22C62 20 74 26 72 42C66 34 58 31 50 31C42 31 34 34 28 42Z" fill="#3a2418"/><path d="M50 22C54 14 62 14 64 18C60 18 57 20 56 24Z" fill="#3a2418"/><circle cx="41" cy="50" r="3.4" fill="#1f2937"/><circle cx="59" cy="50" r="3.4" fill="#1f2937"/><circle cx="42.2" cy="48.8" r="1.1" fill="#fff"/><circle cx="60.2" cy="48.8" r="1.1" fill="#fff"/><path d="M36 43Q41 40 46 42M54 42Q59 40 64 43" stroke="#3a2418" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M42 59Q50 69 58 59Z" fill="#7c2d12"/><path d="M45 63Q50 66 55 63" stroke="#f87171" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="34" cy="58" r="4" fill="#ff8a8a" opacity=".35"/><circle cx="66" cy="58" r="4" fill="#ff8a8a" opacity=".35"/><path d="M50 8L84 22L50 36L16 22Z" fill="#1f2937"/><path d="M30 28V38C40 44 60 44 70 38V28L50 36Z" fill="#374151"/><path d="M76 25V42" stroke="#f59e0b" stroke-width="2.5"/><circle cx="76" cy="45" r="3.4" fill="#f59e0b"/></svg>';
 let hist=[],busy=false,ctl=null;
 window.initAI=async function(role,u){
@@ -24,7 +25,7 @@ window.initAI=async function(role,u){
  const R=ROLE[role]||ROLE.student,name=cfg.name||'Tuto',first=String(u.name||'').split(' ')[0];
  const key='ai_h_'+role;try{hist=JSON.parse(sessionStorage.getItem(key)||'[]')}catch(e){hist=[]}
  const b=document.createElement('button');b.id='aib';b.type='button';b.setAttribute('aria-label',name+' AI');
- b.innerHTML=FACE;
+ b.innerHTML=SPARK;
  const w=document.createElement('div');w.id='aiw';w.hidden=true;
  w.innerHTML='<div class="aih"><span class="aix">'+FACE+'</span><div><b>'+esc(name)+'</b><small>AI study & school helper</small></div><button type="button" id="aic" aria-label="Clear chat" title="New chat">↺</button><button type="button" id="aix" aria-label="Close">×</button></div><div id="aim"></div><form id="aif"><textarea id="ait" rows="1" maxlength="800" placeholder="Type your question…"></textarea><button type="submit" id="ais" aria-label="Send"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg></button></form><div class="aif">AI can make mistakes. Check important things.</div>';
  document.body.append(b,w);
@@ -58,7 +59,7 @@ window.initAI=async function(role,u){
  b.addEventListener('pointermove',e=>{if(!st)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;if(!moved&&Math.hypot(dx,dy)<6)return;moved=true;place(st.l+dx,st.t+dy)});
  const end=()=>{if(!st)return;st=null;b.classList.remove('drag');if(moved){const r=b.offsetLeft+sz()/2>innerWidth/2;try{localStorage.setItem(PK,JSON.stringify({r:r,y:b.offsetTop/innerHeight}))}catch(e){}home()}};
  b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
- b.onclick=()=>{if(moved){moved=false;return}w.hidden?open():close()};window.openAI=()=>{if(w.hidden)open()};{const bb=document.getElementById('bai');if(bb){bb.innerHTML=FACE;bb.onclick=()=>{w.hidden?open():close()};document.body.classList.add('aion')}}w.querySelector('#aix').onclick=close;
+ b.onclick=()=>{if(moved){moved=false;return}w.hidden?open():close()};window.openAI=()=>{if(w.hidden)open()};w.querySelector('#aix').onclick=close;
  w.querySelector('#aic').onclick=()=>{if(ctl)ctl.abort();hist=[];save();busy=false;w.querySelector('#ais').disabled=false;welcome()};
  w.querySelector('#aif').onsubmit=e=>{e.preventDefault();send(T.value)};
  T.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(T.value)}};
