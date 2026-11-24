@@ -490,3 +490,18 @@ button.done{background:#16a34a!important;color:#fff!important;border-color:#16a3
 @media(prefers-color-scheme:dark){:root{--sk:#202024}}
 .sk{background:var(--sk);animation:skp 1.4s ease-in-out infinite}
 .sk-n{background:var(--card);box-shadow:0 8px 30px rgba(0,0,0,.18)}
+
+/* ===== skeleton: calm text-line style (like modern chat apps) ===== */
+.sk{border-radius:8px;background:var(--sk);animation:skp 1.4s ease-in-out infinite;background-image:none}
+.sk-m{padding:18px 0}.sk-m .sk-t{display:block;width:40%;height:26px;border-radius:8px;margin-bottom:22px}
+.sk-card{display:block;height:92px;border-radius:16px;margin-bottom:28px}
+.sk-ln{display:flex;flex-direction:column;gap:13px;margin-bottom:28px}.sk-ln .sk{height:14px;border-radius:7px;width:100%}
+.sk-ln .sk:nth-child(1){width:94%}.sk-ln .sk:nth-child(2){width:100%}.sk-ln .sk:nth-child(3){width:84%}.sk-ln .sk:nth-child(4){width:48%}
+.sk-ln:nth-of-type(2) .sk:nth-child(3){width:58%}
+.sk-h{background:var(--card);border-bottom:1px solid var(--bd,#e4e7ec)}.sk-h .sk{background:var(--sk);background-image:none}
+.sk-s{border-radius:14px}
+.sk-n{background:none;box-shadow:none;padding:0;gap:10px;justify-content:flex-start}
+.sk-n .sk-p{flex:1;height:68px;border-radius:34px;background:var(--card);box-shadow:0 8px 30px rgba(0,0,0,.12);display:flex;justify-content:space-around;align-items:center;padding:0 14px}
+.sk-n .sk-p .sk{width:32px;height:32px;border-radius:50%}
+.sk-n>.sk-a{flex:none;width:58px;height:58px;border-radius:50%}
+@media(min-width:700px){.sk-n{display:none}}

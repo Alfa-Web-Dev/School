@@ -36,7 +36,7 @@ async function initInsights(){
  if(!classes.length){m.append(emptyState('No classes yet','Classes appear here once you are assigned to them'));return}
  const cls=el('select',{},classes.map(c=>el('option',{value:c.classId},c.name))),sub=el('select'),body=el('div');
  const fill=()=>{const c=classes.find(x=>x.classId===cls.value);sub.innerHTML='';sub.append(el('option',{value:''},'All subjects'));(c?c.subjects:[]).forEach(s=>sub.append(el('option',{value:s.subjectId},s.name)))};
- const load=async()=>{body.innerHTML='';body.append(el('p',{class:'mu'},'Loading…'));
+ const load=async()=>{body.innerHTML='';{const sk=el('div',{class:'sk-m skp'});sk.innerHTML=SK_BODY;body.append(sk)}
   try{const r=await call('classInsights',{classId:cls.value,subjectId:sub.value});body.innerHTML='';
    body.append(el('div',{class:'grid'},sCard(r.total,'Students'),sCard(r.active,'Practising or tested'),sCard(r.avg==null?'-':r.avg+'%','Class accuracy')));
    body.append(el('h3',{class:'sh'},'Weak topics in this class'));

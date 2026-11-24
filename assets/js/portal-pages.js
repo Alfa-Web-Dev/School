@@ -2,7 +2,7 @@
 const rupee=n=>(Number(n)<0?'-':'')+'₹'+Math.abs(Number(n||0)).toLocaleString('en-IN');
 const safeUrl=u=>/^https?:\/\//i.test(u)?u:'';
 function page(key,title){const m=$('#main');m.innerHTML='';m.append(el('h1',{'data-i':key},title||''));
- const k=el('div',{id:'skm',class:'sk-m skp'});k.innerHTML='<div class="sk-g"><i class="sk"></i><i class="sk"></i><i class="sk"></i><i class="sk"></i></div><i class="sk sk-w"></i><i class="sk sk-w"></i>';m.append(k);
+ const k=el('div',{id:'skm',class:'sk-m skp'});k.innerHTML='<i class="sk sk-t"></i><i class="sk sk-card"></i><div class="sk-ln"><i class="sk"></i><i class="sk"></i><i class="sk"></i><i class="sk"></i></div><div class="sk-ln"><i class="sk"></i><i class="sk"></i><i class="sk"></i></div><div class="sk-ln"><i class="sk"></i><i class="sk"></i><i class="sk"></i></div>';m.append(k);
  const done=()=>{const x=document.getElementById('skm');if(x)x.remove()};
  window.__skDone=()=>{if(!window.__pend)done()};new MutationObserver(()=>{const x=document.getElementById('skm');if(x&&m.lastElementChild!==x)m.append(x)}).observe(m,{childList:true});setTimeout(done,12000);
  applyI18n();return m}
