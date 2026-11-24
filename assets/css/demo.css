@@ -1,0 +1,42 @@
+/* NEW LOOK (demo) - sirf body.nl par lagta hai. Hatana ho to shell.js ka top block + ye file delete. */
+body.nl{--nbg:#eceff5;--n1:#d3e0f3;--n2:#e5d9f3;--n3:#dcecd3;--n4:#f7dfd5;--nk:#101114;--nb:#2f80ff;font-family:Urbanist,Inter,system-ui,sans-serif}
+@media(prefers-color-scheme:dark){body.nl{--nbg:#0b0b0d;--n1:#1d2a42;--n2:#2c2748;--n3:#1d3328;--n4:#3b2520;--nk:#1b1b1f}}
+body.nl{background:var(--nbg);background-image:none}
+body.nl h1{font-size:30px;font-weight:600;letter-spacing:-.02em;margin-bottom:12px}
+body.nl h2,body.nl h3{font-weight:600}
+/* header */
+body.nl header{background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none}
+body.nl header .bn{font-weight:600}
+body.nl .um{background:var(--card);border:0;border-radius:999px;box-shadow:none}
+/* greeting */
+body.nl .hello.hl2{background:none!important;box-shadow:none!important;padding:4px 0 0;margin:6px 0 14px;overflow:visible}
+body.nl .hello.hl2 .hs,body.nl .hello.hl2 .dt{display:none}
+body.nl .hello.hl2 small{font-size:17px;font-weight:500;color:var(--mu)}
+body.nl .hello.hl2 b{font-size:32px;font-weight:600;letter-spacing:-.02em;white-space:normal}
+/* cards */
+body.nl .card{background:var(--card);border-radius:28px;box-shadow:none;border:0}
+body.nl .card.stat{border-radius:28px;padding:20px 20px 22px;min-height:132px}
+body.nl .card.stat .mp,body.nl .qi .mp{display:none}
+body.nl .card.stat .big{font-size:40px;font-weight:600;letter-spacing:-.03em;margin-top:14px}
+body.nl .card.stat small,body.nl .card.stat .mu{font-size:15px;font-weight:500;color:color-mix(in srgb,var(--tx) 70%,transparent)}
+body.nl .grid>.card.stat:nth-child(4n+1),body.nl .qi.q0{background:var(--n1)}
+body.nl .grid>.card.stat:nth-child(4n+2),body.nl .qi.q1{background:var(--n2)}
+body.nl .grid>.card.stat:nth-child(4n+3),body.nl .qi.q2{background:var(--n3)}
+body.nl .grid>.card.stat:nth-child(4n+4),body.nl .qi.q3{background:var(--n4)}
+/* quick tiles: label neeche-left, white icon chip upar-right */
+body.nl .qi{border-radius:28px;min-height:132px;padding:18px;justify-content:flex-end;box-shadow:none}
+body.nl .qi .ich{position:absolute;top:16px;right:16px;width:40px;height:40px;box-shadow:none}
+body.nl .qi .ql{font-size:19px;font-weight:600;max-width:none}
+/* footer: black pill, icons only, active = white circle; AI = blue round button on right */
+@media(max-width:700px){
+ body.nl #bnav{left:14px;right:84px;bottom:14px}
+ body.nl .bpill{background:var(--nk);box-shadow:0 10px 30px rgba(0,0,0,.25);padding:7px;gap:2px}
+ body.nl .bpill a,body.nl .bpill button{height:50px;padding:0;color:rgba(255,255,255,.75);background:none}
+ body.nl .bpill span{display:none}
+ body.nl .bpill .ic{width:24px;height:24px}
+ body.nl .bpill .on{background:#fff;color:#101114}
+ body.nl #aib{right:14px;bottom:14px;width:64px;height:64px;background:var(--nb);border:0;padding:17px;box-shadow:0 10px 26px rgba(47,128,255,.4)}
+}
+body.nl.app header .brand{color:var(--tx)}
+body.nl.app header .um{background:var(--card);border:0;border-radius:999px;color:var(--tx)}
+body.nl.app header .um:before{background:var(--tx);box-shadow:0 -6px 0 var(--tx),0 6px 0 var(--tx)}
