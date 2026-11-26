@@ -54,6 +54,7 @@ window.initAI=async function(role,u){
  const place=(x,y)=>{const W=innerWidth/zm(),H=innerHeight/zm();x=Math.max(pad,Math.min(W-sz()-pad,x));y=Math.max(pad+60,Math.min(H-sz()-pad,y));b.style.left=x+'px';b.style.top=y+'px';b.style.right='auto';b.style.bottom='auto'};
  const home=()=>{let p=null;try{p=JSON.parse(localStorage.getItem(PK)||'null')}catch(e){}const W=innerWidth/zm(),H=innerHeight/zm();if(p){place(p.r?W-sz()-pad:pad,p.y*H)}else place(W-sz()-16,H-sz()-(W<900?84:24))};
  home();addEventListener('resize',home);
+ {let ly=scrollY;addEventListener('scroll',()=>{const y=scrollY;if(y>ly+6&&y>40)b.classList.add('sh');else if(y<ly-6||y<40)b.classList.remove('sh');ly=y},{passive:true})}
  let st=null;
  b.addEventListener('pointerdown',e=>{st={x:e.clientX,y:e.clientY,l:b.offsetLeft,t:b.offsetTop};moved=false;b.setPointerCapture(e.pointerId);b.classList.add('drag')});
  b.addEventListener('pointermove',e=>{if(!st)return;const dx=(e.clientX-st.x)/zm(),dy=(e.clientY-st.y)/zm();if(!moved&&Math.hypot(dx,dy)<6)return;moved=true;place(st.l+dx,st.t+dy)});

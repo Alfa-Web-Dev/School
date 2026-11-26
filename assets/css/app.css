@@ -524,3 +524,12 @@ button.done{background:#16a34a!important;color:#fff!important;border-color:#16a3
  .bpill .ic{width:26px;height:26px;stroke-width:2.1}
  .sk-n{height:66px;bottom:12px}.sk-n .sk-p{height:66px}.sk-n .sk-p .sk{width:30px;height:30px}
 }
+
+#aib{transition:left .22s ease,top .22s ease,transform .22s ease,opacity .2s ease}#aib.sh{transform:scale(.25)!important;opacity:0;pointer-events:none}
+@media(max-width:700px){
+ #bnav{bottom:12px}
+ .bpill{padding:6px;gap:2px;box-shadow:0 8px 26px rgba(15,23,42,.2)}
+ .bpill a,.bpill button{height:44px}
+ .bpill .ic{width:24px;height:24px}
+ .sk-n{height:56px}.sk-n .sk-p{height:56px}.sk-n .sk-p .sk{width:26px;height:26px}
+}
