@@ -1,3 +1,13 @@
+// Launch splash (sirf installed app mein, session mein ek baar): logo + naam + progress, phir fade-out
+(function(){try{
+ const sa=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone;
+ if(!sa||sessionStorage.getItem('sp_splash'))return;sessionStorage.setItem('sp_splash','1');
+ const go=()=>{let l=(typeof CFG!=='undefined'&&CFG.logo)||'';l=(window.__PH&&window.__PH[l])||l;
+  const src=/^uploads\//.test(l)?'../'+l:(/^https:\/\//.test(l)?l:'icon-192.png');
+  const nm=(typeof CFG!=='undefined'&&(CFG.name||CFG.shortName))||'';
+  const d=document.createElement('div');d.id='splash';d.innerHTML='<div class="spl"><i class="spr"></i><img alt="" src="'+src+'"></div><b>'+String(nm).replace(/[<>&]/g,'')+'</b><div class="spb"><i></i></div>';
+  document.body.appendChild(d);setTimeout(()=>{d.classList.add('out');setTimeout(()=>d.remove(),400)},1300)};
+ if(document.body)go();else document.addEventListener('DOMContentLoaded',go)}catch(e){}})();
 window.SK_BODY='<i class="sk sk-t"></i><i class="sk sk-card"></i><div class="sk-ln"><i class="sk"></i><i class="sk"></i><i class="sk"></i><i class="sk"></i></div><div class="sk-ln"><i class="sk"></i><i class="sk"></i><i class="sk"></i></div><div class="sk-ln"><i class="sk"></i><i class="sk"></i><i class="sk"></i></div>';
 try{if(CFG.color)document.documentElement.style.setProperty('--c',CFG.color)}catch(e){}
 const SK='sp_token';

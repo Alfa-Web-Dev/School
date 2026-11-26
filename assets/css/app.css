@@ -568,3 +568,15 @@ body.vwo{overflow:hidden}
 .vwimg{position:absolute;inset:0;overflow:auto;display:flex;align-items:flex-start;justify-content:center;-webkit-overflow-scrolling:touch}.vwimg img{width:100%;max-width:none;height:auto;display:block;margin:auto 0;transition:width .15s}
 .vwl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#1b1b1e;color:#9a9aa2;font-size:14px;text-align:center;padding:20px;pointer-events:none}
 .vws{width:30px;height:30px;border-radius:50%;border:3px solid #ffffff26;border-top-color:#fff;animation:vwsp .8s linear infinite}@keyframes vwsp{to{transform:rotate(360deg)}}
+
+/* launch splash */
+#splash{position:fixed;inset:0;z-index:99999;background:#111;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;transition:opacity .4s ease}#splash.out{opacity:0;pointer-events:none}
+#splash .spl{position:relative;width:104px;height:104px;display:grid;place-items:center;animation:spi .7s cubic-bezier(.2,.9,.3,1.2) both}
+#splash .spl img{width:96px;height:96px;border-radius:24px;object-fit:cover;background:#111}
+#splash .spr{position:absolute;inset:-10px;border-radius:32px;border:2px solid #ffffff55;animation:spp 1.4s ease-out infinite}
+#splash b{font-size:20px;font-weight:700;letter-spacing:-.01em;text-align:center;padding:0 24px;animation:spt .6s .25s ease both}
+#splash .spb{width:120px;height:3px;border-radius:3px;background:#ffffff24;overflow:hidden;animation:spt .6s .35s ease both}#splash .spb i{display:block;height:100%;width:0;background:#fff;border-radius:3px;animation:spf 1.2s .1s ease-in-out forwards}
+@keyframes spi{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+@keyframes spp{from{opacity:.8;transform:scale(.92)}to{opacity:0;transform:scale(1.35)}}
+@keyframes spt{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes spf{to{width:100%}}
