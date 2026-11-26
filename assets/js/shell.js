@@ -34,6 +34,7 @@ async function initShell(role,page,phase){
  const u=r.user;window.__U=u;
  if(u.role!==role){location.href='../'+HOME[u.role]+'/index.html';return}
  saveShell(u);paint(role,page,u,phase);return u}
+const skv=(role,page)=>{const t=n=>'<div class="sk-tg">'+'<i class="sk"></i>'.repeat(n)+'</div>',HC='<i class="sk sk-hc"></i>';if(page==='index')return role==='student'?HC+'<i class="sk sk-rc"></i>'+t(4)+t(2):HC+t(4)+t(4);return '<i class="sk sk-bn"></i>'+'<div class="sk-li"><i class="sk"></i><div><i class="sk"></i><i class="sk"></i></div></div>'.repeat(4)};
 function paint(role,page,u,phase){
  const nav=NAV[role].map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('');
  const ACCT={student:['profile','idcard','awards','career','study','settings'],teacher:['settings'],admin:['certificates','logs','settings']}[role]||[];
@@ -45,7 +46,7 @@ function paint(role,page,u,phase){
   '<div id="umenu" class="umenu" hidden style="display:none"><div class="up">'+AV.html(AV.get(u.userId,u.name),'')+'<div><b>'+u.name+'</b><small data-i="role_'+u.role+'"></small></div></div>'+
   (role==='student'?'<a href="profile.html">'+icon('profile')+'My profile</a>':'')+acct+'<a href="settings.html">'+icon('settings')+'Settings</a>'+
   '<button id="inst" hidden>'+icon('dashboard')+'Install app</button><a href="../index.html">'+icon('content')+'Visit website</a><hr><button id="lo" class="out"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Logout</button></div></header>'+
-  '<div class="wrap"><nav>'+nav+'</nav><main id="main"><div id="skm1" class="sk-m"><i class="sk sk-t"></i><i class="sk sk-card"></i><div class="sk-ln"><i class="sk"></i><i class="sk"></i><i class="sk"></i><i class="sk"></i></div><div class="sk-ln"><i class="sk"></i><i class="sk"></i><i class="sk"></i></div><div class="sk-ln"><i class="sk"></i><i class="sk"></i><i class="sk"></i></div></div></main></div><div id="bnav"><div class="bpill">'+bn+'</div></div>';
+  '<div class="wrap"><nav>'+nav+'</nav><main id="main"><div id="skm1" class="sk-m">'+skv(role,page)+'</div></main></div><div id="bnav"><div class="bpill">'+bn+'</div></div>';
  {const mm=document.getElementById('main');new MutationObserver(()=>{const k=document.getElementById('skm1');if(k&&mm.children.length>1)k.remove()}).observe(mm,{childList:true})}
  const um=document.getElementById('um'),mn=document.getElementById('umenu');um.onclick=e=>{e.stopPropagation();const o=mn.hidden;mn.hidden=!o;mn.style.display=o?'block':'none';um.setAttribute('aria-expanded',o)};document.addEventListener('click',e=>{if(!mn.contains(e.target)&&e.target!==um){mn.hidden=true;mn.style.display='none';um.setAttribute('aria-expanded',false)}});
  document.getElementById('lo').onclick=async()=>{try{await api('logout')}catch(e){}TOK.clear();location.href='login.html'};
