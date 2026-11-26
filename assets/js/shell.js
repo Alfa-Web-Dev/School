@@ -41,7 +41,7 @@ function paint(role,page,u,phase){
  const DAILY={admin:['index','students','fees','classes'],teacher:['index','attendance','marks','homework'],student:['index','attendance','homework','fees']}[role]||['index'];
  const bn=NAV[role].filter(([p])=>DAILY.indexOf(p)>=0).map(([p,k])=>'<a href="'+p+'.html"'+(p===page?' class="on"':'')+'>'+icon(k)+'<span data-i="n_'+k+'"></span></a>').join('')+'<button type="button" id="bmore"'+(DAILY.indexOf(page)<0?' class="on"':'')+'>'+icon('more')+'<span data-i="n_more"></span></button>';
  document.getElementById('shell').innerHTML=
-  '<header><a class="brand" href="index.html">'+(logoUrl()?'<img src="'+logoUrl()+'" alt="">':'<span class="lm">'+((CFG.shortName||'S').trim().charAt(0))+'</span>')+'<span class="bn">'+(typeof SN==='function'?SN():CFG.name)+'</span></a><span class="sp"></span><a class="bell" href="notices.html" aria-label="Notices"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg></a><button id="um" class="um" aria-label="Menu" aria-expanded="false"></button>'+
+  '<header><a class="brand" href="index.html">'+(logoUrl()?'<img src="'+logoUrl()+'" alt="">':'<span class="lm">'+((CFG.shortName||'S').trim().charAt(0))+'</span>')+'<span class="bn">'+(typeof SN==='function'?SN():CFG.name)+'</span></a><span class="sp"></span><a class="bell" href="notices.html" aria-label="Notices"><i class="nb" hidden></i><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg></a><button id="um" class="um" aria-label="Menu" aria-expanded="false"></button>'+
   '<div id="umenu" class="umenu" hidden style="display:none"><div class="up">'+AV.html(AV.get(u.userId,u.name),'')+'<div><b>'+u.name+'</b><small data-i="role_'+u.role+'"></small></div></div>'+
   (role==='student'?'<a href="profile.html">'+icon('profile')+'My profile</a>':'')+acct+'<a href="settings.html">'+icon('settings')+'Settings</a>'+
   '<button id="inst" hidden>'+icon('dashboard')+'Install app</button><a href="../index.html">'+icon('content')+'Visit website</a><hr><button id="lo" class="out"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Logout</button></div></header>'+
@@ -53,6 +53,9 @@ function paint(role,page,u,phase){
  try{const z=localStorage.getItem('ui_zoom');if(z)document.body.style.zoom=z}catch(e){}
  applyI18n();
  {const bm=document.getElementById('bmore');if(bm)bm.onclick=()=>openMore(role,page,DAILY)}
+ {const bl=document.querySelector('.app header .bell');if(bl&&role==='student')(async()=>{try{const K='ntc_seen_'+u.userId;let seen=[];try{seen=JSON.parse(localStorage.getItem(K)||'[]')}catch(e){}const r=await api('myNotices');const ids=((r&&r.notices)||[]).map(n=>String(n.id));
+  if(page==='notices'){localStorage.setItem(K,JSON.stringify(ids));return}
+  const n=ids.filter(i=>seen.indexOf(i)<0).length,nb=bl.querySelector('.nb');if(n>0){nb.textContent=n>9?'9+':n;nb.hidden=false}}catch(e){}})()}
  const m=document.getElementById('main');
  if(typeof initAI==='function')initAI(role,u);
  if(!phase)return;

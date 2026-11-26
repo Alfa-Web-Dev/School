@@ -514,3 +514,13 @@ button.done{background:#16a34a!important;color:#fff!important;border-color:#16a3
  .sk-n{bottom:10px;left:16px;right:16px;height:54px}.sk-n .sk-p{height:54px}.sk-n .sk-p .sk{width:26px;height:26px}
 }
 @media(min-width:701px){.app header .bell{margin-left:0}}
+
+.app header .bell{position:relative}
+.app header .bell .nb{position:absolute;top:-1px;right:-2px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e53935;color:#fff;font:700 10.5px/17px system-ui,sans-serif;font-style:normal;text-align:center;box-shadow:0 0 0 2px #111}.app header .bell .nb[hidden]{display:none}
+@media(max-width:700px){
+ #bnav{bottom:12px}
+ .bpill{padding:7px;gap:3px;box-shadow:0 10px 30px rgba(15,23,42,.24)}
+ .bpill a,.bpill button{height:52px}
+ .bpill .ic{width:26px;height:26px;stroke-width:2.1}
+ .sk-n{height:66px;bottom:12px}.sk-n .sk-p{height:66px}.sk-n .sk-p .sk{width:30px;height:30px}
+}
