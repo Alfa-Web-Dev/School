@@ -10,7 +10,8 @@ function viewNote(n){
  const isImg=/^image\//.test(n.mime||''),I=(d,w)=>'<svg viewBox="0 0 24 24" width="'+(w||22)+'" height="'+(w||22)+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
  const wrap=el('div',{id:'vw',role:'dialog','aria-label':n.title}),body=el('div',{class:'vwb'}),load=el('div',{class:'vwl'},el('i',{class:'vws'}),el('span',{},'Opening…'));
  const close=()=>{if(history.state&&history.state.vw){history.back()}else done()};
- const done=()=>{wrap.remove();document.body.classList.remove('vwo');removeEventListener('popstate',pop);removeEventListener('keydown',key)};
+ const vm=document.querySelector('meta[name=viewport]'),vc=vm&&vm.content;if(vm)vm.content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no';
+ const done=()=>{if(vm&&vc!=null)vm.content=vc;wrap.remove();document.body.classList.remove('vwo');removeEventListener('popstate',pop);removeEventListener('keydown',key)};
  const pop=()=>done(),key=e=>{if(e.key==='Escape')close()};
  const dl=el('button',{type:'button','aria-label':'Download',class:'vwi',onclick:()=>window.open(gDown(n.fileId),'_blank','noopener')});dl.innerHTML=I('<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>');
  const bk=el('button',{type:'button','aria-label':'Close',class:'vwi',onclick:close});bk.innerHTML=I('<path d="M15 5l-7 7 7 7"/>');
@@ -20,8 +21,15 @@ function viewNote(n){
   img.onload=()=>load.remove();img.onerror=()=>{load.innerHTML='';load.append(el('span',{},'Could not load preview. Use download.'))};
   const zi=el('button',{type:'button',class:'vwi','aria-label':'Zoom in',onclick:()=>set(z+.5)});zi.innerHTML=I('<path d="M12 5v14M5 12h14"/>');
   const zo=el('button',{type:'button',class:'vwi','aria-label':'Zoom out',onclick:()=>set(z-.5)});zo.innerHTML=I('<path d="M5 12h14"/>');
-  img.ondblclick=()=>set(z>1?1:2.5);tools.push(zo,zi);body.append(sc)}
- else{const f=el('iframe',{src:gView(n.fileId),allow:'autoplay',title:n.title});f.onload=()=>load.remove();setTimeout(()=>load.remove(),12000);body.append(f,el('div',{class:'vwm'}))}
+  img.ondblclick=()=>set(z>1?1:2.5);tools.push(zo,zi);body.append(sc);
+  let sd=0,sz=1;const dist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+  sc.addEventListener('touchstart',e=>{if(e.touches.length===2){sd=dist(e.touches);sz=z}},{passive:true});
+  sc.addEventListener('touchmove',e=>{if(e.touches.length!==2||!sd)return;e.preventDefault();const z0=z,r=sc.getBoundingClientRect(),cx=(e.touches[0].clientX+e.touches[1].clientX)/2-r.left,cy=(e.touches[0].clientY+e.touches[1].clientY)/2-r.top;set(sz*dist(e.touches)/sd);const k=z/z0;sc.scrollLeft=(sc.scrollLeft+cx)*k-cx;sc.scrollTop=(sc.scrollTop+cy)*k-cy},{passive:false});
+  sc.addEventListener('touchend',()=>{sd=0},{passive:true})}
+ else{let z=1;const f=el('iframe',{src:gView(n.fileId),allow:'autoplay',title:n.title}),pz=el('div',{class:'vwp'},f);f.onload=()=>load.remove();setTimeout(()=>load.remove(),12000);
+  const set=v=>{z=Math.max(1,Math.min(3,v));f.style.width=(100*z)+'%';f.style.height=(100*z)+'%';f.style.transform='';pz.style.setProperty('--z',z)};
+  const zi=el('button',{type:'button',class:'vwi','aria-label':'Zoom in',onclick:()=>set(z+.5)});zi.innerHTML=I('<path d="M12 5v14M5 12h14"/>');
+  const zo=el('button',{type:'button',class:'vwi','aria-label':'Zoom out',onclick:()=>set(z-.5)});zo.innerHTML=I('<path d="M5 12h14"/>');tools.push(zo,zi);body.append(pz,el('div',{class:'vwm'}))}
  body.append(load);
  wrap.append(el('div',{class:'vwh'},bk,el('div',{class:'vwt'},el('b',{},n.title),el('small',{},[n.subject,n.chapter&&n.chapter!=='General'?n.chapter:''].filter(Boolean).join(' · '))),...tools,dl),body);
  document.body.append(wrap);document.body.classList.add('vwo');
