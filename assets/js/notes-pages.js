@@ -6,9 +6,26 @@ const gDown=id=>'https://drive.google.com/uc?export=download&id='+encodeURICompo
 const NOTE_MAX=20*1024*1024;
 
 function viewNote(n){
- const d=modal(n.title+' · '+n.subject,el('iframe',{src:gView(n.fileId),allow:'autoplay',style:'width:100%;height:70vh;border:0;background:#fff'}),
-  [{t:'Download',g:1,fn:()=>{window.open(gDown(n.fileId),'_blank','noopener');return false}},{t:'Close',fn:()=>true}]);
- d.classList.add('wide')}
+ if(document.getElementById('vw'))return;
+ const isImg=/^image\//.test(n.mime||''),I=(d,w)=>'<svg viewBox="0 0 24 24" width="'+(w||22)+'" height="'+(w||22)+'" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
+ const wrap=el('div',{id:'vw',role:'dialog','aria-label':n.title}),body=el('div',{class:'vwb'}),load=el('div',{class:'vwl'},el('i',{class:'vws'}),el('span',{},'Opening…'));
+ const close=()=>{if(history.state&&history.state.vw){history.back()}else done()};
+ const done=()=>{wrap.remove();document.body.classList.remove('vwo');removeEventListener('popstate',pop);removeEventListener('keydown',key)};
+ const pop=()=>done(),key=e=>{if(e.key==='Escape')close()};
+ const dl=el('button',{type:'button','aria-label':'Download',class:'vwi',onclick:()=>window.open(gDown(n.fileId),'_blank','noopener')});dl.innerHTML=I('<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>');
+ const bk=el('button',{type:'button','aria-label':'Close',class:'vwi',onclick:close});bk.innerHTML=I('<path d="M15 5l-7 7 7 7"/>');
+ const tools=[];
+ if(isImg){let z=1;const img=el('img',{alt:n.title,referrerpolicy:'no-referrer',src:'https://drive.google.com/thumbnail?id='+encodeURIComponent(n.fileId)+'&sz=w2000'});
+  const sc=el('div',{class:'vwimg'},img);const set=v=>{z=Math.max(1,Math.min(4,v));img.style.width=(z*100)+'%'};
+  img.onload=()=>load.remove();img.onerror=()=>{load.innerHTML='';load.append(el('span',{},'Could not load preview. Use download.'))};
+  const zi=el('button',{type:'button',class:'vwi','aria-label':'Zoom in',onclick:()=>set(z+.5)});zi.innerHTML=I('<path d="M12 5v14M5 12h14"/>');
+  const zo=el('button',{type:'button',class:'vwi','aria-label':'Zoom out',onclick:()=>set(z-.5)});zo.innerHTML=I('<path d="M5 12h14"/>');
+  img.ondblclick=()=>set(z>1?1:2.5);tools.push(zo,zi);body.append(sc)}
+ else{const f=el('iframe',{src:gView(n.fileId),allow:'autoplay',title:n.title});f.onload=()=>load.remove();setTimeout(()=>load.remove(),12000);body.append(f,el('div',{class:'vwm'}))}
+ body.append(load);
+ wrap.append(el('div',{class:'vwh'},bk,el('div',{class:'vwt'},el('b',{},n.title),el('small',{},[n.subject,n.chapter&&n.chapter!=='General'?n.chapter:''].filter(Boolean).join(' · '))),...tools,dl),body);
+ document.body.append(wrap);document.body.classList.add('vwo');
+ try{history.pushState({vw:1},'')}catch(e){}addEventListener('popstate',pop);addEventListener('keydown',key)}
 
 const NCATS=[['short','Short Notes','notebook'],['chapter','Chapter-wise Notes','books'],['pyq','Previous Year Papers (PYQ)','exam'],['sample','Sample Papers','clipboard'],['ref','Reference Books','cap'],['mag','Magazines','medal'],['syll','Syllabus','calendar'],['work','Worksheets','board'],['other','Other','box']];
 const catName=k=>(NCATS.find(c=>c[0]===k)||NCATS[8])[1];
