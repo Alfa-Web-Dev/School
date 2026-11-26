@@ -56,6 +56,7 @@ function paint(role,page,u,phase){
  {const bl=document.querySelector('.app header .bell');if(bl&&role==='student')(async()=>{try{const K='ntc_seen_'+u.userId;let seen=[];try{seen=JSON.parse(localStorage.getItem(K)||'[]')}catch(e){}const r=await api('myNotices');const ids=((r&&r.notices)||[]).map(n=>String(n.id));
   if(page==='notices'){localStorage.setItem(K,JSON.stringify(ids));return}
   const n=ids.filter(i=>seen.indexOf(i)<0).length,nb=bl.querySelector('.nb');if(n>0){nb.textContent=n>9?'9+':n;nb.hidden=false}}catch(e){}})()}
+ if(page==='index')document.body.classList.add('dash');
  const m=document.getElementById('main');
  if(typeof initAI==='function')initAI(role,u);
  if(!phase)return;
