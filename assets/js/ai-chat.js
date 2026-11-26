@@ -27,27 +27,34 @@ window.initAI=async function(role,u){
  const b=document.createElement('button');b.id='aib';b.type='button';b.setAttribute('aria-label',name+' AI');
  b.innerHTML=SPARK;if(!/(^|\/)(index\.html)?$/.test(location.pathname))b.style.display='none';
  const w=document.createElement('div');w.id='aiw';w.hidden=true;
- w.innerHTML='<div class="aih"><span class="aix">'+SPARK+'</span><div><b>'+esc(name)+'</b><small>AI study & school helper</small></div><button type="button" id="aic" aria-label="New chat" title="New chat"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button><button type="button" id="aix" aria-label="Close"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div id="aim"></div><form id="aif"><textarea id="ait" rows="1" maxlength="800" placeholder="Type your question…"></textarea><button type="submit" id="ais" aria-label="Send"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></form><div class="aif">AI can make mistakes. Check important things.</div>';
+ w.innerHTML='<div class="aih"><button type="button" id="aix" aria-label="Close"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="aht"><span class="aix">'+SPARK+'</span><b>'+esc(name)+'</b></div><button type="button" id="aic" aria-label="New chat" title="New chat"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button></div><div id="aim"></div><form id="aif"><textarea id="ait" rows="1" maxlength="800" placeholder="Ask"></textarea><button type="submit" id="ais" aria-label="Send"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></form><div class="aif">AI can make mistakes. Check important things.</div>';
  document.body.append(b,w);
- const M=w.querySelector('#aim'),T=w.querySelector('#ait');
+ const M=w.querySelector('#aim'),T=w.querySelector('#ait'),SB=w.querySelector('#ais');
+ const CI=['<path d="M22 10L12 5 2 10l10 5 10-5zM6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/>','<path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z"/>','<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'],cico=i=>'<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+CI[i%3]+'</svg>';
+ const COPY='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="3"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
+ const ARROW=SB.innerHTML,STOP='<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>';let userStop=false;
+ const setBusy=v=>{busy=v;SB.classList.toggle('stop',v);SB.classList.toggle('off',!v&&!T.value.trim());SB.innerHTML=v?STOP:ARROW;SB.setAttribute('aria-label',v?'Stop':'Send')};
+ const ph=f=>{T.placeholder=(f?'Ask ':'Reply to ')+name};
+ const acts=(d,t)=>{if(d.querySelector('.aia'))return;const a=document.createElement('div');a.className='aia';const b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Copy');b.innerHTML=COPY;b.onclick=async()=>{try{await navigator.clipboard.writeText(t);b.classList.add('ok');setTimeout(()=>b.classList.remove('ok'),1200)}catch(e){}};a.append(b);d.append(a)};
  const add=(r,t)=>{const d=document.createElement('div');d.className='aim '+r;if(r==='bot')d.innerHTML=md(t);else d.textContent=t;M.append(d);M.scrollTop=M.scrollHeight;return d};
  const save=()=>{try{sessionStorage.setItem(key,JSON.stringify(hist.slice(-12)))}catch(e){}};
- const welcome=()=>{M.innerHTML='';const d=document.createElement('div');d.className='aiwel';d.innerHTML='<div class="aix big">'+SPARK+'</div><b>Hi'+(first?' '+esc(first):'')+'</b><p>'+R.hi+'</p>'+R.chips.map(c=>'<button type="button" class="aic">'+esc(c)+'</button>').join('');M.append(d);d.onclick=e=>{const c=e.target.closest('.aic');if(c)send(c.textContent)}};
- const render=()=>{if(!hist.length)return welcome();M.innerHTML='';hist.forEach(m=>add(m.role==='user'?'me':'bot',m.content))};
- async function send(q){q=String(q||'').trim();if(!q||busy)return;busy=true;w.querySelector('#ais').disabled=true;
+ const welcome=()=>{M.innerHTML='';const d=document.createElement('div');d.className='aiwel';d.innerHTML='<div class="aig"><b>Hi'+(first?' '+esc(first):'')+'</b><p>'+R.hi+'</p></div><div class="aic-l">'+R.chips.map((c,i)=>'<button type="button" class="aic">'+cico(i)+'<span>'+esc(c)+'</span></button>').join('')+'</div>';ph(1);M.append(d);d.onclick=e=>{const c=e.target.closest('.aic');if(c)send(c.textContent.trim())}};
+ const render=()=>{if(!hist.length)return welcome();M.innerHTML='';hist.forEach(m=>{const d=add(m.role==='user'?'me':'bot',m.content);if(m.role!=='user')acts(d,m.content)});ph(0)};
+ async function send(q){q=String(q||'').trim();if(!q||busy)return;setBusy(true);userStop=false;
   if(!hist.length)M.innerHTML='';add('me',q);hist.push({role:'user',content:q});T.value='';T.style.height='';
-  const out=add('bot','…');out.classList.add('typing');ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),45000);
+  const out=add('bot','');out.innerHTML='<i class="adot"></i>';ph(0);ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),45000);
   const c=Object.assign({},DEF,(window.CFG&&CFG.ai)||{});
   const sys=R.sys+' Your name is '+name+'. '+(first?'The user\'s first name is '+first+'. ':'')+'School: '+(CFG.name||'the school')+'. Reply in the same language the user writes in (Hindi, English or Hinglish). You cannot see any school records, marks, fees or personal data; never claim to. Today is '+new Date().toDateString()+'.';
+  let text='';
   try{
    const res=await fetch(c.endpoint,{method:'POST',signal:ctl.signal,headers:Object.assign({'Content-Type':'application/json'},c.apiKey?{Authorization:'Bearer '+c.apiKey}:{}),body:JSON.stringify({model:c.model,messages:[{role:'system',content:sys}].concat(hist.slice(-8)),stream:true,temperature:.5,max_tokens:900})});
    if(!res.ok)throw new Error('busy');
-   let text='';const ty=res.headers.get('content-type')||'';
+   text='';const ty=res.headers.get('content-type')||'';
    if(!ty.includes('event-stream')||!res.body){const j=await res.json();text=j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content||'';out.classList.remove('typing');out.innerHTML=md(text)}
    else{const rd=res.body.getReader(),dc=new TextDecoder();let buf='';for(;;){const{done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});const ls=buf.split('\n');buf=ls.pop();for(const l0 of ls){const l=l0.trim();if(l.indexOf('data:')!==0)continue;const d=l.slice(5).trim();if(d==='[DONE]')continue;try{const t=JSON.parse(d).choices[0].delta.content;if(t){text+=t;out.classList.remove('typing');out.innerHTML=md(text);M.scrollTop=M.scrollHeight}}catch(e){}}}}
-   if(!text.trim())throw new Error('empty');hist.push({role:'assistant',content:text});save();
-  }catch(e){out.classList.remove('typing');out.classList.add('err');out.textContent=e.name==='AbortError'?'This is taking too long. Please try again.':name+' is busy right now. Please try again in a moment.';hist.pop()}
-  clearTimeout(to);busy=false;w.querySelector('#ais').disabled=false;M.scrollTop=M.scrollHeight;T.focus()}
+   if(!text.trim())throw new Error('empty');hist.push({role:'assistant',content:text});save();acts(out,text);
+  }catch(e){if(userStop){if(text.trim()){hist.push({role:'assistant',content:text});save();acts(out,text)}else{out.remove();hist.pop()}}else{out.classList.remove('typing');out.classList.add('err');out.textContent=e.name==='AbortError'?'This is taking too long. Please try again.':name+' is busy right now. Please try again in a moment.';hist.pop()}}
+  clearTimeout(to);setBusy(false);userStop=false;M.scrollTop=M.scrollHeight;T.focus()}
  const open=()=>{w.hidden=false;b.classList.add('on');if(!M.children.length)render();setTimeout(()=>T.focus(),50)},close=()=>{w.hidden=true;b.classList.remove('on')};
  let moved=false;
  const PK='ai_pos',pad=8,sz=()=>b.offsetWidth||44,zm=()=>parseFloat(document.body.style.zoom)||1;
@@ -61,8 +68,8 @@ window.initAI=async function(role,u){
  const end=()=>{if(!st)return;st=null;b.classList.remove('drag');if(moved){const r=b.offsetLeft+sz()/2>innerWidth/zm()/2;try{localStorage.setItem(PK,JSON.stringify({r:r,y:b.offsetTop/(innerHeight/zm())}))}catch(e){}home()}};
  b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
  b.onclick=()=>{if(moved){moved=false;return}w.hidden?open():close()};window.openAI=()=>{if(w.hidden)open()};w.querySelector('#aix').onclick=close;
- w.querySelector('#aic').onclick=()=>{if(ctl)ctl.abort();hist=[];save();busy=false;w.querySelector('#ais').disabled=false;welcome()};
- w.querySelector('#aif').onsubmit=e=>{e.preventDefault();send(T.value)};
+ w.querySelector('#aic').onclick=()=>{if(ctl)ctl.abort();hist=[];save();setBusy(false);welcome()};
+ w.querySelector('#aif').onsubmit=e=>{e.preventDefault();if(busy){userStop=true;if(ctl)ctl.abort();return}send(T.value)};T.addEventListener('input',()=>SB.classList.toggle('off',!T.value.trim()&&!busy));SB.classList.add('off');
  T.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(T.value)}};
  T.oninput=()=>{T.style.height='auto';T.style.height=Math.min(T.scrollHeight,110)+'px'};
 };
