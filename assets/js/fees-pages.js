@@ -45,7 +45,7 @@ async function tabPayments(box){
 async function tabDue(box){
  const cs=el('select',{},el('option',{value:''},'All classes'),FCL.map(c=>el('option',{value:c.classId},c.name))),out=el('div');let last=null;
  box.append(el('div',{class:'bar'},cs,btn('CSV',()=>last&&downloadCSV('defaulters.csv',[['studentId','name','class','parent phone','due','paid','balance']].concat(last.students.map(s=>[s.studentId,s.name,s.className,s.phone,s.due,s.paid,s.balance]))))),out);
- async function load(){const r=await call('defaulters',{classId:cs.value});last=r;out.innerHTML='';out.append(el('p',{},el('b',{},r.students.length+' students · Total baaki '+rupee(r.total))),
+ async function load(){const r=await call('defaulters',{classId:cs.value});last=r;out.innerHTML='';out.append(el('p',{},el('b',{},r.students.length+' students · Total due '+rupee(r.total))),
   tableEl([{h:'ID',f:s=>s.studentId},{h:'Name',f:s=>s.name},{h:'Class',f:s=>s.className},{h:'Parent phone',f:s=>s.phone?el('a',{href:'tel:'+s.phone},s.phone):''},{h:'Due',f:s=>rupee(s.due)},{h:'Paid',f:s=>rupee(s.paid)},{h:'Due',f:s=>rupee(s.balance)}],r.students,'No dues'))}
  cs.onchange=load;await load()}
 

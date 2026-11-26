@@ -12,7 +12,7 @@ const badge=s=>el('span',{class:'bdg '+(s==='P'?'ok':s==='A'?'no':'lt')},s==='P'
 
 async function initSDash(){
  const m=page('n_dashboard'),r=await call('myDashboard'),p=r.profile;
- m.append(helloCard(p.name,p.studentId,p.className+(p.roll?' · Roll '+p.roll:'')),ringCard(r.attendance.percent,'Attendance',r.attendance.present+r.attendance.late+'/'+r.attendance.total+' din present'),quickActions([['attendance.html','attendance','Attendance','q0'],['fees.html','fees','Fees','q1'],['results.html','results','Results','q2'],['homework.html','homework','Homework','q3']]),
+ m.append(helloCard(p.name,p.studentId,p.className+(p.roll?' · Roll '+p.roll:'')),ringCard(r.attendance.percent,'Attendance',r.attendance.present+r.attendance.late+'/'+r.attendance.total+' days present'),quickActions([['attendance.html','attendance','Attendance','q0'],['fees.html','fees','Fees','q1'],['results.html','results','Results','q2'],['homework.html','homework','Homework','q3']]),
   el('div',{class:'grid'},
    stat('Fee balance',rupee(r.fees.balance),'Paid '+rupee(r.fees.totalPaid)),stat('Class',p.className,p.classTeacher?'Teacher: '+p.classTeacher:'')),
   el('h3',{},'Today\'s classes'),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Subject',f:l=>l.subject},{h:'Teacher',f:l=>l.teacher}],r.today,'No classes today'),
@@ -27,7 +27,7 @@ async function initSProfile(){
   ['Gender',p.gender],['Date of birth',p.dob],['Parent',p.parentName],['Parent phone',p.parentPhone],['Address',p.address]]))}
 async function initSAtt(){
  const m=page('n_attendance'),r=await call('myAttendance');
- m.append(ringCard(r.percent,'Attendance',(r.present+r.late)+' / '+r.total+' din (late = present)'),
+ m.append(ringCard(r.percent,'Attendance',(r.present+r.late)+' / '+r.total+' days (late = present)'),
   el('div',{class:'chips3'},el('div',{class:'pc ok'},el('b',{},String(r.present)),el('small',{},'Present')),el('div',{class:'pc lt'},el('b',{},String(r.late)),el('small',{},'Late')),el('div',{class:'pc no'},el('b',{},String(r.absent)),el('small',{},'Absent'))),
   calMonth(r.rows),el('h3',{},'Recent'),r.rows.length?el('div',{class:'recent'},r.rows.slice(0,10).map(x=>el('div',{class:'rr'},el('span',{},x.date),badge(x.status)))):emptyState('No attendance yet','Attendance is not marked yet'))}
 async function initSFees(){
@@ -86,5 +86,5 @@ function upiLink(bal,sid){const u=CFG.upi||{};return 'upi://pay?pa='+encodeURICo
 function upiBlock(m,r){
  if(!(CFG.upi&&CFG.upi.id)||!(r.balance>0)||typeof qrSvg!=='function')return;
  const sid=r.studentId||'',link=upiLink(r.balance,sid),q=el('div');q.innerHTML=qrSvg(link,200);
- m.append(el('h3',{},'Pay via UPI'),el('div',{class:'upi'},q,el('div',{},el('p',{},'Baaki: '+rupee(r.balance)),el('a',{class:'btnlink',href:link},'Open in UPI app'),
+ m.append(el('h3',{},'Pay via UPI'),el('div',{class:'upi'},q,el('div',{},el('p',{},'Due: '+rupee(r.balance)),el('a',{class:'btnlink',href:link},'Open in UPI app'),
   el('p',{class:'mu'},'Scan the QR or tap the button to pay. Tell the school office after paying; your receipt appears once the office confirms the payment.'))))}
