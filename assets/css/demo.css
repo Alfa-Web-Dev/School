@@ -1,0 +1,40 @@
+/* NEW LOOK (demo) - sirf body.nl par lagta hai. Hatana ho to shell.js ka "New look" block + newui.js + ye file delete. */
+body.nl{--nl:#3a36c8;--nl2:#4a45da;--bg:#f3f2fb;--card:#fff;--c:#3a36c8;background:var(--bg);font-family:Urbanist,Inter,system-ui,sans-serif}
+/* header */
+body.nl.app header{background:linear-gradient(180deg,var(--nl),var(--nl2))!important;color:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;border:0!important;box-shadow:none}
+body.nl.app header .brand,body.nl.app header .bn,body.nl.app header b{color:#fff}
+body.nl.app header .bell{color:#fff}
+body.nl.app header .um{background:#ffffff1f;border:0;color:#fff;border-radius:50%}
+body.nl.app header .um:before{background:#fff;box-shadow:0 -6px 0 #fff,0 6px 0 #fff}
+/* dashboard header block + overlapping profile card */
+body.nl .nlhead{margin:-14px calc(50% - 50vw) 0;padding:2px calc(50vw - 50% + 4px) 70px;background:linear-gradient(180deg,var(--nl2),var(--nl));color:#fff}
+body.nl .nlhead h2{margin:8px 0 0;font-size:22px;font-weight:700;letter-spacing:-.01em}
+body.nl .nlpc{position:relative;display:flex;align-items:center;gap:14px;margin:-52px 0 14px;padding:14px 16px;background:#fff;border-radius:22px;color:#17163a;text-decoration:none;box-shadow:0 8px 24px rgba(40,30,120,.14)}
+body.nl .nlpc .av{width:60px;height:60px;flex:none;margin:0}.nlpc>div{flex:1;min-width:0}
+body.nl .nlpc b{display:block;font-size:18px;font-weight:700}body.nl .nlpc small{display:block;color:var(--nl);font-weight:600;margin-top:2px}
+body.nl .nlch{font-style:normal;font-size:24px;color:#9a99b8;line-height:1}
+body.nl .nlg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+body.nl .nlc{display:flex;align-items:center;gap:10px;padding:14px 12px;background:#fff;border-radius:18px;color:#17163a;text-decoration:none;box-shadow:0 2px 12px rgba(40,30,120,.07)}
+body.nl .nlc>div{flex:1;min-width:0}body.nl .nlc small{display:block;font-size:12.5px;color:#6b6a8c;font-weight:500}body.nl .nlc b{display:block;font-size:20px;font-weight:700;margin-top:1px;white-space:nowrap}
+body.nl .nlgreen{color:#1fa971}
+body.nl .nli{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;color:#fff;flex:none}body.nl .nli .ic{width:20px;height:20px}
+body.nl .nlr{background:#fff;border-radius:22px;padding:16px 16px 6px;box-shadow:0 2px 12px rgba(40,30,120,.07);margin-bottom:14px}
+body.nl .nlrh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}body.nl .nlrh b{font-size:16px;font-weight:700;color:#17163a}body.nl .nlrh a{font-size:13px;font-weight:600;color:var(--nl);text-decoration:none}
+body.nl .nlrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #efeef8}body.nl .nlrow:first-of-type{border-top:0}
+body.nl .nlrow .nli{width:36px;height:36px}body.nl .nlrow .nli .ic{width:17px;height:17px}
+body.nl .nlrow>div{flex:1;min-width:0}body.nl .nlrow b{display:block;font-size:14px;font-weight:600;color:#17163a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}body.nl .nlrow small{display:block;font-size:12.5px;color:#7a79a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}body.nl .nlrow>span{font-size:12px;color:#8e8db0;flex:none}
+body.nl .nlsh{font-size:16px;font-weight:700;margin:6px 2px 10px}
+/* all pages: calmer cards */
+body.nl .card,body.nl .tcard{border-radius:18px;box-shadow:0 2px 12px rgba(40,30,120,.07);border:0}
+body.nl .pbn{border-radius:22px}
+/* footer: white bar, icon + label, active = indigo */
+@media(max-width:700px){
+ body.nl #bnav{left:0;right:0;bottom:0}
+ body.nl .bpill{border-radius:0;padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));gap:0;background:#fff;box-shadow:0 -4px 20px rgba(40,30,120,.1);border-top:1px solid #eeedf7}
+ body.nl .bpill a,body.nl .bpill button{height:auto;flex-direction:column;gap:3px;padding:2px 0;background:none!important;color:#8e8db0;border-radius:0}
+ body.nl .bpill span{position:static;width:auto;height:auto;clip:auto;overflow:visible;font-size:10.5px;font-weight:600}
+ body.nl .bpill .ic{width:23px;height:23px}
+ body.nl .bpill .on{color:var(--nl)}
+ body.nl #aib{bottom:84px;background:linear-gradient(135deg,var(--nl2),#6a5cff)}
+ body.nl main,body.nl #main{padding-bottom:96px}
+}

@@ -11,6 +11,7 @@ const badge=s=>el('span',{class:'bdg '+(s==='P'?'ok':s==='A'?'no':'lt')},s==='P'
 
 
 async function initSDash(){
+ if(document.body.classList.contains('nl')){await window.__nlReady;if(window.nlStudentDash)return window.nlStudentDash()}
  const m=page('n_dashboard'),r=await call('myDashboard'),p=r.profile;
  m.append(helloCard(p.name,p.studentId,p.className+(p.roll?' · Roll '+p.roll:'')),ringCard(r.attendance.percent,'Attendance',r.attendance.present+r.attendance.late+'/'+r.attendance.total+' days present'),quickActions([['attendance.html','attendance','Attendance','q0'],['fees.html','fees','Fees','q1'],['results.html','results','Results','q2'],['homework.html','homework','Homework','q3']]),
   el('div',{class:'grid'},
