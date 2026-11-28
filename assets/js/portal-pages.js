@@ -16,7 +16,7 @@ async function initSDash(){
   el('div',{class:'grid'},
    stat('Fee balance',rupee(r.fees.balance),'Paid '+rupee(r.fees.totalPaid)),stat('Class',p.className,p.classTeacher?'Teacher: '+p.classTeacher:'')),
   el('h3',{},'Today\'s classes'),tableEl([{h:'Time',f:l=>l.start+' - '+l.end},{h:'Subject',f:l=>l.subject},{h:'Teacher',f:l=>l.teacher}],r.today,'No classes today'),
-  el('h3',{},'Latest notices'),noticeList(r.notices))}
+  el('h3',{},'Latest notices'),noticeList(r.notices));if(typeof liveBanner==='function')liveBanner(m)}
 const TONES=['#d9f5e8','#e4dcfb','#fde5d6','#fbe0ee','#fff0bd','#d9e7ff'];
 function feedCard(k,i,title,chip,body,extra){const c=el('div',{class:'fcard'}),b=el('span',{class:'fb',style:'background:var(--p'+(i%5+1)+')'});b.innerHTML=PA.mini(k);
  c.append(b,el('div',{class:'ft'},el('b',{},title),el('span',{class:'fc'},chip),body?el('p',{},body):'',extra||''));return c}

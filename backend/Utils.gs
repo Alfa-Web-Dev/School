@@ -1,4 +1,4 @@
-const VERSION='0.5.8';
+const VERSION='0.5.9';
 const P=PropertiesService.getScriptProperties();
 const SCHEMA={
  Settings:['key','value'],
@@ -27,6 +27,7 @@ const SCHEMA={
  LeaveRequests:['leaveId','studentId','classId','type','fromDate','toDate','outMin','pickupBy','reason','status','decidedBy','decidedAt','remark','created'],
  HelpSlots:['slotId','classId','teacherId','title','slotDate','startMin','endMin','capacity','place','note','status','created'],
  SlotBookings:['bookingId','slotId','studentId','topic','status','created'],
+ LiveClasses:['liveId','classId','teacherId','title','liveDate','startMin','endMin','link','note','status','created'],
  Awards:['awardId','studentId','classId','title','category','note','awardDate','givenBy','created'],
  CareerProfiles:['studentId','scores','top','updated'],
  AlertLog:['key','sentAt','by'],

@@ -617,3 +617,14 @@ body.vwo{overflow:hidden}
 #ait{font-size:17px;padding:8px 0;color:var(--abt)}
 #ais{width:46px;height:46px;background:var(--ablue);color:#fff;transition:background .2s,opacity .2s}#ais.off{background:#c3d2f7}#ais.stop{background:var(--ablue)}#ais:disabled{opacity:1}
 .aif{display:none}
+
+/* Live classes */
+.lvhero{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:6px;padding:20px;margin-bottom:16px;border-radius:28px;color:#fff;background:linear-gradient(135deg,#1b1f3b,#3b2f8f 60%,#5b3fd1)}
+.lvhero b{font-size:21px;font-weight:700;letter-spacing:-.01em}.lvhero>span{opacity:.8;font-size:14px}
+.lvtag{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;font:700 11px/1 system-ui;letter-spacing:.12em;background:#ffffff1f;padding:7px 11px;border-radius:99px}
+.lvdot{width:9px;height:9px;border-radius:50%;background:#ff4d5a;animation:lvp 1.2s ease-in-out infinite}@keyframes lvp{50%{transform:scale(.6);opacity:.5}}
+.lvjoin{margin-top:12px;display:flex;align-items:center;justify-content:center;gap:10px;height:50px;border:0;border-radius:16px;background:#fff;color:#1b1f3b;font:700 16px inherit;font-family:inherit;box-shadow:none}.lvjoin:active{transform:scale(.98)}
+.lvsoon{display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:16px;border-radius:22px;background:var(--card);color:var(--tx);text-decoration:none;border:1px solid var(--bd)}
+.lvsoon .lvic{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:#e9e4ff;color:#4b35c9;flex:none}.lvsoon b{display:block;font-size:15px}.lvsoon small{color:var(--mu)}
+.lvhint{font-size:12.5px;margin-top:8px}
+.lvmk{align-self:flex-start;margin:-4px 0 8px;padding:6px 0;border:0;background:none;color:var(--c);font:600 14px inherit;font-family:inherit;box-shadow:none}
